@@ -4,6 +4,7 @@ import (
 	"context"
 	"crawlab-lite/config"
 	"crawlab-lite/lib/validate_bridge"
+	"crawlab-lite/routes"
 	"github.com/apex/log"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -21,7 +22,7 @@ func main() {
 	app := gin.Default()
 
 	// 初始化配置
-	if err := config.InitConfig(""); err != nil {
+	if err := config.InitConfig("./config.yml"); err != nil {
 		log.Error("Init config error:" + err.Error())
 		panic(err)
 	}
@@ -33,6 +34,9 @@ func main() {
 		log.SetLevelFromString(logLevel)
 	}
 	log.Info("Initialized log config successfully")
+
+	// 初始化路由
+	routes.InitRoutes(app)
 
 	// 运行服务器
 	host := viper.GetString("server.host")

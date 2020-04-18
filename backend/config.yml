@@ -1,15 +1,20 @@
 api:
   address: "localhost:8000"
+
+users:
+  - { username: "admin", password: "admin" }
+
 log:
   level: info
-  path: "/var/logs/crawlab"
+  path: "./logs/crawlab"
   isDeletePeriodically: "N"
   deleteFrequency: "@hourly"
+
 server:
   host: 0.0.0.0
   port: 8000
   master: "Y"
-  secret: "crawlab"
+  secret: "crawlab-lite"
   register:
     # mac地址/ip地址/hostname, 如果是ip，则需要手动指定IP
     type: "mac"
@@ -20,19 +25,24 @@ server:
     java: "N"
     dotnet: "N"
     php: "N"
+
 spider:
   path: "/app/spiders"
+
 task:
   workers: 4
+
 other:
   tmppath: "/tmp"
-version: 0.4.8
+
+version: 0.0.1
+
 setting:
-  allowRegister: "N"
   enableTutorial: "N"
   runOnMaster: "Y"
   demoSpiders: "N"
   checkScrapy: "Y"
+
 notification:
   mail:
     server: ''
