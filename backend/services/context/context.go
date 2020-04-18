@@ -3,6 +3,7 @@ package context
 import (
 	"crawlab-lite/constants"
 	"crawlab-lite/errors"
+	"crawlab-lite/model"
 	"fmt"
 	"github.com/apex/log"
 	"github.com/gin-gonic/gin"
