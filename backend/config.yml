@@ -6,7 +6,7 @@ users:
 
 log:
   level: info
-  path: "./logs/crawlab"
+  path: "../logs/crawlab"
   isDeletePeriodically: "N"
   deleteFrequency: "@hourly"
 
@@ -27,7 +27,7 @@ server:
     php: "N"
 
 spider:
-  path: "/app/spiders"
+  path: "../data/spiders"
 
 task:
   workers: 4
