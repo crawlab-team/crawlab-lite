@@ -9,8 +9,8 @@ require (
 	github.com/gin-gonic/gin v1.6.0
 	github.com/imroc/req v0.3.0
 	github.com/pkg/errors v0.8.1
-	github.com/satori/go.uuid v1.2.0
 	github.com/smartystreets/goconvey v1.6.4
 	github.com/spf13/viper v1.6.2
+	github.com/xujiajun/nutsdb v0.5.0
 	gopkg.in/go-playground/validator.v9 v9.31.0
 )

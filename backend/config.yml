@@ -32,6 +32,9 @@ spider:
 task:
   workers: 4
 
+kvdb:
+  path: "../data/db"
+
 other:
   tmppath: "/tmp"
 

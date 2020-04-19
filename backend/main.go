@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crawlab-lite/config"
+	"crawlab-lite/database"
 	"crawlab-lite/lib/validate_bridge"
 	"crawlab-lite/routes"
 	"github.com/apex/log"
@@ -27,6 +28,13 @@ func main() {
 		panic(err)
 	}
 	log.Info("Initialized config successfully")
+
+	// 初始化 Key-Value 数据库
+	if err := database.InitKvDB(); err != nil {
+		log.Error("init key-value database error:" + err.Error())
+		panic(err)
+	}
+	log.Info("initialized key-value database successfully")
 
 	// 初始化日志设置
 	logLevel := viper.GetString("log.level")
