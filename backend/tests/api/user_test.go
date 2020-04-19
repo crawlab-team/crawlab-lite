@@ -2,7 +2,7 @@ package api
 
 import (
 	"crawlab-lite/forms"
-	"crawlab-lite/model"
+	"crawlab-lite/models"
 	. "github.com/smartystreets/goconvey/convey"
 	"net/http/httptest"
 	"testing"
@@ -11,7 +11,7 @@ import (
 func TestUserAPI(t *testing.T) {
 	Convey("Test User API", t, func() {
 		app := InitTestApp()
-		users, err := model.GetUserList()
+		users, err := models.GetUserList()
 		So(err, ShouldBeNil)
 		user := users[0]
 

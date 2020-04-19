@@ -1,7 +1,7 @@
 package services
 
 import (
-	"crawlab-lite/model"
+	"crawlab-lite/models"
 	"errors"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/spf13/viper"
@@ -9,7 +9,7 @@ import (
 )
 
 func CheckUser(username string, password string) (bool, error) {
-	user, err := model.GetUserByName(username)
+	user, err := models.GetUserByName(username)
 	if err != nil {
 		return false, err
 	}
@@ -43,7 +43,7 @@ func GetUserFromToken(tokenStr string) (username string, err error) {
 	}
 
 	username = claim["username"].(string)
-	if model.ExistUser(username) == false {
+	if models.ExistUser(username) == false {
 		err = errors.New("username does not match")
 		return "", err
 	}

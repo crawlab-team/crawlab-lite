@@ -3,7 +3,7 @@ package context
 import (
 	"crawlab-lite/constants"
 	"crawlab-lite/errors"
-	"crawlab-lite/model"
+	"crawlab-lite/models"
 	"fmt"
 	"github.com/apex/log"
 	"github.com/gin-gonic/gin"
@@ -17,12 +17,12 @@ type Context struct {
 	*gin.Context
 }
 
-func (c *Context) User() *model.User {
+func (c *Context) User() *models.User {
 	userIfe, exists := c.Get(constants.ContextUser)
 	if !exists {
 		return nil
 	}
-	user, ok := userIfe.(*model.User)
+	user, ok := userIfe.(*models.User)
 	if !ok {
 		return nil
 	}

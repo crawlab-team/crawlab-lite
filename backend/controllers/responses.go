@@ -26,7 +26,7 @@ func HandleSuccess(ctx *gin.Context, data interface{}) {
 	})
 }
 
-func HandleSuccessList(total int, ctx *gin.Context, data interface{}) {
+func HandleSuccessList(ctx *gin.Context, total int, data interface{}) {
 	ctx.AbortWithStatusJSON(http.StatusOK, ListResponse{
 		Code:    http.StatusOK,
 		Data:    data,

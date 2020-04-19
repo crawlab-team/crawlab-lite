@@ -21,12 +21,15 @@ func InitRoutes(app *gin.Engine) {
 
 		authGroup := root.Group("/", middlewares.AuthorizationMiddleware())
 		{
-			// 爬虫
+			// 爬虫项目
 			{
-				authGroup.GET("/spiders", controllers.QuerySpiderList)       // 爬虫列表
-				authGroup.GET("/spiders/:name", controllers.QuerySpider)     // 爬虫详情
-				authGroup.POST("/spiders", controllers.UploadSpider)         // 上传爬虫
-				authGroup.DELETE("/spiders/:name", controllers.DeleteSpider) // 删除爬虫
+				authGroup.GET("/projects", controllers.QueryProjectList)                                  // 爬虫项目列表
+				authGroup.POST("/projects", controllers.CreateProject)                                    // 创建爬虫项目
+				authGroup.GET("/projects/:name", controllers.QueryProject)                                // 爬虫项目详情
+				authGroup.DELETE("/projects/:name", controllers.DeleteProject)                            // 删除爬虫项目
+				authGroup.GET("/projects/:name/versions", controllers.QueryProjectVersionList)            // 项目版本列表
+				authGroup.POST("/projects/:name/versions", controllers.UploadProjectVersion)              // 上传项目版本
+				authGroup.DELETE("/projects/:name/versions/:versionId", controllers.DeleteProjectVersion) // 删除项目版本
 			}
 		}
 	}
