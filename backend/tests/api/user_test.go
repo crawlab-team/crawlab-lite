@@ -1,23 +1,28 @@
-package routes
+package api
 
 import (
+	"crawlab-lite/forms"
 	"crawlab-lite/model"
 	. "github.com/smartystreets/goconvey/convey"
 	"net/http/httptest"
 	"testing"
 )
 
-func TestUserRoutes(t *testing.T) {
-	Convey("Test User Routes", t, func() {
+func TestUserAPI(t *testing.T) {
+	Convey("Test User API", t, func() {
 		app := InitTestApp()
 		users, err := model.GetUserList()
 		So(err, ShouldBeNil)
 		user := users[0]
 
-		Convey("Test correct user", func() {
+		Convey("Test right user", func() {
 			w := httptest.NewRecorder()
-			values := map[string]string{"username": user.Username, "password": user.Password}
-			req := PostJson("/api/login", values)
+			form := forms.UserForm{
+				Username: user.Username,
+				Password: user.Password,
+			}
+			req, err := PostJson("/api/login", form)
+			So(err, ShouldBeNil)
 			app.ServeHTTP(w, req)
 
 			So(w.Code, ShouldEqual, 200)
@@ -31,7 +36,8 @@ func TestUserRoutes(t *testing.T) {
 		Convey("Test wrong user", func() {
 			w := httptest.NewRecorder()
 			values := map[string]string{"username": "abcdefg", "password": "000000"}
-			req := PostJson("/api/login", values)
+			req, err := PostJson("/api/login", values)
+			So(err, ShouldBeNil)
 			app.ServeHTTP(w, req)
 
 			So(w.Code, ShouldEqual, 401)

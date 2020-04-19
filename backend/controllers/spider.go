@@ -4,12 +4,13 @@ import (
 	"crawlab-lite/forms"
 	"crawlab-lite/model"
 	"crawlab-lite/services"
+	"crawlab-lite/utils"
 	"errors"
 	"github.com/gin-gonic/gin"
-	uuid "github.com/satori/go.uuid"
 	"net/http"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -58,7 +59,7 @@ func UploadSpider(c *gin.Context) {
 	}
 
 	// 生成爬虫文件名
-	fileName := uuid.NewV4().String() + ".zip"
+	fileName := strconv.FormatInt(utils.NowTimestamp(), 10) + ".zip"
 
 	spider := &model.Spider{
 		Name: form.Name,
@@ -81,6 +82,8 @@ func UploadSpider(c *gin.Context) {
 		HandleError(http.StatusInternalServerError, c, err)
 		return
 	}
+
+	HandleSuccess(c, spider)
 }
 
 func DeleteSpider(c *gin.Context) {

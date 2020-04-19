@@ -19,7 +19,7 @@ func InitRoutes(app *gin.Engine) {
 			anonymousGroup.GET("/releases/latest", controllers.GetLatestRelease) // 获取最近发布的版本
 		}
 
-		authGroup := root.Group("/")
+		authGroup := root.Group("/", middlewares.AuthorizationMiddleware())
 		{
 			// 爬虫
 			{

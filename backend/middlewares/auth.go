@@ -12,7 +12,7 @@ import (
 func AuthorizationMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// 获取 Token string
-		tokenStr := c.GetHeader("Authorization")
+		tokenStr := c.GetHeader(constants.AuthHeader)
 
 		// 校验 Token 并从其中提取用户
 		user, err := services.GetUserFromToken(tokenStr)
