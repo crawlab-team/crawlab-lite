@@ -17,7 +17,7 @@ import (
 	"strconv"
 )
 
-func GetProjectList(pageNum int, pageSize int) (total int, projects []*models.Project, err error) {
+func QueryProjectList(pageNum int, pageSize int) (total int, projects []*models.Project, err error) {
 	start := (pageNum - 1) * pageSize
 	end := start + pageSize
 
@@ -27,7 +27,7 @@ func GetProjectList(pageNum int, pageSize int) (total int, projects []*models.Pr
 	if err := db.View(func(tx *nutsdb.Tx) error {
 		// 查询区间内的所有项目
 		if nodes, err := tx.ZRangeByRank(constants.ProjectListBucket, start, end); err != nil {
-			if err.Error() == "err bucket" {
+			if err == nutsdb.ErrBucket {
 				return nil
 			}
 			return err
@@ -53,13 +53,13 @@ func GetProjectList(pageNum int, pageSize int) (total int, projects []*models.Pr
 	return total, projects, nil
 }
 
-func GetProjectByName(name string) (project *models.Project, err error) {
+func QueryProjectByName(name string) (project *models.Project, err error) {
 	db := database.GetKvDB()
 	defer db.Close()
 
 	if err := db.View(func(tx *nutsdb.Tx) error {
 		if node, err := tx.ZGetByKey(constants.ProjectListBucket, []byte(name)); err != nil {
-			if err.Error() == "err bucket" {
+			if err == nutsdb.ErrBucket {
 				return nil
 			}
 			return err
@@ -78,7 +78,7 @@ func SaveProject(form forms.ProjectForm) (project *models.Project, err error) {
 	projectName := form.Name
 
 	// 检查项目是否已存在
-	if project, err := GetProjectByName(projectName); err != nil {
+	if project, err := QueryProjectByName(projectName); err != nil {
 		return nil, err
 	} else if project != nil {
 		return nil, errors.New("project already exists")
@@ -106,7 +106,7 @@ func SaveProject(form forms.ProjectForm) (project *models.Project, err error) {
 
 func RemoveProject(projectName string) (res interface{}, err error) {
 	// 检查项目是否已存在
-	if project, err := GetProjectByName(projectName); err != nil {
+	if project, err := QueryProjectByName(projectName); err != nil {
 		return nil, err
 	} else if project == nil {
 		return nil, errors.New("project not found")
@@ -133,7 +133,7 @@ func RemoveProject(projectName string) (res interface{}, err error) {
 		}
 		verBucket := getVersionBucket(projectName)
 		if nodes, err := tx.ZMembers(verBucket); err != nil {
-			if err.Error() == "err bucket" {
+			if err == nutsdb.ErrBucket {
 				return nil
 			}
 			return err
@@ -152,14 +152,14 @@ func RemoveProject(projectName string) (res interface{}, err error) {
 	return nil, nil
 }
 
-func GetProjectVersionList(projectName string) (versions []*models.ProjectVersion, err error) {
+func QueryProjectVersionList(projectName string) (versions []*models.ProjectVersion, err error) {
 	db := database.GetKvDB()
 	defer db.Close()
 
 	if err := db.View(func(tx *nutsdb.Tx) error {
 		// 查询项目下的所有版本信息
 		if nodes, err := tx.ZMembers(getVersionBucket(projectName)); err != nil {
-			if err.Error() == "err bucket" {
+			if err == nutsdb.ErrBucket {
 				return nil
 			}
 			return err
@@ -186,7 +186,7 @@ func GetProjectVersionById(projectName string, versionId string) (version *model
 
 	if err := db.View(func(tx *nutsdb.Tx) error {
 		if node, err := tx.ZGetByKey(getVersionBucket(projectName), []byte(versionId)); err != nil {
-			if err.Error() == "err bucket" {
+			if err == nutsdb.ErrBucket {
 				return nil
 			}
 			return err
@@ -203,7 +203,7 @@ func GetProjectVersionById(projectName string, versionId string) (version *model
 
 func SaveProjectVersion(projectName string, form forms.ProjectUploadForm) (version *models.ProjectVersion, err error) {
 	// 检查项目是否已存在
-	if project, err := GetProjectByName(projectName); err != nil {
+	if project, err := QueryProjectByName(projectName); err != nil {
 		return nil, err
 	} else if project == nil {
 		return nil, errors.New("project not found")
@@ -259,7 +259,7 @@ func SaveProjectVersion(projectName string, form forms.ProjectUploadForm) (versi
 
 func RemoveProjectVersion(projectName string, versionId string) (res interface{}, err error) {
 	// 检查项目是否已存在
-	if project, err := GetProjectByName(projectName); err != nil {
+	if project, err := QueryProjectByName(projectName); err != nil {
 		return nil, err
 	} else if project == nil {
 		return nil, errors.New("project not found")

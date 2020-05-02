@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func QueryProjectList(c *gin.Context) {
+func GetProjectList(c *gin.Context) {
 	var page forms.PageForm
 
 	if err := c.ShouldBind(&page); err != nil {
@@ -18,7 +18,7 @@ func QueryProjectList(c *gin.Context) {
 		return
 	}
 
-	if total, projects, err := services.GetProjectList(page.PageNum, page.PageSize); err != nil {
+	if total, projects, err := services.QueryProjectList(page.PageNum, page.PageSize); err != nil {
 		HandleError(http.StatusInternalServerError, c, err)
 		return
 	} else {
@@ -26,10 +26,10 @@ func QueryProjectList(c *gin.Context) {
 	}
 }
 
-func QueryProject(c *gin.Context) {
+func GetProject(c *gin.Context) {
 	name := c.Param("name")
 
-	if project, err := services.GetProjectByName(name); err != nil {
+	if project, err := services.QueryProjectByName(name); err != nil {
 		HandleError(http.StatusInternalServerError, c, err)
 		return
 	} else {
@@ -73,10 +73,10 @@ func DeleteProject(c *gin.Context) {
 	}
 }
 
-func QueryProjectVersionList(c *gin.Context) {
+func GetProjectVersionList(c *gin.Context) {
 	name := c.Param("name")
 
-	if res, err := services.GetProjectVersionList(name); err != nil {
+	if res, err := services.QueryProjectVersionList(name); err != nil {
 		HandleError(http.StatusInternalServerError, c, err)
 		return
 	} else {

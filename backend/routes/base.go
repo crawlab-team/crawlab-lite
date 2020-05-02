@@ -23,11 +23,11 @@ func InitRoutes(app *gin.Engine) {
 		{
 			// 爬虫项目
 			{
-				authGroup.GET("/projects", controllers.QueryProjectList)                                  // 爬虫项目列表
+				authGroup.GET("/projects", controllers.GetProjectList)                                    // 爬虫项目列表
 				authGroup.POST("/projects", controllers.CreateProject)                                    // 创建爬虫项目
-				authGroup.GET("/projects/:name", controllers.QueryProject)                                // 爬虫项目详情
+				authGroup.GET("/projects/:name", controllers.GetProject)                                  // 爬虫项目详情
 				authGroup.DELETE("/projects/:name", controllers.DeleteProject)                            // 删除爬虫项目
-				authGroup.GET("/projects/:name/versions", controllers.QueryProjectVersionList)            // 项目版本列表
+				authGroup.GET("/projects/:name/versions", controllers.GetProjectVersionList)              // 项目版本列表
 				authGroup.POST("/projects/:name/versions", controllers.UploadProjectVersion)              // 上传项目版本
 				authGroup.DELETE("/projects/:name/versions/:versionId", controllers.DeleteProjectVersion) // 删除项目版本
 			}
