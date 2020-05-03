@@ -1,0 +1,30 @@
+GET {{base_url}}/api/tasks
+Accept: application/json
+Authorization: {{token}}
+
+###
+
+POST {{base_url}}/api/tasks
+Content-Type: application/json
+Authorization: {{token}}
+
+{
+  "spider_name": "test-spider",
+  "cmd": "sh run.sh"
+}
+
+> {% client.global.set("task_id", response.body.data.id); %}
+
+###
+
+GET {{base_url}}/api/tasks/{{task_id}}
+Accept: application/json
+Authorization: {{token}}
+
+###
+
+POST {{base_url}}/api/tasks/{{task_id}}/cancel
+Accept: application/json
+Authorization: {{token}}
+
+###

@@ -1,0 +1,11 @@
+POST {{base_url}}/api/login
+Content-Type: application/json
+
+{
+  "username": "{{username}}",
+  "password": "{{password}}"
+}
+
+> {% client.global.set("token", response.body.data); %}
+
+###

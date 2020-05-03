@@ -1,0 +1,26 @@
+GET {{base_url}}/api/spiders
+Accept: application/json
+Authorization: {{token}}
+
+###
+
+POST {{base_url}}/api/spiders
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+Authorization: {{token}}
+
+--WebAppBoundary
+Content-Disposition: form-data; name="file"; filename="test.zip"
+Content-Type: image/jpeg
+
+< ./task.http
+--WebAppBoundary
+Content-Disposition: form-data; name="name"
+
+test-spider
+--WebAppBoundary--
+
+###
+
+DELETE {{base_url}}/api/spiders/test-spider
+Accept: application/json
+Authorization: {{token}}
