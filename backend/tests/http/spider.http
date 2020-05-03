@@ -10,17 +10,46 @@ Authorization: {{token}}
 
 --WebAppBoundary
 Content-Disposition: form-data; name="file"; filename="test.zip"
-Content-Type: image/jpeg
 
-< ./task.http
+< ../test.zip
 --WebAppBoundary
 Content-Disposition: form-data; name="name"
 
-test-spider
+{{spider_name}}
 --WebAppBoundary--
 
 ###
 
-DELETE {{base_url}}/api/spiders/test-spider
+DELETE {{base_url}}/api/spiders/{{spider_name}}
 Accept: application/json
 Authorization: {{token}}
+
+###
+
+GET {{base_url}}/api/spiders/{{spider_name}}/versions
+Accept: application/json
+Authorization: {{token}}
+
+###
+
+POST {{base_url}}/api/spiders/{{spider_name}}/versions
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+Authorization: {{token}}
+
+--WebAppBoundary
+Content-Disposition: form-data; name="file"; filename="test.zip"
+
+< ../test.zip
+--WebAppBoundary
+Content-Disposition: form-data; name="name"
+
+{{spider_name}}
+--WebAppBoundary--
+
+###
+
+DELETE {{base_url}}/api/spiders/{{spider_name}}/versions/b7e5cd3a5e8a017ca8be86fc6da7a09f
+Accept: application/json
+Authorization: {{token}}
+
+###

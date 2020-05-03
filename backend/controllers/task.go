@@ -18,7 +18,7 @@ func GetTaskList(c *gin.Context) {
 	}
 
 	if total, tasks, err := services.QueryTaskList(page.PageNum, page.PageSize); err != nil {
-		HandleError(http.StatusInternalServerError, c, err)
+		HandleError(http.StatusBadRequest, c, err)
 		return
 	} else {
 		HandleSuccessList(c, total, tasks)
@@ -29,7 +29,7 @@ func GetTask(c *gin.Context) {
 	id := c.Param("id")
 
 	if task, err := services.QueryTaskById(id); err != nil {
-		HandleError(http.StatusInternalServerError, c, err)
+		HandleError(http.StatusBadRequest, c, err)
 		return
 	} else {
 		if task == nil {
@@ -48,8 +48,8 @@ func CreateTask(c *gin.Context) {
 		return
 	}
 
-	if res, err := services.SaveTask(form); err != nil {
-		HandleError(http.StatusInternalServerError, c, err)
+	if res, err := services.AddTask(form); err != nil {
+		HandleError(http.StatusBadRequest, c, err)
 		return
 	} else {
 		HandleSuccess(c, res)

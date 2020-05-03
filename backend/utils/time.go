@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"math"
 	"time"
 )
 
@@ -17,8 +18,8 @@ func ConvertLocalTimeString(t time.Time) string {
 	return ConvertTimeString(t)
 }
 
-func ConvertTimestamp(t time.Time) int64 {
-	return t.UnixNano() / 1e6
+func ConvertTimestamp(t time.Time) float64 {
+	return float64(t.UnixNano()/1e6) / math.Pow10(0)
 }
 
 // 秒时间戳

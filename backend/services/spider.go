@@ -8,13 +8,13 @@ import (
 	"crawlab-lite/utils"
 	"encoding/json"
 	"errors"
+	"github.com/google/uuid"
 	"github.com/spf13/viper"
 	"github.com/xujiajun/nutsdb"
 	"io/ioutil"
-	"math"
 	"os"
 	"path/filepath"
-	"strconv"
+	"time"
 )
 
 func QuerySpiderList(pageNum int, pageSize int) (total int, spiders []*models.Spider, err error) {
@@ -68,7 +68,7 @@ func QuerySpiderByName(name string) (spider *models.Spider, err error) {
 	return spider, nil
 }
 
-func SaveSpider(form forms.SpiderForm) (spider *models.Spider, err error) {
+func AddSpider(form forms.SpiderForm) (spider *models.Spider, err error) {
 	spiderName := form.Name
 
 	// 检查爬虫是否已存在
@@ -80,12 +80,12 @@ func SaveSpider(form forms.SpiderForm) (spider *models.Spider, err error) {
 
 	spider = &models.Spider{
 		Name:     spiderName,
-		CreateTs: utils.NowTimestamp(),
+		CreateTs: time.Now(),
 	}
 
 	// 存储爬虫信息
 	if err := database.KvDB.Update(func(tx *nutsdb.Tx) error {
-		score := float64(spider.CreateTs) / math.Pow10(0)
+		score := utils.ConvertTimestamp(spider.CreateTs)
 		value, _ := json.Marshal(&spider)
 		return tx.ZAdd(constants.SpiderListBucket, []byte(spiderName), score, value)
 	}); err != nil {
@@ -121,7 +121,7 @@ func RemoveSpider(spiderName string) (res interface{}, err error) {
 			return err
 		}
 		// 删除爬虫版本
-		verBucket := getVersionBucket(spiderName)
+		verBucket := joinVersionBucket(spiderName)
 		if nodes, err := tx.ZMembers(verBucket); err != nil {
 			if err == nutsdb.ErrBucket {
 				return nil
@@ -165,7 +165,7 @@ func RemoveSpider(spiderName string) (res interface{}, err error) {
 func QuerySpiderVersionList(spiderName string) (versions []*models.SpiderVersion, err error) {
 	if err := database.KvDB.View(func(tx *nutsdb.Tx) error {
 		// 查询爬虫下的所有版本信息
-		if nodes, err := tx.ZMembers(getVersionBucket(spiderName)); err != nil {
+		if nodes, err := tx.ZMembers(joinVersionBucket(spiderName)); err != nil {
 			if err == nutsdb.ErrBucket {
 				return nil
 			}
@@ -187,9 +187,9 @@ func QuerySpiderVersionList(spiderName string) (versions []*models.SpiderVersion
 	return versions, nil
 }
 
-func GetSpiderVersionById(spiderName string, versionId string) (version *models.SpiderVersion, err error) {
+func QuerySpiderVersionById(spiderName string, versionId string) (version *models.SpiderVersion, err error) {
 	if err := database.KvDB.View(func(tx *nutsdb.Tx) error {
-		if node, err := tx.ZGetByKey(getVersionBucket(spiderName), []byte(versionId)); err != nil {
+		if node, err := tx.ZGetByKey(joinVersionBucket(spiderName), []byte(versionId)); err != nil {
 			if err == nutsdb.ErrBucket || err == nutsdb.ErrNotFoundKey {
 				return nil
 			}
@@ -205,7 +205,7 @@ func GetSpiderVersionById(spiderName string, versionId string) (version *models.
 	return version, nil
 }
 
-func SaveSpiderVersion(spiderName string, form forms.SpiderUploadForm) (version *models.SpiderVersion, err error) {
+func AddSpiderVersion(spiderName string, form forms.SpiderUploadForm) (version *models.SpiderVersion, err error) {
 	// 检查爬虫是否已存在
 	if spider, err := QuerySpiderByName(spiderName); err != nil {
 		return nil, err
@@ -213,42 +213,75 @@ func SaveSpiderVersion(spiderName string, form forms.SpiderUploadForm) (version 
 		return nil, errors.New("spider not found")
 	}
 
-	// 生成存储版本文件的路径
-	fileName := strconv.FormatInt(utils.NowTimestamp(), 10) + ".zip"
-	dir := filepath.Join(viper.GetString("spider.path"), spiderName)
-	path := filepath.Join(dir, fileName)
+	dirName := uuid.New().String()
+	tmpPath := filepath.Join(viper.GetString("other.tmppath"), spiderName)
+	zipPath := filepath.Join(tmpPath, dirName+".zip")
 
-	file, err := form.File.Open()
+	formFile, err := form.File.Open()
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
+	defer formFile.Close()
 
-	// 保存版本文件
-	if err := os.MkdirAll(dir, os.ModePerm); err != nil {
+	// 检查创建临时目录
+	if utils.PathExist(tmpPath) == false {
+		if err := os.MkdirAll(tmpPath, os.ModePerm); err != nil {
+			return nil, err
+		}
+	}
+
+	// 保存压缩文件到临时目录
+	if err := utils.SaveFile(formFile, zipPath); err != nil {
 		return nil, err
 	}
-	if err := utils.SaveFile(file, path); err != nil {
+
+	// 打开压缩文件
+	zipFile, err := os.OpenFile(zipPath, os.O_CREATE|os.O_RDWR, os.ModePerm)
+	if err != nil {
 		return nil, err
 	}
+
+	defer func() {
+		// 关闭压缩文件
+		_ = zipFile.Close()
+		// 删除压缩文件
+		_ = os.Remove(zipPath)
+	}()
 
 	version = &models.SpiderVersion{
-		Id:       utils.GetFileMD5(file),
-		Path:     filepath.Join(spiderName, fileName),
-		UploadTs: utils.NowTimestamp(),
+		Id:       utils.GetFileMD5(zipFile),
+		Path:     filepath.Join(spiderName, dirName),
+		CreateTs: time.Now(),
 	}
 
-	// 根据 MD5 判断是否为重复的版本
-	if version, err := GetSpiderVersionById(spiderName, version.Id); err != nil {
+	// 通过文件 MD5 作为 ID，可以根据 ID 判断是否为重复的版本
+	if version, err := QuerySpiderVersionById(spiderName, version.Id); err != nil {
 		return nil, err
 	} else if version != nil {
 		return nil, errors.New("version already exists")
 	}
 
+	// 解压文件
+	unzipPath := filepath.Join(viper.GetString("spider.path"), version.Path)
+	if err := utils.Unzip(zipFile, unzipPath); err != nil {
+		_ = os.RemoveAll(unzipPath)
+		return nil, err
+	}
+
+	// 修改权限
+	if err := os.Chmod(unzipPath, os.ModePerm); err != nil {
+		return nil, err
+	}
+
+	fileList, err := ioutil.ReadDir(unzipPath)
+	if err == nil && len(fileList) == 1 && fileList[0].IsDir() {
+		version.Path = filepath.Join(version.Path, fileList[0].Name())
+	}
+
 	// 存储版本信息
 	if err := database.KvDB.Update(func(tx *nutsdb.Tx) error {
-		spiderBucket := getVersionBucket(spiderName)
-		score := float64(version.UploadTs) / math.Pow10(0)
+		spiderBucket := joinVersionBucket(spiderName)
+		score := utils.ConvertTimestamp(version.CreateTs)
 		value, _ := json.Marshal(&version)
 		return tx.ZAdd(spiderBucket, []byte(version.Id), score, value)
 	}); err != nil {
@@ -267,22 +300,16 @@ func RemoveSpiderVersion(spiderName string, versionId string) (res interface{}, 
 	}
 
 	// 查询版本信息
-	version, err := GetSpiderVersionById(spiderName, versionId)
+	version, err := QuerySpiderVersionById(spiderName, versionId)
 	if err != nil {
 		return nil, err
 	} else if version == nil {
 		return nil, errors.New("version not found")
 	}
 
-	// 删除版本文件
-	dirPath := viper.GetString("spider.path")
-	if err := os.Remove(filepath.Join(dirPath, version.Path)); err != nil {
-		return nil, err
-	}
-
 	// 删除爬虫与版本数据
 	if err := database.KvDB.Update(func(tx *nutsdb.Tx) error {
-		if err := tx.ZRem(getVersionBucket(spiderName), versionId); err != nil {
+		if err := tx.ZRem(joinVersionBucket(spiderName), versionId); err != nil {
 			return err
 		}
 		return nil
@@ -290,9 +317,15 @@ func RemoveSpiderVersion(spiderName string, versionId string) (res interface{}, 
 		return nil, err
 	}
 
+	// 删除版本文件
+	dirPath := viper.GetString("spider.path")
+	if err := os.RemoveAll(filepath.Join(dirPath, version.Path)); err != nil {
+		return nil, err
+	}
+
 	return nil, nil
 }
 
-func getVersionBucket(spiderName string) string {
+func joinVersionBucket(spiderName string) string {
 	return constants.SpiderVersionBucket + spiderName
 }

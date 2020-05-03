@@ -10,7 +10,6 @@ import (
 	"errors"
 	"github.com/google/uuid"
 	"github.com/xujiajun/nutsdb"
-	"math"
 	"time"
 )
 
@@ -65,7 +64,40 @@ func QueryTaskById(id string) (task *models.Task, err error) {
 	return task, nil
 }
 
-func SaveTask(form forms.TaskForm) (task *models.Task, err error) {
+func PopPendingTask() (task *models.Task, err error) {
+	if err := database.KvDB.Update(func(tx *nutsdb.Tx) error {
+		// 查询爬虫下的所有任务
+		if nodes, err := tx.ZMembers(constants.TaskListBucket); err != nil {
+			if err == nutsdb.ErrBucket {
+				return nil
+			}
+			return err
+		} else {
+			for _, node := range nodes {
+				var t *models.Task
+				if err := json.Unmarshal(node.Value, &t); err != nil {
+					return err
+				}
+				if t.Status == constants.TaskStatusPending {
+					t.Status = constants.TaskStatusProcessing
+					value, _ := json.Marshal(&t)
+					if err := tx.ZAdd(constants.TaskListBucket, []byte(t.Id), float64(node.Score()), value); err != nil {
+						return err
+					}
+					task = t
+					return nil
+				}
+			}
+		}
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+
+	return task, nil
+}
+
+func AddTask(form forms.TaskForm) (task *models.Task, err error) {
 	return newTask(form.SpiderName, "", form.Cmd)
 }
 
@@ -83,21 +115,21 @@ func newTask(spiderName string, scheduleId string, cmd string) (task *models.Tas
 		ScheduleId: scheduleId,
 		Status:     constants.TaskStatusPending,
 		Cmd:        cmd,
-		StartTs:    time.Now(),
+		CreateTs:   time.Now(),
 	}
 
 	// 存储任务信息
-	if err := saveTask(task); err != nil {
+	if err := SaveTask(task); err != nil {
 		return nil, err
 	}
 
 	return task, nil
 }
 
-func saveTask(task *models.Task) (err error) {
+func SaveTask(task *models.Task) (err error) {
 	// 存储任务信息
 	if err := database.KvDB.Update(func(tx *nutsdb.Tx) error {
-		score := float64(utils.ConvertTimestamp(task.CreateTs)) / math.Pow10(0)
+		score := utils.ConvertTimestamp(task.CreateTs)
 		value, _ := json.Marshal(&task)
 		return tx.ZAdd(constants.TaskListBucket, []byte(task.Id), score, value)
 	}); err != nil {
@@ -116,7 +148,7 @@ func UpdateTaskStatus(id string, status constants.TaskStatus) (res interface{}, 
 	task.Status = status
 
 	// 存储任务信息
-	if err := saveTask(task); err != nil {
+	if err := SaveTask(task); err != nil {
 		return nil, err
 	}
 

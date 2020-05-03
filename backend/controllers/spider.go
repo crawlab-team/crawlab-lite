@@ -19,7 +19,7 @@ func GetSpiderList(c *gin.Context) {
 	}
 
 	if total, spiders, err := services.QuerySpiderList(page.PageNum, page.PageSize); err != nil {
-		HandleError(http.StatusInternalServerError, c, err)
+		HandleError(http.StatusBadRequest, c, err)
 		return
 	} else {
 		HandleSuccessList(c, total, spiders)
@@ -30,7 +30,7 @@ func GetSpider(c *gin.Context) {
 	name := c.Param("name")
 
 	if spider, err := services.QuerySpiderByName(name); err != nil {
-		HandleError(http.StatusInternalServerError, c, err)
+		HandleError(http.StatusBadRequest, c, err)
 		return
 	} else {
 		if spider == nil {
@@ -60,12 +60,12 @@ func CreateSpider(c *gin.Context) {
 		return
 	}
 
-	if res, err := services.SaveSpider(form); err != nil {
-		HandleError(http.StatusInternalServerError, c, err)
+	if res, err := services.AddSpider(form); err != nil {
+		HandleError(http.StatusBadRequest, c, err)
 		return
 	} else {
-		if _, err := services.SaveSpiderVersion(form.Name, form.SpiderUploadForm); err != nil {
-			HandleError(http.StatusInternalServerError, c, err)
+		if _, err := services.AddSpiderVersion(form.Name, form.SpiderUploadForm); err != nil {
+			HandleError(http.StatusBadRequest, c, err)
 			return
 		}
 		HandleSuccess(c, res)
@@ -76,7 +76,7 @@ func DeleteSpider(c *gin.Context) {
 	name := c.Param("name")
 
 	if res, err := services.RemoveSpider(name); err != nil {
-		HandleError(http.StatusInternalServerError, c, err)
+		HandleError(http.StatusBadRequest, c, err)
 		return
 	} else {
 		HandleSuccess(c, res)
@@ -87,7 +87,7 @@ func GetSpiderVersionList(c *gin.Context) {
 	name := c.Param("name")
 
 	if res, err := services.QuerySpiderVersionList(name); err != nil {
-		HandleError(http.StatusInternalServerError, c, err)
+		HandleError(http.StatusBadRequest, c, err)
 		return
 	} else {
 		HandleSuccess(c, res)
@@ -109,8 +109,8 @@ func UploadSpiderVersion(c *gin.Context) {
 	}
 
 	spiderName := c.Param("name")
-	if res, err := services.SaveSpiderVersion(spiderName, form); err != nil {
-		HandleError(http.StatusInternalServerError, c, err)
+	if res, err := services.AddSpiderVersion(spiderName, form); err != nil {
+		HandleError(http.StatusBadRequest, c, err)
 		return
 	} else {
 		HandleSuccess(c, res)
@@ -122,7 +122,7 @@ func DeleteSpiderVersion(c *gin.Context) {
 	versionId := c.Param("versionId")
 
 	if res, err := services.RemoveSpiderVersion(name, versionId); err != nil {
-		HandleError(http.StatusInternalServerError, c, err)
+		HandleError(http.StatusBadRequest, c, err)
 		return
 	} else {
 		HandleSuccess(c, res)

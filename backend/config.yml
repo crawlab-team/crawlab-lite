@@ -36,7 +36,7 @@ kvdb:
   path: "../data/db"
 
 other:
-  tmppath: "/tmp"
+  tmppath: "../data/tmp"
 
 version: 0.0.1
 
