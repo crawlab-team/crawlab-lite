@@ -1,6 +1,6 @@
 package constants
 
 const (
-	ProjectListBucket    = "projects"
-	ProjectVersionBucket = "project_versions:"
+	SpiderListBucket    = "spiders"
+	SpiderVersionBucket = "spider_versions:"
 )

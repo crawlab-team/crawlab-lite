@@ -17,7 +17,7 @@ import (
 	"strconv"
 )
 
-func QueryProjectList(pageNum int, pageSize int) (total int, projects []*models.Project, err error) {
+func QuerySpiderList(pageNum int, pageSize int) (total int, spiders []*models.Spider, err error) {
 	start := (pageNum - 1) * pageSize
 	end := start + pageSize
 
@@ -26,23 +26,23 @@ func QueryProjectList(pageNum int, pageSize int) (total int, projects []*models.
 
 	if err := db.View(func(tx *nutsdb.Tx) error {
 		// 查询区间内的所有项目
-		if nodes, err := tx.ZRangeByRank(constants.ProjectListBucket, start, end); err != nil {
+		if nodes, err := tx.ZRangeByRank(constants.SpiderListBucket, start, end); err != nil {
 			if err == nutsdb.ErrBucket {
 				return nil
 			}
 			return err
 		} else {
 			for _, node := range nodes {
-				var project *models.Project
-				if err := json.Unmarshal(node.Value, &project); err != nil {
+				var spider *models.Spider
+				if err := json.Unmarshal(node.Value, &spider); err != nil {
 					return err
 				}
-				projects = append(projects, project)
+				spiders = append(spiders, spider)
 			}
 		}
 
 		// 查询数据总数目
-		if total, err = tx.ZCard(constants.ProjectListBucket); err != nil {
+		if total, err = tx.ZCard(constants.SpiderListBucket); err != nil {
 			return err
 		}
 		return nil
@@ -50,20 +50,20 @@ func QueryProjectList(pageNum int, pageSize int) (total int, projects []*models.
 		return 0, nil, err
 	}
 
-	return total, projects, nil
+	return total, spiders, nil
 }
 
-func QueryProjectByName(name string) (project *models.Project, err error) {
+func QuerySpiderByName(name string) (spider *models.Spider, err error) {
 	db := database.GetKvDB()
 	defer db.Close()
 
 	if err := db.View(func(tx *nutsdb.Tx) error {
-		if node, err := tx.ZGetByKey(constants.ProjectListBucket, []byte(name)); err != nil {
+		if node, err := tx.ZGetByKey(constants.SpiderListBucket, []byte(name)); err != nil {
 			if err == nutsdb.ErrBucket {
 				return nil
 			}
 			return err
-		} else if err := json.Unmarshal(node.Value, &project); err != nil {
+		} else if err := json.Unmarshal(node.Value, &spider); err != nil {
 			return err
 		}
 		return nil
@@ -71,21 +71,21 @@ func QueryProjectByName(name string) (project *models.Project, err error) {
 		return nil, err
 	}
 
-	return project, nil
+	return spider, nil
 }
 
-func SaveProject(form forms.ProjectForm) (project *models.Project, err error) {
-	projectName := form.Name
+func SaveSpider(form forms.SpiderForm) (spider *models.Spider, err error) {
+	spiderName := form.Name
 
 	// 检查项目是否已存在
-	if project, err := QueryProjectByName(projectName); err != nil {
+	if spider, err := QuerySpiderByName(spiderName); err != nil {
 		return nil, err
-	} else if project != nil {
-		return nil, errors.New("project already exists")
+	} else if spider != nil {
+		return nil, errors.New("spider already exists")
 	}
 
-	project = &models.Project{
-		Name:     projectName,
+	spider = &models.Spider{
+		Name:     spiderName,
 		CreateTs: utils.NowTimestamp(),
 	}
 
@@ -94,30 +94,30 @@ func SaveProject(form forms.ProjectForm) (project *models.Project, err error) {
 
 	// 存储项目信息
 	if err := db.Update(func(tx *nutsdb.Tx) error {
-		score := float64(project.CreateTs) / math.Pow10(0)
-		value, _ := json.Marshal(&project)
-		return tx.ZAdd(constants.ProjectListBucket, []byte(projectName), score, value)
+		score := float64(spider.CreateTs) / math.Pow10(0)
+		value, _ := json.Marshal(&spider)
+		return tx.ZAdd(constants.SpiderListBucket, []byte(spiderName), score, value)
 	}); err != nil {
 		return nil, err
 	}
 
-	return project, nil
+	return spider, nil
 }
 
-func RemoveProject(projectName string) (res interface{}, err error) {
+func RemoveSpider(spiderName string) (res interface{}, err error) {
 	// 检查项目是否已存在
-	if project, err := QueryProjectByName(projectName); err != nil {
+	if spider, err := QuerySpiderByName(spiderName); err != nil {
 		return nil, err
-	} else if project == nil {
-		return nil, errors.New("project not found")
+	} else if spider == nil {
+		return nil, errors.New("spider not found")
 	}
 
 	// 删除版本文件
-	projectDir := viper.GetString("spider.path")
-	dirs, _ := ioutil.ReadDir(projectDir)
+	spiderDir := viper.GetString("spider.path")
+	dirs, _ := ioutil.ReadDir(spiderDir)
 	for _, dir := range dirs {
-		if dir.IsDir() && dir.Name() == projectName {
-			if err := os.RemoveAll(filepath.Join(projectDir, projectName)); err != nil {
+		if dir.IsDir() && dir.Name() == spiderName {
+			if err := os.RemoveAll(filepath.Join(spiderDir, spiderName)); err != nil {
 				return nil, err
 			}
 		}
@@ -128,10 +128,10 @@ func RemoveProject(projectName string) (res interface{}, err error) {
 
 	// 删除项目与版本数据
 	if err := db.Update(func(tx *nutsdb.Tx) error {
-		if err := tx.ZRem(constants.ProjectListBucket, projectName); err != nil {
+		if err := tx.ZRem(constants.SpiderListBucket, spiderName); err != nil {
 			return err
 		}
-		verBucket := getVersionBucket(projectName)
+		verBucket := getVersionBucket(spiderName)
 		if nodes, err := tx.ZMembers(verBucket); err != nil {
 			if err == nutsdb.ErrBucket {
 				return nil
@@ -152,20 +152,20 @@ func RemoveProject(projectName string) (res interface{}, err error) {
 	return nil, nil
 }
 
-func QueryProjectVersionList(projectName string) (versions []*models.ProjectVersion, err error) {
+func QuerySpiderVersionList(spiderName string) (versions []*models.SpiderVersion, err error) {
 	db := database.GetKvDB()
 	defer db.Close()
 
 	if err := db.View(func(tx *nutsdb.Tx) error {
 		// 查询项目下的所有版本信息
-		if nodes, err := tx.ZMembers(getVersionBucket(projectName)); err != nil {
+		if nodes, err := tx.ZMembers(getVersionBucket(spiderName)); err != nil {
 			if err == nutsdb.ErrBucket {
 				return nil
 			}
 			return err
 		} else {
 			for _, node := range nodes {
-				var version *models.ProjectVersion
+				var version *models.SpiderVersion
 				if err := json.Unmarshal(node.Value, &version); err != nil {
 					return err
 				}
@@ -180,12 +180,12 @@ func QueryProjectVersionList(projectName string) (versions []*models.ProjectVers
 	return versions, nil
 }
 
-func GetProjectVersionById(projectName string, versionId string) (version *models.ProjectVersion, err error) {
+func GetSpiderVersionById(spiderName string, versionId string) (version *models.SpiderVersion, err error) {
 	db := database.GetKvDB()
 	defer db.Close()
 
 	if err := db.View(func(tx *nutsdb.Tx) error {
-		if node, err := tx.ZGetByKey(getVersionBucket(projectName), []byte(versionId)); err != nil {
+		if node, err := tx.ZGetByKey(getVersionBucket(spiderName), []byte(versionId)); err != nil {
 			if err == nutsdb.ErrBucket {
 				return nil
 			}
@@ -201,17 +201,17 @@ func GetProjectVersionById(projectName string, versionId string) (version *model
 	return version, nil
 }
 
-func SaveProjectVersion(projectName string, form forms.ProjectUploadForm) (version *models.ProjectVersion, err error) {
+func SaveSpiderVersion(spiderName string, form forms.SpiderUploadForm) (version *models.SpiderVersion, err error) {
 	// 检查项目是否已存在
-	if project, err := QueryProjectByName(projectName); err != nil {
+	if spider, err := QuerySpiderByName(spiderName); err != nil {
 		return nil, err
-	} else if project == nil {
-		return nil, errors.New("project not found")
+	} else if spider == nil {
+		return nil, errors.New("spider not found")
 	}
 
 	// 生成存储版本文件的路径
 	fileName := strconv.FormatInt(utils.NowTimestamp(), 10) + ".zip"
-	dir := filepath.Join(viper.GetString("spider.path"), projectName)
+	dir := filepath.Join(viper.GetString("spider.path"), spiderName)
 	path := filepath.Join(dir, fileName)
 
 	file, err := form.File.Open()
@@ -228,9 +228,9 @@ func SaveProjectVersion(projectName string, form forms.ProjectUploadForm) (versi
 		return nil, err
 	}
 
-	version = &models.ProjectVersion{
+	version = &models.SpiderVersion{
 		Id:       utils.GetFileMD5(file),
-		Path:     filepath.Join(projectName, fileName),
+		Path:     filepath.Join(spiderName, fileName),
 		UploadTs: utils.NowTimestamp(),
 	}
 
@@ -238,7 +238,7 @@ func SaveProjectVersion(projectName string, form forms.ProjectUploadForm) (versi
 	defer db.Close()
 
 	// 根据 MD5 判断是否为重复的版本
-	if version, err := GetProjectVersionById(projectName, version.Id); err != nil {
+	if version, err := GetSpiderVersionById(spiderName, version.Id); err != nil {
 		return nil, err
 	} else if version != nil {
 		return nil, errors.New("version already exists")
@@ -246,10 +246,10 @@ func SaveProjectVersion(projectName string, form forms.ProjectUploadForm) (versi
 
 	// 存储版本信息
 	if err := db.Update(func(tx *nutsdb.Tx) error {
-		projectBucket := getVersionBucket(projectName)
+		spiderBucket := getVersionBucket(spiderName)
 		score := float64(version.UploadTs) / math.Pow10(0)
 		value, _ := json.Marshal(&version)
-		return tx.ZAdd(projectBucket, []byte(version.Id), score, value)
+		return tx.ZAdd(spiderBucket, []byte(version.Id), score, value)
 	}); err != nil {
 		return nil, err
 	}
@@ -257,16 +257,16 @@ func SaveProjectVersion(projectName string, form forms.ProjectUploadForm) (versi
 	return version, nil
 }
 
-func RemoveProjectVersion(projectName string, versionId string) (res interface{}, err error) {
+func RemoveSpiderVersion(spiderName string, versionId string) (res interface{}, err error) {
 	// 检查项目是否已存在
-	if project, err := QueryProjectByName(projectName); err != nil {
+	if spider, err := QuerySpiderByName(spiderName); err != nil {
 		return nil, err
-	} else if project == nil {
-		return nil, errors.New("project not found")
+	} else if spider == nil {
+		return nil, errors.New("spider not found")
 	}
 
 	// 查询版本信息
-	version, err := GetProjectVersionById(projectName, versionId)
+	version, err := GetSpiderVersionById(spiderName, versionId)
 	if err != nil {
 		return nil, err
 	} else if version == nil {
@@ -284,7 +284,7 @@ func RemoveProjectVersion(projectName string, versionId string) (res interface{}
 
 	// 删除项目与版本数据
 	if err := db.Update(func(tx *nutsdb.Tx) error {
-		if err := tx.ZRem(getVersionBucket(projectName), versionId); err != nil {
+		if err := tx.ZRem(getVersionBucket(spiderName), versionId); err != nil {
 			return err
 		}
 		return nil
@@ -295,6 +295,6 @@ func RemoveProjectVersion(projectName string, versionId string) (res interface{}
 	return nil, nil
 }
 
-func getVersionBucket(projectName string) string {
-	return constants.ProjectVersionBucket + projectName
+func getVersionBucket(spiderName string) string {
+	return constants.SpiderVersionBucket + spiderName
 }

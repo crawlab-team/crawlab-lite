@@ -10,51 +10,51 @@ import (
 	"strings"
 )
 
-func GetProjectList(c *gin.Context) {
+func GetSpiderList(c *gin.Context) {
 	var page forms.PageForm
 
-	if err := c.ShouldBind(&page); err != nil {
+	if err := c.ShouldBindQuery(&page); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
 		return
 	}
 
-	if total, projects, err := services.QueryProjectList(page.PageNum, page.PageSize); err != nil {
+	if total, spiders, err := services.QuerySpiderList(page.PageNum, page.PageSize); err != nil {
 		HandleError(http.StatusInternalServerError, c, err)
 		return
 	} else {
-		HandleSuccessList(c, total, projects)
+		HandleSuccessList(c, total, spiders)
 	}
 }
 
-func GetProject(c *gin.Context) {
+func GetSpider(c *gin.Context) {
 	name := c.Param("name")
 
-	if project, err := services.QueryProjectByName(name); err != nil {
+	if spider, err := services.QuerySpiderByName(name); err != nil {
 		HandleError(http.StatusInternalServerError, c, err)
 		return
 	} else {
-		if project == nil {
-			HandleError(http.StatusNotFound, c, errors.New("project not found"))
+		if spider == nil {
+			HandleError(http.StatusNotFound, c, errors.New("spider not found"))
 			return
 		}
-		HandleSuccess(c, project)
+		HandleSuccess(c, spider)
 	}
 }
 
-func CreateProject(c *gin.Context) {
-	var form forms.ProjectForm
+func CreateSpider(c *gin.Context) {
+	var form forms.SpiderForm
 
-	if err := c.ShouldBind(&form); err != nil {
+	if err := c.ShouldBindJSON(&form); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
 		return
 	}
 
 	// 正则校验项目名称
 	if ok, err := regexp.MatchString("[\\w_-]", form.Name); err != nil || ok == false {
-		HandleError(http.StatusBadRequest, c, errors.New("invalid project name"))
+		HandleError(http.StatusBadRequest, c, errors.New("invalid spider name"))
 	}
 
-	if res, err := services.SaveProject(form); err != nil {
+	if res, err := services.SaveSpider(form); err != nil {
 		HandleError(http.StatusInternalServerError, c, err)
 		return
 	} else {
@@ -62,10 +62,10 @@ func CreateProject(c *gin.Context) {
 	}
 }
 
-func DeleteProject(c *gin.Context) {
+func DeleteSpider(c *gin.Context) {
 	name := c.Param("name")
 
-	if res, err := services.RemoveProject(name); err != nil {
+	if res, err := services.RemoveSpider(name); err != nil {
 		HandleError(http.StatusInternalServerError, c, err)
 		return
 	} else {
@@ -73,10 +73,10 @@ func DeleteProject(c *gin.Context) {
 	}
 }
 
-func GetProjectVersionList(c *gin.Context) {
+func GetSpiderVersionList(c *gin.Context) {
 	name := c.Param("name")
 
-	if res, err := services.QueryProjectVersionList(name); err != nil {
+	if res, err := services.QuerySpiderVersionList(name); err != nil {
 		HandleError(http.StatusInternalServerError, c, err)
 		return
 	} else {
@@ -84,8 +84,8 @@ func GetProjectVersionList(c *gin.Context) {
 	}
 }
 
-func UploadProjectVersion(c *gin.Context) {
-	var form forms.ProjectUploadForm
+func UploadSpiderVersion(c *gin.Context) {
+	var form forms.SpiderUploadForm
 
 	if err := c.ShouldBind(&form); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
@@ -98,8 +98,8 @@ func UploadProjectVersion(c *gin.Context) {
 		return
 	}
 
-	projectName := c.Param("name")
-	if res, err := services.SaveProjectVersion(projectName, form); err != nil {
+	spiderName := c.Param("name")
+	if res, err := services.SaveSpiderVersion(spiderName, form); err != nil {
 		HandleError(http.StatusInternalServerError, c, err)
 		return
 	} else {
@@ -107,11 +107,11 @@ func UploadProjectVersion(c *gin.Context) {
 	}
 }
 
-func DeleteProjectVersion(c *gin.Context) {
+func DeleteSpiderVersion(c *gin.Context) {
 	name := c.Param("name")
 	versionId := c.Param("versionId")
 
-	if res, err := services.RemoveProjectVersion(name, versionId); err != nil {
+	if res, err := services.RemoveSpiderVersion(name, versionId); err != nil {
 		HandleError(http.StatusInternalServerError, c, err)
 		return
 	} else {
