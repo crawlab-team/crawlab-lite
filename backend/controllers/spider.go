@@ -44,20 +44,30 @@ func GetSpider(c *gin.Context) {
 func CreateSpider(c *gin.Context) {
 	var form forms.SpiderForm
 
-	if err := c.ShouldBindJSON(&form); err != nil {
+	if err := c.ShouldBind(&form); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
 		return
 	}
 
-	// 正则校验项目名称
+	// 正则校验爬虫名称
 	if ok, err := regexp.MatchString("[\\w_-]", form.Name); err != nil || ok == false {
 		HandleError(http.StatusBadRequest, c, errors.New("invalid spider name"))
+	}
+
+	// 如果不为 zip 文件，返回错误
+	if !strings.HasSuffix(form.File.Filename, ".zip") {
+		HandleError(http.StatusBadRequest, c, errors.New("invalid zip file"))
+		return
 	}
 
 	if res, err := services.SaveSpider(form); err != nil {
 		HandleError(http.StatusInternalServerError, c, err)
 		return
 	} else {
+		if _, err := services.SaveSpiderVersion(form.Name, form.SpiderUploadForm); err != nil {
+			HandleError(http.StatusInternalServerError, c, err)
+			return
+		}
 		HandleSuccess(c, res)
 	}
 }

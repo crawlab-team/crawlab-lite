@@ -25,7 +25,7 @@ func QuerySpiderList(pageNum int, pageSize int) (total int, spiders []*models.Sp
 	defer db.Close()
 
 	if err := db.View(func(tx *nutsdb.Tx) error {
-		// 查询区间内的所有项目
+		// 查询区间内的所有爬虫
 		if nodes, err := tx.ZRangeByRank(constants.SpiderListBucket, start, end); err != nil {
 			if err == nutsdb.ErrBucket {
 				return nil
@@ -59,7 +59,7 @@ func QuerySpiderByName(name string) (spider *models.Spider, err error) {
 
 	if err := db.View(func(tx *nutsdb.Tx) error {
 		if node, err := tx.ZGetByKey(constants.SpiderListBucket, []byte(name)); err != nil {
-			if err == nutsdb.ErrBucket {
+			if err == nutsdb.ErrBucket || err == nutsdb.ErrNotFoundKey {
 				return nil
 			}
 			return err
@@ -77,7 +77,7 @@ func QuerySpiderByName(name string) (spider *models.Spider, err error) {
 func SaveSpider(form forms.SpiderForm) (spider *models.Spider, err error) {
 	spiderName := form.Name
 
-	// 检查项目是否已存在
+	// 检查爬虫是否已存在
 	if spider, err := QuerySpiderByName(spiderName); err != nil {
 		return nil, err
 	} else if spider != nil {
@@ -92,7 +92,7 @@ func SaveSpider(form forms.SpiderForm) (spider *models.Spider, err error) {
 	db := database.GetKvDB()
 	defer db.Close()
 
-	// 存储项目信息
+	// 存储爬虫信息
 	if err := db.Update(func(tx *nutsdb.Tx) error {
 		score := float64(spider.CreateTs) / math.Pow10(0)
 		value, _ := json.Marshal(&spider)
@@ -105,7 +105,7 @@ func SaveSpider(form forms.SpiderForm) (spider *models.Spider, err error) {
 }
 
 func RemoveSpider(spiderName string) (res interface{}, err error) {
-	// 检查项目是否已存在
+	// 检查爬虫是否已存在
 	if spider, err := QuerySpiderByName(spiderName); err != nil {
 		return nil, err
 	} else if spider == nil {
@@ -126,7 +126,7 @@ func RemoveSpider(spiderName string) (res interface{}, err error) {
 	db := database.GetKvDB()
 	defer db.Close()
 
-	// 删除项目与版本数据
+	// 删除爬虫与版本数据
 	if err := db.Update(func(tx *nutsdb.Tx) error {
 		if err := tx.ZRem(constants.SpiderListBucket, spiderName); err != nil {
 			return err
@@ -157,7 +157,7 @@ func QuerySpiderVersionList(spiderName string) (versions []*models.SpiderVersion
 	defer db.Close()
 
 	if err := db.View(func(tx *nutsdb.Tx) error {
-		// 查询项目下的所有版本信息
+		// 查询爬虫下的所有版本信息
 		if nodes, err := tx.ZMembers(getVersionBucket(spiderName)); err != nil {
 			if err == nutsdb.ErrBucket {
 				return nil
@@ -186,7 +186,7 @@ func GetSpiderVersionById(spiderName string, versionId string) (version *models.
 
 	if err := db.View(func(tx *nutsdb.Tx) error {
 		if node, err := tx.ZGetByKey(getVersionBucket(spiderName), []byte(versionId)); err != nil {
-			if err == nutsdb.ErrBucket {
+			if err == nutsdb.ErrBucket || err == nutsdb.ErrNotFoundKey {
 				return nil
 			}
 			return err
@@ -202,7 +202,7 @@ func GetSpiderVersionById(spiderName string, versionId string) (version *models.
 }
 
 func SaveSpiderVersion(spiderName string, form forms.SpiderUploadForm) (version *models.SpiderVersion, err error) {
-	// 检查项目是否已存在
+	// 检查爬虫是否已存在
 	if spider, err := QuerySpiderByName(spiderName); err != nil {
 		return nil, err
 	} else if spider == nil {
@@ -258,7 +258,7 @@ func SaveSpiderVersion(spiderName string, form forms.SpiderUploadForm) (version 
 }
 
 func RemoveSpiderVersion(spiderName string, versionId string) (res interface{}, err error) {
-	// 检查项目是否已存在
+	// 检查爬虫是否已存在
 	if spider, err := QuerySpiderByName(spiderName); err != nil {
 		return nil, err
 	} else if spider == nil {
@@ -282,7 +282,7 @@ func RemoveSpiderVersion(spiderName string, versionId string) (res interface{}, 
 	db := database.GetKvDB()
 	defer db.Close()
 
-	// 删除项目与版本数据
+	// 删除爬虫与版本数据
 	if err := db.Update(func(tx *nutsdb.Tx) error {
 		if err := tx.ZRem(getVersionBucket(spiderName), versionId); err != nil {
 			return err

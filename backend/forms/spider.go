@@ -3,7 +3,7 @@ package forms
 import "mime/multipart"
 
 type SpiderForm struct {
-	BaseForm
+	SpiderUploadForm
 
 	Name string `form:"name" json:"name" binding:"required,min=1,max=32"`
 }
