@@ -21,10 +21,7 @@ func QuerySpiderList(pageNum int, pageSize int) (total int, spiders []*models.Sp
 	start := (pageNum - 1) * pageSize
 	end := start + pageSize
 
-	db := database.GetKvDB()
-	defer db.Close()
-
-	if err := db.View(func(tx *nutsdb.Tx) error {
+	if err := database.KvDB.View(func(tx *nutsdb.Tx) error {
 		// 查询区间内的所有爬虫
 		if nodes, err := tx.ZRangeByRank(constants.SpiderListBucket, start, end); err != nil {
 			if err == nutsdb.ErrBucket {
@@ -54,10 +51,7 @@ func QuerySpiderList(pageNum int, pageSize int) (total int, spiders []*models.Sp
 }
 
 func QuerySpiderByName(name string) (spider *models.Spider, err error) {
-	db := database.GetKvDB()
-	defer db.Close()
-
-	if err := db.View(func(tx *nutsdb.Tx) error {
+	if err := database.KvDB.View(func(tx *nutsdb.Tx) error {
 		if node, err := tx.ZGetByKey(constants.SpiderListBucket, []byte(name)); err != nil {
 			if err == nutsdb.ErrBucket || err == nutsdb.ErrNotFoundKey {
 				return nil
@@ -89,11 +83,8 @@ func SaveSpider(form forms.SpiderForm) (spider *models.Spider, err error) {
 		CreateTs: utils.NowTimestamp(),
 	}
 
-	db := database.GetKvDB()
-	defer db.Close()
-
 	// 存储爬虫信息
-	if err := db.Update(func(tx *nutsdb.Tx) error {
+	if err := database.KvDB.Update(func(tx *nutsdb.Tx) error {
 		score := float64(spider.CreateTs) / math.Pow10(0)
 		value, _ := json.Marshal(&spider)
 		return tx.ZAdd(constants.SpiderListBucket, []byte(spiderName), score, value)
@@ -123,11 +114,8 @@ func RemoveSpider(spiderName string) (res interface{}, err error) {
 		}
 	}
 
-	db := database.GetKvDB()
-	defer db.Close()
-
 	// 删除爬虫相关数据
-	if err := db.Update(func(tx *nutsdb.Tx) error {
+	if err := database.KvDB.Update(func(tx *nutsdb.Tx) error {
 		// 删除爬虫
 		if err := tx.ZRem(constants.SpiderListBucket, spiderName); err != nil {
 			return err
@@ -175,10 +163,7 @@ func RemoveSpider(spiderName string) (res interface{}, err error) {
 }
 
 func QuerySpiderVersionList(spiderName string) (versions []*models.SpiderVersion, err error) {
-	db := database.GetKvDB()
-	defer db.Close()
-
-	if err := db.View(func(tx *nutsdb.Tx) error {
+	if err := database.KvDB.View(func(tx *nutsdb.Tx) error {
 		// 查询爬虫下的所有版本信息
 		if nodes, err := tx.ZMembers(getVersionBucket(spiderName)); err != nil {
 			if err == nutsdb.ErrBucket {
@@ -203,10 +188,7 @@ func QuerySpiderVersionList(spiderName string) (versions []*models.SpiderVersion
 }
 
 func GetSpiderVersionById(spiderName string, versionId string) (version *models.SpiderVersion, err error) {
-	db := database.GetKvDB()
-	defer db.Close()
-
-	if err := db.View(func(tx *nutsdb.Tx) error {
+	if err := database.KvDB.View(func(tx *nutsdb.Tx) error {
 		if node, err := tx.ZGetByKey(getVersionBucket(spiderName), []byte(versionId)); err != nil {
 			if err == nutsdb.ErrBucket || err == nutsdb.ErrNotFoundKey {
 				return nil
@@ -256,9 +238,6 @@ func SaveSpiderVersion(spiderName string, form forms.SpiderUploadForm) (version 
 		UploadTs: utils.NowTimestamp(),
 	}
 
-	db := database.GetKvDB()
-	defer db.Close()
-
 	// 根据 MD5 判断是否为重复的版本
 	if version, err := GetSpiderVersionById(spiderName, version.Id); err != nil {
 		return nil, err
@@ -267,7 +246,7 @@ func SaveSpiderVersion(spiderName string, form forms.SpiderUploadForm) (version 
 	}
 
 	// 存储版本信息
-	if err := db.Update(func(tx *nutsdb.Tx) error {
+	if err := database.KvDB.Update(func(tx *nutsdb.Tx) error {
 		spiderBucket := getVersionBucket(spiderName)
 		score := float64(version.UploadTs) / math.Pow10(0)
 		value, _ := json.Marshal(&version)
@@ -301,11 +280,8 @@ func RemoveSpiderVersion(spiderName string, versionId string) (res interface{}, 
 		return nil, err
 	}
 
-	db := database.GetKvDB()
-	defer db.Close()
-
 	// 删除爬虫与版本数据
-	if err := db.Update(func(tx *nutsdb.Tx) error {
+	if err := database.KvDB.Update(func(tx *nutsdb.Tx) error {
 		if err := tx.ZRem(getVersionBucket(spiderName), versionId); err != nil {
 			return err
 		}

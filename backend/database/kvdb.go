@@ -5,20 +5,16 @@ import (
 	"github.com/xujiajun/nutsdb"
 )
 
+var KvDB *nutsdb.DB
+
 func InitKvDB() error {
 	opt := nutsdb.DefaultOptions
+	opt.SegmentSize = 64 * 1000 * 1000
 	opt.Dir = viper.GetString("kvdb.path")
 	db, err := nutsdb.Open(opt)
 	if err != nil {
 		return err
 	}
-	defer db.Close()
+	KvDB = db
 	return nil
-}
-
-func GetKvDB() *nutsdb.DB {
-	opt := nutsdb.DefaultOptions
-	opt.Dir = viper.GetString("kvdb.path")
-	db, _ := nutsdb.Open(opt)
-	return db
 }

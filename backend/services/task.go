@@ -18,10 +18,7 @@ func QueryTaskList(pageNum int, pageSize int) (total int, tasks []*models.Task, 
 	start := (pageNum - 1) * pageSize
 	end := start + pageSize
 
-	db := database.GetKvDB()
-	defer db.Close()
-
-	if err := db.View(func(tx *nutsdb.Tx) error {
+	if err := database.KvDB.View(func(tx *nutsdb.Tx) error {
 		// 查询区间内的所有任务
 		if nodes, err := tx.ZRangeByRank(constants.TaskListBucket, start, end); err != nil {
 			if err == nutsdb.ErrBucket {
@@ -51,10 +48,7 @@ func QueryTaskList(pageNum int, pageSize int) (total int, tasks []*models.Task, 
 }
 
 func QueryTaskById(id string) (task *models.Task, err error) {
-	db := database.GetKvDB()
-	defer db.Close()
-
-	if err := db.View(func(tx *nutsdb.Tx) error {
+	if err := database.KvDB.View(func(tx *nutsdb.Tx) error {
 		if node, err := tx.ZGetByKey(constants.TaskListBucket, []byte(id)); err != nil {
 			if err == nutsdb.ErrBucket || err == nutsdb.ErrNotFoundKey {
 				return nil
@@ -92,9 +86,6 @@ func newTask(spiderName string, scheduleId string, cmd string) (task *models.Tas
 		StartTs:    time.Now(),
 	}
 
-	db := database.GetKvDB()
-	defer db.Close()
-
 	// 存储任务信息
 	if err := saveTask(task); err != nil {
 		return nil, err
@@ -104,12 +95,9 @@ func newTask(spiderName string, scheduleId string, cmd string) (task *models.Tas
 }
 
 func saveTask(task *models.Task) (err error) {
-	db := database.GetKvDB()
-	defer db.Close()
-
 	// 存储任务信息
-	if err := db.Update(func(tx *nutsdb.Tx) error {
-		score := float64(utils.ConvertTimestamp(task.StartTs)) / math.Pow10(0)
+	if err := database.KvDB.Update(func(tx *nutsdb.Tx) error {
+		score := float64(utils.ConvertTimestamp(task.CreateTs)) / math.Pow10(0)
 		value, _ := json.Marshal(&task)
 		return tx.ZAdd(constants.TaskListBucket, []byte(task.Id), score, value)
 	}); err != nil {
@@ -126,9 +114,6 @@ func UpdateTaskStatus(id string, status constants.TaskStatus) (res interface{}, 
 	}
 
 	task.Status = status
-
-	db := database.GetKvDB()
-	defer db.Close()
 
 	// 存储任务信息
 	if err := saveTask(task); err != nil {
