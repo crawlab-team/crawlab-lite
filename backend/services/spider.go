@@ -126,11 +126,13 @@ func RemoveSpider(spiderName string) (res interface{}, err error) {
 	db := database.GetKvDB()
 	defer db.Close()
 
-	// 删除爬虫与版本数据
+	// 删除爬虫相关数据
 	if err := db.Update(func(tx *nutsdb.Tx) error {
+		// 删除爬虫
 		if err := tx.ZRem(constants.SpiderListBucket, spiderName); err != nil {
 			return err
 		}
+		// 删除爬虫版本
 		verBucket := getVersionBucket(spiderName)
 		if nodes, err := tx.ZMembers(verBucket); err != nil {
 			if err == nutsdb.ErrBucket {
@@ -141,6 +143,26 @@ func RemoveSpider(spiderName string) (res interface{}, err error) {
 			for _, node := range nodes {
 				if err := tx.ZRem(verBucket, node.Key()); err != nil {
 					return err
+				}
+			}
+		}
+		// 删除爬虫任务
+		if nodes, err := tx.ZMembers(constants.TaskListBucket); err != nil {
+			if err == nutsdb.ErrBucket {
+				return nil
+			}
+			return err
+		} else {
+			for _, node := range nodes {
+				var task *models.Task
+				if err := json.Unmarshal(node.Value, &task); err != nil {
+					return err
+				}
+				if task.SpiderName == spiderName {
+					if err := tx.ZRem(constants.TaskListBucket, task.Id); err != nil {
+						return err
+					}
+					return nil
 				}
 			}
 		}

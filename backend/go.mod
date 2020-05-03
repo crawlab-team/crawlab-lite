@@ -7,6 +7,7 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/gin-gonic/gin v1.6.0
+	github.com/google/uuid v1.1.1
 	github.com/imroc/req v0.3.0
 	github.com/pkg/errors v0.8.1
 	github.com/smartystreets/goconvey v1.6.4

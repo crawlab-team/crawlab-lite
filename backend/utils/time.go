@@ -4,17 +4,21 @@ import (
 	"time"
 )
 
-func GetLocalTime(t time.Time) time.Time {
+func ConvertLocalTime(t time.Time) time.Time {
 	return t.In(time.Local)
 }
 
-func GetTimeString(t time.Time) string {
+func ConvertTimeString(t time.Time) string {
 	return t.Format("2006-01-02 15:04:05")
 }
 
-func GetLocalTimeString(t time.Time) string {
-	t = GetLocalTime(t)
-	return GetTimeString(t)
+func ConvertLocalTimeString(t time.Time) string {
+	t = ConvertLocalTime(t)
+	return ConvertTimeString(t)
+}
+
+func ConvertTimestamp(t time.Time) int64 {
+	return t.UnixNano() / 1e6
 }
 
 // 秒时间戳

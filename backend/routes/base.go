@@ -31,6 +31,13 @@ func InitRoutes(app *gin.Engine) {
 				authGroup.POST("/spiders/:name/versions", controllers.UploadSpiderVersion)              // 上传爬虫版本
 				authGroup.DELETE("/spiders/:name/versions/:versionId", controllers.DeleteSpiderVersion) // 删除爬虫版本
 			}
+			// 任务
+			{
+				authGroup.GET("/tasks", controllers.GetTaskList)            // 任务列表
+				authGroup.GET("/tasks/:id", controllers.GetTask)            // 任务详情
+				authGroup.POST("/tasks", controllers.CreateTask)            // 创建任务
+				authGroup.POST("/tasks/:id/cancel", controllers.CancelTask) // 取消任务
+			}
 		}
 	}
 }
