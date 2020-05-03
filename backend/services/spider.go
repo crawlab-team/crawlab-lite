@@ -205,6 +205,24 @@ func QuerySpiderVersionById(spiderName string, versionId string) (version *model
 	return version, nil
 }
 
+func QueryLatestSpiderVersion(spiderName string) (version *models.SpiderVersion, err error) {
+	if err := database.KvDB.View(func(tx *nutsdb.Tx) error {
+		if node, err := tx.ZPeekMax(joinVersionBucket(spiderName)); err != nil {
+			if err == nutsdb.ErrBucket || err == nutsdb.ErrNotFoundKey {
+				return nil
+			}
+			return err
+		} else if err := json.Unmarshal(node.Value, &version); err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+
+	return version, nil
+}
+
 func AddSpiderVersion(spiderName string, form forms.SpiderUploadForm) (version *models.SpiderVersion, err error) {
 	// 检查爬虫是否已存在
 	if spider, err := QuerySpiderByName(spiderName); err != nil {

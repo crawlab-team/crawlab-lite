@@ -10,3 +10,8 @@ const (
 	TaskStatusError      TaskStatus = "ERROR"      // 错误
 	TaskStatusCancelled  TaskStatus = "CANCELLED"  // 取消
 )
+
+const (
+	TaskFinish string = "FINISH"
+	TaskCancel string = "CANCEL"
+)

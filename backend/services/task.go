@@ -98,24 +98,30 @@ func PopPendingTask() (task *models.Task, err error) {
 }
 
 func AddTask(form forms.TaskForm) (task *models.Task, err error) {
-	return newTask(form.SpiderName, "", form.Cmd)
-}
-
-func newTask(spiderName string, scheduleId string, cmd string) (task *models.Task, err error) {
 	// 检查爬虫是否存在
-	if spider, err := QuerySpiderByName(spiderName); err != nil {
+	if spider, err := QuerySpiderByName(form.SpiderName); err != nil {
 		return nil, err
 	} else if spider == nil {
 		return nil, errors.New("spider not found")
 	}
 
+	if form.SpiderVersionId != "" {
+		// 检查爬虫版本是否存在
+		if version, err := QuerySpiderVersionById(form.SpiderName, form.SpiderVersionId); err != nil {
+			return nil, err
+		} else if version == nil {
+			return nil, errors.New("spider version not found")
+		}
+	}
+
 	task = &models.Task{
-		Id:         uuid.New().String(),
-		SpiderName: spiderName,
-		ScheduleId: scheduleId,
-		Status:     constants.TaskStatusPending,
-		Cmd:        cmd,
-		CreateTs:   time.Now(),
+		Id:              uuid.New().String(),
+		SpiderName:      form.SpiderName,
+		SpiderVersionId: form.SpiderVersionId,
+		ScheduleId:      form.ScheduleId,
+		Status:          constants.TaskStatusPending,
+		Cmd:             form.Cmd,
+		CreateTs:        time.Now(),
 	}
 
 	// 存储任务信息

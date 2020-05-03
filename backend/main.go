@@ -6,6 +6,7 @@ import (
 	"crawlab-lite/database"
 	"crawlab-lite/lib/validate_bridge"
 	"crawlab-lite/routes"
+	"crawlab-lite/task"
 	"github.com/apex/log"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -31,10 +32,10 @@ func main() {
 
 	// 初始化 Key-Value 数据库
 	if err := database.InitKvDB(); err != nil {
-		log.Error("init key-value database error:" + err.Error())
+		log.Error("Init key-value database error:" + err.Error())
 		panic(err)
 	}
-	log.Info("initialized key-value database successfully")
+	log.Info("Initialized key-value database successfully")
 
 	// 初始化日志设置
 	logLevel := viper.GetString("log.level")
@@ -42,6 +43,13 @@ func main() {
 		log.SetLevelFromString(logLevel)
 	}
 	log.Info("Initialized log config successfully")
+
+	// 初始化任务执行器
+	if err := task.InitTaskExecutor(); err != nil {
+		log.Error("Init task executor error:" + err.Error())
+		panic(err)
+	}
+	log.Info("Initialized task executor successfully")
 
 	// 初始化路由
 	routes.InitRoutes(app)
