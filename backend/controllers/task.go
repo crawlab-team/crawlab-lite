@@ -17,7 +17,7 @@ func GetTaskList(c *gin.Context) {
 		return
 	}
 
-	if total, tasks, err := services.QueryTaskList(page.PageNum, page.PageSize); err != nil {
+	if total, tasks, err := services.QueryTaskPage(page); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
 		return
 	} else {
@@ -56,10 +56,10 @@ func CreateTask(c *gin.Context) {
 	}
 }
 
-func CancelTask(c *gin.Context) {
+func UpdateTaskCancel(c *gin.Context) {
 	id := c.Param("id")
 
-	if res, err := services.UpdateTaskStatus(id, constants.TaskStatusCancelled); err != nil {
+	if res, err := services.CancelTask(id, constants.TaskStatusCancelled); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
 		return
 	} else {

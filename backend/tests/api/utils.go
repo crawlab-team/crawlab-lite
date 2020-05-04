@@ -5,8 +5,8 @@ import (
 	"crawlab-lite/config"
 	"crawlab-lite/constants"
 	"crawlab-lite/controllers"
+	"crawlab-lite/dao"
 	"crawlab-lite/lib/validate_bridge"
-	"crawlab-lite/models"
 	"crawlab-lite/routes"
 	"encoding/json"
 	"errors"
@@ -29,7 +29,7 @@ func InitTestApp() *gin.Engine {
 }
 
 func Login(app *gin.Engine) (string, error) {
-	users, err := models.GetUserList()
+	users, err := dao.GetUserList()
 	if err != nil {
 		return "", err
 	}

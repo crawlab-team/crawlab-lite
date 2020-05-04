@@ -3,7 +3,6 @@ package task
 import (
 	"crawlab-lite/constants"
 	"crawlab-lite/models"
-	"crawlab-lite/services"
 	"github.com/apex/log"
 	"os/exec"
 	"time"
@@ -16,7 +15,7 @@ func StartTaskProcess(cmd *exec.Cmd, task models.Task) error {
 		task.Error = "start task error: " + err.Error()
 		task.Status = constants.TaskStatusError
 		task.FinishTs = time.Now()
-		services.SaveTask(&task)
+		_ = updateTask(&task)
 		return err
 	}
 	return nil
@@ -36,7 +35,7 @@ func WaitTaskProcess(cmd *exec.Cmd, task models.Task) error {
 				task.Error = err.Error()
 				task.FinishTs = time.Now()
 				task.Status = constants.TaskStatusError
-				services.SaveTask(&task)
+				_ = updateTask(&task)
 
 				go FinishUpTask(task)
 			}

@@ -33,10 +33,17 @@ func InitRoutes(app *gin.Engine) {
 			}
 			// 任务
 			{
-				authGroup.GET("/tasks", controllers.GetTaskList)            // 任务列表
-				authGroup.GET("/tasks/:id", controllers.GetTask)            // 任务详情
-				authGroup.POST("/tasks", controllers.CreateTask)            // 创建任务
-				authGroup.POST("/tasks/:id/cancel", controllers.CancelTask) // 取消任务
+				authGroup.GET("/tasks", controllers.GetTaskList)                  // 任务列表
+				authGroup.GET("/tasks/:id", controllers.GetTask)                  // 任务详情
+				authGroup.POST("/tasks", controllers.CreateTask)                  // 创建任务
+				authGroup.POST("/tasks/:id/cancel", controllers.UpdateTaskCancel) // 取消任务
+			}
+			// 定时调度
+			{
+				authGroup.GET("/schedules", controllers.GetScheduleList)    // 调度列表
+				authGroup.GET("/schedules/:id", controllers.GetSchedule)    // 调度详情
+				authGroup.POST("/schedules", controllers.CreateSchedule)    // 创建调度
+				authGroup.PUT("/schedules/:id", controllers.UpdateSchedule) // 更新调度
 			}
 		}
 	}

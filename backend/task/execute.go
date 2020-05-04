@@ -2,6 +2,7 @@ package task
 
 import (
 	"crawlab-lite/constants"
+	"crawlab-lite/dao"
 	"crawlab-lite/models"
 	"crawlab-lite/services"
 	"crawlab-lite/utils"
@@ -114,17 +115,16 @@ func ExecuteTask(id int) {
 			return
 		}
 	}
+	if version == nil {
+		log.Errorf("execute task, query spider version error: spider have no version")
+		return
+	}
 
 	// 工作目录
 	cwd := filepath.Join(
 		viper.GetString("spider.path"),
 		version.Path,
 	)
-
-	// 任务赋值
-	task.StartTs = time.Now()                                     // 任务开始时间
-	task.Status = constants.TaskStatusRunning                     // 任务状态
-	task.WaitDuration = task.StartTs.Sub(task.CreateTs).Seconds() // 等待时长
 
 	// 文件检查
 	//if err := SpiderFileCheck(t, spider); err != nil {
@@ -135,9 +135,13 @@ func ExecuteTask(id int) {
 	// 开始执行任务
 	log.Infof(GetWorkerPrefix(id) + "start task (id:" + task.Id + ")")
 
-	// 储存任务
-	if err = services.SaveTask(task); err != nil {
+	// 更新任务
+	task.StartTs = time.Now()                                     // 任务开始时间
+	task.Status = constants.TaskStatusRunning                     // 任务状态
+	task.WaitDuration = task.StartTs.Sub(task.CreateTs).Seconds() // 等待时长
+	if err := updateTask(task); err != nil {
 		log.Errorf("execute task, save task error: %s", err.Error())
+		return
 	}
 
 	// 执行Shell命令
@@ -150,15 +154,13 @@ func ExecuteTask(id int) {
 		return
 	}
 
-	// 统计数据
+	// 更新任务
 	task.Status = constants.TaskStatusFinished                       // 任务状态: 已完成
 	task.FinishTs = time.Now()                                       // 结束时间
 	task.RuntimeDuration = task.FinishTs.Sub(task.StartTs).Seconds() // 运行时长
 	task.TotalDuration = task.FinishTs.Sub(task.CreateTs).Seconds()  // 总时长
-
-	// 保存任务
-	if err := services.SaveTask(task); err != nil {
-		log.Errorf(GetWorkerPrefix(id) + err.Error())
+	if err := updateTask(task); err != nil {
+		log.Errorf("execute task, save task error: %s", err.Error())
 		return
 	}
 
@@ -248,7 +250,7 @@ func FinishOrCancelTask(ch chan string, cmd *exec.Cmd, task models.Task) {
 	}
 
 	task.FinishTs = time.Now()
-	services.SaveTask(&task)
+	_ = updateTask(&task)
 
 	go FinishUpTask(task)
 }
@@ -256,4 +258,16 @@ func FinishOrCancelTask(ch chan string, cmd *exec.Cmd, task models.Task) {
 // 完成任务的收尾工作
 func FinishUpTask(task models.Task) {
 	// TODO
+}
+
+func updateTask(task *models.Task) (err error) {
+	if err := dao.WriteTx(func(tx dao.Tx) error {
+		if err = tx.UpdateTask(task); err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		return nil
+	}
+	return nil
 }

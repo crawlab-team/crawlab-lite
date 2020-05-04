@@ -14,6 +14,7 @@ type Task struct {
 	Cmd             string               `json:"cmd"`
 	Error           string               `json:"error"`
 	CreateTs        time.Time            `json:"create_ts"`
+	UpdateTs        time.Time            `json:"update_ts"`
 	StartTs         time.Time            `json:"start_ts"`
 	FinishTs        time.Time            `json:"finish_ts"`
 	ResultCount     int                  `json:"result_count"`

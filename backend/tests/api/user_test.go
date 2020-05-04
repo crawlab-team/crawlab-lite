@@ -1,8 +1,8 @@
 package api
 
 import (
+	"crawlab-lite/dao"
 	"crawlab-lite/forms"
-	"crawlab-lite/models"
 	. "github.com/smartystreets/goconvey/convey"
 	"net/http/httptest"
 	"testing"
@@ -11,7 +11,7 @@ import (
 func TestUserAPI(t *testing.T) {
 	Convey("Test User API", t, func() {
 		app := InitTestApp()
-		users, err := models.GetUserList()
+		users, err := dao.GetUserList()
 		So(err, ShouldBeNil)
 		user := users[0]
 

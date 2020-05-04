@@ -18,7 +18,7 @@ func GetSpiderList(c *gin.Context) {
 		return
 	}
 
-	if total, spiders, err := services.QuerySpiderList(page.PageNum, page.PageSize); err != nil {
+	if total, spiders, err := services.QuerySpiderPage(page); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
 		return
 	} else {

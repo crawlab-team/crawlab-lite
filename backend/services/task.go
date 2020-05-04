@@ -2,40 +2,20 @@ package services
 
 import (
 	"crawlab-lite/constants"
-	"crawlab-lite/database"
+	"crawlab-lite/dao"
 	"crawlab-lite/forms"
 	"crawlab-lite/models"
-	"crawlab-lite/utils"
-	"encoding/json"
 	"errors"
-	"github.com/google/uuid"
-	"github.com/xujiajun/nutsdb"
-	"time"
 )
 
-func QueryTaskList(pageNum int, pageSize int) (total int, tasks []*models.Task, err error) {
-	start := (pageNum - 1) * pageSize
-	end := start + pageSize
+func QueryTaskPage(page forms.PageForm) (total int, tasks []*models.Task, err error) {
+	start, end := page.Range()
 
-	if err := database.KvDB.View(func(tx *nutsdb.Tx) error {
-		// 查询区间内的所有任务
-		if nodes, err := tx.ZRangeByRank(constants.TaskListBucket, start, end); err != nil {
-			if err == nutsdb.ErrBucket {
-				return nil
-			}
+	if err := dao.ReadTx(func(tx dao.Tx) error {
+		if tasks, err = tx.SelectAllTasksLimit(start, end); err != nil {
 			return err
-		} else {
-			for _, node := range nodes {
-				var task *models.Task
-				if err := json.Unmarshal(node.Value, &task); err != nil {
-					return err
-				}
-				tasks = append(tasks, task)
-			}
 		}
-
-		// 查询数据总数目
-		if total, err = tx.ZCard(constants.TaskListBucket); err != nil {
+		if total, err = tx.CountSpiders(); err != nil {
 			return err
 		}
 		return nil
@@ -47,47 +27,28 @@ func QueryTaskList(pageNum int, pageSize int) (total int, tasks []*models.Task, 
 }
 
 func QueryTaskById(id string) (task *models.Task, err error) {
-	if err := database.KvDB.View(func(tx *nutsdb.Tx) error {
-		if node, err := tx.ZGetByKey(constants.TaskListBucket, []byte(id)); err != nil {
-			if err == nutsdb.ErrBucket || err == nutsdb.ErrNotFoundKey {
-				return nil
-			}
-			return err
-		} else if err := json.Unmarshal(node.Value, &task); err != nil {
+	if err := dao.ReadTx(func(tx dao.Tx) error {
+		if task, err = tx.SelectTaskWhereId(id); err != nil {
 			return err
 		}
 		return nil
 	}); err != nil {
 		return nil, err
 	}
-
 	return task, nil
 }
 
 func PopPendingTask() (task *models.Task, err error) {
-	if err := database.KvDB.Update(func(tx *nutsdb.Tx) error {
-		// 查询爬虫下的所有任务
-		if nodes, err := tx.ZMembers(constants.TaskListBucket); err != nil {
-			if err == nutsdb.ErrBucket {
-				return nil
-			}
+	if err := dao.WriteTx(func(tx dao.Tx) error {
+		if task, err = tx.SelectTaskWhereStatus(constants.TaskStatusPending); err != nil {
 			return err
-		} else {
-			for _, node := range nodes {
-				var t *models.Task
-				if err := json.Unmarshal(node.Value, &t); err != nil {
-					return err
-				}
-				if t.Status == constants.TaskStatusPending {
-					t.Status = constants.TaskStatusProcessing
-					value, _ := json.Marshal(&t)
-					if err := tx.ZAdd(constants.TaskListBucket, []byte(t.Id), float64(node.Score()), value); err != nil {
-						return err
-					}
-					task = t
-					return nil
-				}
-			}
+		}
+		if task == nil {
+			return nil
+		}
+		task.Status = constants.TaskStatusProcessing
+		if err = tx.UpdateTask(task); err != nil {
+			return err
 		}
 		return nil
 	}); err != nil {
@@ -98,65 +59,62 @@ func PopPendingTask() (task *models.Task, err error) {
 }
 
 func AddTask(form forms.TaskForm) (task *models.Task, err error) {
-	// 检查爬虫是否存在
-	if spider, err := QuerySpiderByName(form.SpiderName); err != nil {
-		return nil, err
-	} else if spider == nil {
-		return nil, errors.New("spider not found")
-	}
-
-	if form.SpiderVersionId != "" {
-		// 检查爬虫版本是否存在
-		if version, err := QuerySpiderVersionById(form.SpiderName, form.SpiderVersionId); err != nil {
-			return nil, err
-		} else if version == nil {
-			return nil, errors.New("spider version not found")
+	if err := dao.WriteTx(func(tx dao.Tx) error {
+		// 检查爬虫是否存在
+		if spider, err := tx.SelectSpiderWhereName(form.SpiderName); err != nil {
+			return err
+		} else if spider == nil {
+			return errors.New("spider not found")
 		}
-	}
 
-	task = &models.Task{
-		Id:              uuid.New().String(),
-		SpiderName:      form.SpiderName,
-		SpiderVersionId: form.SpiderVersionId,
-		ScheduleId:      form.ScheduleId,
-		Status:          constants.TaskStatusPending,
-		Cmd:             form.Cmd,
-		CreateTs:        time.Now(),
-	}
+		if form.SpiderVersionId != "" {
+			// 检查爬虫版本是否存在
+			version, err := tx.SelectSpiderVersionWhereSpiderNameAndId(form.SpiderName, form.SpiderVersionId)
+			if err != nil {
+				return err
+			} else if version == nil {
+				return errors.New("spider version not found")
+			}
+		}
 
-	// 存储任务信息
-	if err := SaveTask(task); err != nil {
+		task = &models.Task{
+			SpiderName:      form.SpiderName,
+			SpiderVersionId: form.SpiderVersionId,
+			ScheduleId:      form.ScheduleId,
+			Cmd:             form.Cmd,
+		}
+
+		// 存储任务信息
+		if err := tx.InsertTask(task); err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
 		return nil, err
 	}
 
 	return task, nil
 }
 
-func SaveTask(task *models.Task) (err error) {
-	// 存储任务信息
-	if err := database.KvDB.Update(func(tx *nutsdb.Tx) error {
-		score := utils.ConvertTimestamp(task.CreateTs)
-		value, _ := json.Marshal(&task)
-		return tx.ZAdd(constants.TaskListBucket, []byte(task.Id), score, value)
+func CancelTask(id string, status constants.TaskStatus) (task *models.Task, err error) {
+	if err := dao.WriteTx(func(tx dao.Tx) error {
+		if task, err = tx.SelectTaskWhereId(id); err != nil {
+			return err
+		}
+		if task == nil {
+			return errors.New("task not found")
+		}
+		if task.Status == constants.TaskStatusFinished {
+			return errors.New("task has been finished")
+		}
+		task.Status = status
+		if err = tx.UpdateTask(task); err != nil {
+			return err
+		}
+		return nil
 	}); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func UpdateTaskStatus(id string, status constants.TaskStatus) (res interface{}, err error) {
-	task, err := QueryTaskById(id)
-	if err != nil {
 		return nil, err
 	}
 
-	task.Status = status
-
-	// 存储任务信息
-	if err := SaveTask(task); err != nil {
-		return nil, err
-	}
-
-	return nil, nil
+	return task, nil
 }

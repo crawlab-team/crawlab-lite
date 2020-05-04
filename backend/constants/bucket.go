@@ -4,4 +4,5 @@ const (
 	SpiderListBucket    = "spiders"
 	SpiderVersionBucket = "spider_versions:"
 	TaskListBucket      = "tasks"
+	ScheduleListBucket  = "schedules"
 )
