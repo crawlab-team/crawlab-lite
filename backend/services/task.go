@@ -15,7 +15,7 @@ func QueryTaskPage(page forms.PageForm) (total int, tasks []*models.Task, err er
 		if tasks, err = tx.SelectAllTasksLimit(start, end); err != nil {
 			return err
 		}
-		if total, err = tx.CountSpiders(); err != nil {
+		if total, err = tx.CountTasks(); err != nil {
 			return err
 		}
 		return nil
@@ -35,26 +35,6 @@ func QueryTaskById(id string) (task *models.Task, err error) {
 	}); err != nil {
 		return nil, err
 	}
-	return task, nil
-}
-
-func PopPendingTask() (task *models.Task, err error) {
-	if err := dao.WriteTx(func(tx dao.Tx) error {
-		if task, err = tx.SelectTaskWhereStatus(constants.TaskStatusPending); err != nil {
-			return err
-		}
-		if task == nil {
-			return nil
-		}
-		task.Status = constants.TaskStatusProcessing
-		if err = tx.UpdateTask(task); err != nil {
-			return err
-		}
-		return nil
-	}); err != nil {
-		return nil, err
-	}
-
 	return task, nil
 }
 

@@ -40,10 +40,11 @@ func InitRoutes(app *gin.Engine) {
 			}
 			// 定时调度
 			{
-				authGroup.GET("/schedules", controllers.GetScheduleList)    // 调度列表
-				authGroup.GET("/schedules/:id", controllers.GetSchedule)    // 调度详情
-				authGroup.POST("/schedules", controllers.CreateSchedule)    // 创建调度
-				authGroup.PUT("/schedules/:id", controllers.UpdateSchedule) // 更新调度
+				authGroup.GET("/schedules", controllers.GetScheduleList)       // 调度列表
+				authGroup.GET("/schedules/:id", controllers.GetSchedule)       // 调度详情
+				authGroup.POST("/schedules", controllers.CreateSchedule)       // 创建调度
+				authGroup.PUT("/schedules/:id", controllers.UpdateSchedule)    // 更新调度
+				authGroup.DELETE("/schedules/:id", controllers.DeleteSchedule) // 删除调度
 			}
 		}
 	}

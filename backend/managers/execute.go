@@ -1,10 +1,9 @@
-package task
+package managers
 
 import (
 	"crawlab-lite/constants"
 	"crawlab-lite/dao"
 	"crawlab-lite/models"
-	"crawlab-lite/services"
 	"crawlab-lite/utils"
 	"github.com/apex/log"
 	"github.com/robfig/cron/v3"
@@ -41,7 +40,7 @@ func InitTaskExecutor() error {
 }
 
 // 任务执行锁
-var LockList sync.Map
+var lockList sync.Map
 
 // 启动任务执行器
 func (ex *Executor) Start() error {
@@ -55,11 +54,11 @@ func (ex *Executor) Start() error {
 		id := i
 
 		// 初始化任务锁
-		LockList.Store(id, false)
+		lockList.Store(id, false)
 
 		// 加入定时任务
 		_, err := ex.Cron.AddFunc(spec, func() {
-			ExecuteTask(id)
+			ex.ExecuteTask(id)
 		})
 		if err != nil {
 			return err
@@ -70,28 +69,28 @@ func (ex *Executor) Start() error {
 }
 
 // 执行任务
-func ExecuteTask(id int) {
-	if flag, ok := LockList.Load(id); ok {
+func (ex *Executor) ExecuteTask(id int) {
+	if flag, ok := lockList.Load(id); ok {
 		if flag.(bool) {
-			log.Debugf(GetWorkerPrefix(id) + "running tasks...")
+			log.Debugf(getWorkerPrefix(id) + "running tasks...")
 			return
 		}
 	}
 
 	// 上锁
-	LockList.Store(id, true)
+	lockList.Store(id, true)
 
 	// 解锁（延迟执行）
 	defer func() {
-		LockList.Delete(id)
-		LockList.Store(id, false)
+		lockList.Delete(id)
+		lockList.Store(id, false)
 	}()
 
 	// 开始计时
 	tic := time.Now()
 
 	// 获取任务
-	task, err := services.PopPendingTask()
+	task, err := popPendingTask()
 	if err != nil {
 		log.Errorf("execute task, query task error: %s", err.Error())
 		return
@@ -103,13 +102,13 @@ func ExecuteTask(id int) {
 	// 获取爬虫版本
 	var version *models.SpiderVersion
 	if task.SpiderVersionId != "" {
-		version, err = services.QuerySpiderVersionById(task.SpiderName, task.SpiderVersionId)
+		version, err = querySpiderVersionById(task.SpiderName, task.SpiderVersionId)
 		if err != nil {
 			log.Errorf("execute task, query spider version error: %s", err.Error())
 			return
 		}
 	} else {
-		version, err = services.QueryLatestSpiderVersion(task.SpiderName)
+		version, err = queryLatestSpiderVersion(task.SpiderName)
 		if err != nil {
 			log.Errorf("execute task, query spider version error: %s", err.Error())
 			return
@@ -133,7 +132,7 @@ func ExecuteTask(id int) {
 	//}
 
 	// 开始执行任务
-	log.Infof(GetWorkerPrefix(id) + "start task (id:" + task.Id + ")")
+	log.Infof(getWorkerPrefix(id) + "start task (id:" + task.Id + ")")
 
 	// 更新任务
 	task.StartTs = time.Now()                                     // 任务开始时间
@@ -145,8 +144,8 @@ func ExecuteTask(id int) {
 	}
 
 	// 执行Shell命令
-	if err := ExecuteShellCmd(cwd, *task); err != nil {
-		log.Errorf(GetWorkerPrefix(id) + err.Error())
+	if err := executeShellCmd(cwd, *task); err != nil {
+		log.Errorf(getWorkerPrefix(id) + err.Error())
 
 		// 如果发生错误，则发送通知
 		//SendNotifications(task, spider)
@@ -164,7 +163,7 @@ func ExecuteTask(id int) {
 		return
 	}
 
-	go FinishUpTask(*task)
+	go finishUpTask(*task)
 
 	// 结束计时
 	toc := time.Now()
@@ -172,15 +171,15 @@ func ExecuteTask(id int) {
 	// 统计时长
 	duration := toc.Sub(tic).Seconds()
 	durationStr := strconv.FormatFloat(duration, 'f', 6, 64)
-	log.Infof(GetWorkerPrefix(id) + "task (id:" + task.Id + ")" + " finished. elapsed:" + durationStr + " sec")
+	log.Infof(getWorkerPrefix(id) + "task (id:" + task.Id + ")" + " finished. elapsed:" + durationStr + " sec")
 }
 
-func GetWorkerPrefix(id int) string {
+func getWorkerPrefix(id int) string {
 	return "[Worker " + strconv.Itoa(id) + "] "
 }
 
 // 执行shell命令
-func ExecuteShellCmd(cwd string, task models.Task) (err error) {
+func executeShellCmd(cwd string, task models.Task) (err error) {
 	cmdStr := task.Cmd
 
 	log.Infof("cwd: %s", cwd)
@@ -200,7 +199,7 @@ func ExecuteShellCmd(cwd string, task models.Task) (err error) {
 	// 起一个 goroutine 来监控进程
 	ch := utils.TaskExecChanMap.ChanBlocked(task.Id)
 
-	go FinishOrCancelTask(ch, cmd, task)
+	go finishOrCancelTask(ch, cmd, task)
 
 	// kill 的时候，可以 kill 所有的子进程
 	if runtime.GOOS != constants.Windows {
@@ -208,66 +207,40 @@ func ExecuteShellCmd(cwd string, task models.Task) (err error) {
 	}
 
 	// 启动进程
-	if err := StartTaskProcess(cmd, task); err != nil {
+	if err := startTaskProcess(cmd, task); err != nil {
 		return err
 	}
 
 	// 同步等待进程完成
-	if err := WaitTaskProcess(cmd, task); err != nil {
+	if err := waitTaskProcess(cmd, task); err != nil {
 		return err
 	}
 	ch <- constants.TaskFinish
 	return nil
 }
 
-// 完成或取消任务
-func FinishOrCancelTask(ch chan string, cmd *exec.Cmd, task models.Task) {
-	// 传入信号，此处阻塞
-	signal := <-ch
-	log.Infof("process received signal: %s", signal)
-
-	if signal == constants.TaskCancel && cmd.Process != nil {
-		var err error
-		// 兼容windows
-		if runtime.GOOS == constants.Windows {
-			err = cmd.Process.Kill()
-		} else {
-			err = syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
-		}
-		// 取消进程
-		if err != nil {
-			log.Errorf("process kill error: %s", err.Error())
-
-			task.Error = "kill process error: " + err.Error()
-			task.Status = constants.TaskStatusError
-		} else {
-			task.Error = "user kill the process ..."
-			task.Status = constants.TaskStatusCancelled
-		}
-	} else {
-		// 保存任务
-		task.Status = constants.TaskStatusFinished
-	}
-
-	task.FinishTs = time.Now()
-	_ = updateTask(&task)
-
-	go FinishUpTask(task)
-}
-
-// 完成任务的收尾工作
-func FinishUpTask(task models.Task) {
-	// TODO
-}
-
-func updateTask(task *models.Task) (err error) {
-	if err := dao.WriteTx(func(tx dao.Tx) error {
-		if err = tx.UpdateTask(task); err != nil {
+func querySpiderVersionById(spiderName string, versionId string) (version *models.SpiderVersion, err error) {
+	if err := dao.ReadTx(func(tx dao.Tx) error {
+		if version, err = tx.SelectSpiderVersionWhereSpiderNameAndId(spiderName, versionId); err != nil {
 			return err
 		}
 		return nil
 	}); err != nil {
-		return nil
+		return nil, err
 	}
-	return nil
+
+	return version, nil
+}
+
+func queryLatestSpiderVersion(spiderName string) (version *models.SpiderVersion, err error) {
+	if err := dao.ReadTx(func(tx dao.Tx) error {
+		if version, err = tx.SelectLatestSpiderVersionWhereSpiderName(spiderName); err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+
+	return version, nil
 }

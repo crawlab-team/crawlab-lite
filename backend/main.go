@@ -5,8 +5,8 @@ import (
 	"crawlab-lite/config"
 	"crawlab-lite/database"
 	"crawlab-lite/lib/validate_bridge"
+	"crawlab-lite/managers"
 	"crawlab-lite/routes"
-	"crawlab-lite/task"
 	"github.com/apex/log"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"runtime/debug"
 	"syscall"
 	"time"
 )
@@ -44,8 +45,16 @@ func main() {
 	}
 	log.Info("Initialized log config successfully")
 
+	// 初始化定时调度器
+	if err := managers.InitScheduler(); err != nil {
+		log.Error("init scheduler error:" + err.Error())
+		debug.PrintStack()
+		panic(err)
+	}
+	log.Info("Initialized schedule successfully")
+
 	// 初始化任务执行器
-	if err := task.InitTaskExecutor(); err != nil {
+	if err := managers.InitTaskExecutor(); err != nil {
 		log.Error("Init task executor error:" + err.Error())
 		panic(err)
 	}

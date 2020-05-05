@@ -1,4 +1,4 @@
-package task
+package managers
 
 import (
 	"crawlab-lite/constants"
@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func StartTaskProcess(cmd *exec.Cmd, task models.Task) error {
+func startTaskProcess(cmd *exec.Cmd, task models.Task) error {
 	if err := cmd.Start(); err != nil {
 		log.Errorf("start spider error:{}", err.Error())
 
@@ -21,7 +21,7 @@ func StartTaskProcess(cmd *exec.Cmd, task models.Task) error {
 	return nil
 }
 
-func WaitTaskProcess(cmd *exec.Cmd, task models.Task) error {
+func waitTaskProcess(cmd *exec.Cmd, task models.Task) error {
 	if err := cmd.Wait(); err != nil {
 		log.Errorf("wait process finish error: %s", err.Error())
 
@@ -37,7 +37,7 @@ func WaitTaskProcess(cmd *exec.Cmd, task models.Task) error {
 				task.Status = constants.TaskStatusError
 				_ = updateTask(&task)
 
-				go FinishUpTask(task)
+				go finishUpTask(task)
 			}
 		}
 
