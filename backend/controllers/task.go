@@ -6,6 +6,7 @@ import (
 	"crawlab-lite/services"
 	"errors"
 	"github.com/gin-gonic/gin"
+	uuid "github.com/satori/go.uuid"
 	"net/http"
 )
 
@@ -26,7 +27,10 @@ func GetTaskList(c *gin.Context) {
 }
 
 func GetTask(c *gin.Context) {
-	id := c.Param("id")
+	id, err := uuid.FromString(c.Param("id"))
+	if err != nil {
+		HandleError(http.StatusBadRequest, c, errors.New("invalid id"))
+	}
 
 	if task, err := services.QueryTaskById(id); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
@@ -57,7 +61,10 @@ func CreateTask(c *gin.Context) {
 }
 
 func UpdateTaskCancel(c *gin.Context) {
-	id := c.Param("id")
+	id, err := uuid.FromString(c.Param("id"))
+	if err != nil {
+		HandleError(http.StatusBadRequest, c, errors.New("invalid id"))
+	}
 
 	if res, err := services.CancelTask(id, constants.TaskStatusCancelled); err != nil {
 		HandleError(http.StatusBadRequest, c, err)

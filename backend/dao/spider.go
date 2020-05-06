@@ -5,7 +5,7 @@ import (
 	"crawlab-lite/models"
 	"crawlab-lite/utils"
 	"encoding/json"
-	"github.com/google/uuid"
+	uuid "github.com/satori/go.uuid"
 	"github.com/xujiajun/nutsdb"
 	"time"
 )
@@ -54,7 +54,7 @@ func (t *Tx) SelectSpiderWhereName(name string) (spider *models.Spider, err erro
 
 // 插入新爬虫
 func (t *Tx) InsertSpider(spider *models.Spider) (err error) {
-	spider.Id = uuid.New().String()
+	spider.Id = uuid.NewV4()
 	spider.CreateTs = time.Now()
 	spider.UpdateTs = time.Now()
 
@@ -136,7 +136,7 @@ func (t *Tx) SelectLatestSpiderVersionWhereSpiderName(spiderName string) (versio
 // 插入新爬虫版本
 func (t *Tx) InsertSpiderVersion(version *models.SpiderVersion) (err error) {
 	if version.Id == "" {
-		version.Id = uuid.New().String()
+		version.Id = uuid.NewV4().String()
 	}
 	version.CreateTs = time.Now()
 	version.UpdateTs = time.Now()

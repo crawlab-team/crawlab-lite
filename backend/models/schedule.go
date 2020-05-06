@@ -2,11 +2,12 @@ package models
 
 import (
 	"github.com/robfig/cron/v3"
+	uuid "github.com/satori/go.uuid"
 	"time"
 )
 
 type Schedule struct {
-	Id              string       `json:"id"`
+	Id              uuid.UUID    `json:"id"`
 	SpiderName      string       `json:"spider_name"`
 	SpiderVersionId string       `json:"spider_version_id"`
 	Cron            string       `json:"cron"`

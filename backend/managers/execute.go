@@ -132,7 +132,7 @@ func (ex *Executor) ExecuteTask(id int) {
 	//}
 
 	// 开始执行任务
-	log.Infof(getWorkerPrefix(id) + "start task (id:" + task.Id + ")")
+	log.Infof(getWorkerPrefix(id) + "start task (id:" + task.Id.String() + ")")
 
 	// 更新任务
 	task.StartTs = time.Now()                                     // 任务开始时间
@@ -171,7 +171,7 @@ func (ex *Executor) ExecuteTask(id int) {
 	// 统计时长
 	duration := toc.Sub(tic).Seconds()
 	durationStr := strconv.FormatFloat(duration, 'f', 6, 64)
-	log.Infof(getWorkerPrefix(id) + "task (id:" + task.Id + ")" + " finished. elapsed:" + durationStr + " sec")
+	log.Infof(getWorkerPrefix(id) + "task (id:" + task.Id.String() + ")" + " finished. elapsed:" + durationStr + " sec")
 }
 
 func getWorkerPrefix(id int) string {
@@ -197,7 +197,7 @@ func executeShellCmd(cwd string, task models.Task) (err error) {
 	cmd.Dir = cwd
 
 	// 起一个 goroutine 来监控进程
-	ch := utils.TaskExecChanMap.ChanBlocked(task.Id)
+	ch := utils.TaskExecChanMap.ChanBlocked(task.Id.String())
 
 	go finishOrCancelTask(ch, cmd, task)
 

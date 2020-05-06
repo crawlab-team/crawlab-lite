@@ -5,6 +5,7 @@ import (
 	"crawlab-lite/services"
 	"errors"
 	"github.com/gin-gonic/gin"
+	uuid "github.com/satori/go.uuid"
 	"net/http"
 )
 
@@ -25,7 +26,10 @@ func GetScheduleList(c *gin.Context) {
 }
 
 func GetSchedule(c *gin.Context) {
-	id := c.Param("id")
+	id, err := uuid.FromString(c.Param("id"))
+	if err != nil {
+		HandleError(http.StatusBadRequest, c, errors.New("invalid id"))
+	}
 
 	if schedule, err := services.QueryScheduleById(id); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
@@ -56,7 +60,10 @@ func CreateSchedule(c *gin.Context) {
 }
 
 func UpdateSchedule(c *gin.Context) {
-	id := c.Param("id")
+	id, err := uuid.FromString(c.Param("id"))
+	if err != nil {
+		HandleError(http.StatusBadRequest, c, errors.New("invalid id"))
+	}
 
 	var form forms.ScheduleUpdateForm
 
@@ -74,7 +81,10 @@ func UpdateSchedule(c *gin.Context) {
 }
 
 func DeleteSchedule(c *gin.Context) {
-	id := c.Param("id")
+	id, err := uuid.FromString(c.Param("id"))
+	if err != nil {
+		HandleError(http.StatusBadRequest, c, errors.New("invalid id"))
+	}
 
 	if res, err := services.RemoveSchedule(id); err != nil {
 		HandleError(http.StatusBadRequest, c, err)

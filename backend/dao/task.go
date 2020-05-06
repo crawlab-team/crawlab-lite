@@ -5,7 +5,7 @@ import (
 	"crawlab-lite/models"
 	"crawlab-lite/utils"
 	"encoding/json"
-	"github.com/google/uuid"
+	uuid "github.com/satori/go.uuid"
 	"github.com/xujiajun/nutsdb"
 	"time"
 )
@@ -40,8 +40,8 @@ func (t *Tx) CountTasks() (total int, err error) {
 }
 
 // 根据 ID 查询任务
-func (t *Tx) SelectTaskWhereId(id string) (task *models.Task, err error) {
-	if node, err := t.tx.ZGetByKey(constants.TaskListBucket, []byte(id)); err != nil {
+func (t *Tx) SelectTaskWhereId(id uuid.UUID) (task *models.Task, err error) {
+	if node, err := t.tx.ZGetByKey(constants.TaskListBucket, id.Bytes()); err != nil {
 		if err == nutsdb.ErrBucket || err == nutsdb.ErrNotFoundKey {
 			return nil, nil
 		}
@@ -75,7 +75,7 @@ func (t *Tx) SelectTaskWhereStatus(status constants.TaskStatus) (task *models.Ta
 
 // 插入新任务
 func (t *Tx) InsertTask(task *models.Task) (err error) {
-	task.Id = uuid.New().String()
+	task.Id = uuid.NewV4()
 	task.CreateTs = time.Now()
 	task.UpdateTs = time.Now()
 
@@ -85,7 +85,7 @@ func (t *Tx) InsertTask(task *models.Task) (err error) {
 
 	score := utils.ConvertTimestamp(task.UpdateTs)
 	value, _ := json.Marshal(&task)
-	if err = t.tx.ZAdd(constants.TaskListBucket, []byte(task.Id), score, value); err != nil {
+	if err = t.tx.ZAdd(constants.TaskListBucket, task.Id.Bytes(), score, value); err != nil {
 		return err
 	}
 	return nil
@@ -96,15 +96,15 @@ func (t *Tx) UpdateTask(task *models.Task) (err error) {
 	task.UpdateTs = time.Now()
 	score := utils.ConvertTimestamp(task.UpdateTs)
 	value, _ := json.Marshal(&task)
-	if err = t.tx.ZAdd(constants.TaskListBucket, []byte(task.Id), score, value); err != nil {
+	if err = t.tx.ZAdd(constants.TaskListBucket, task.Id.Bytes(), score, value); err != nil {
 		return err
 	}
 	return nil
 }
 
 // 通过 ID 删除任务
-func (t *Tx) DeleteTaskFromId(id string) (err error) {
-	if err := t.tx.ZRem(constants.TaskListBucket, id); err != nil {
+func (t *Tx) DeleteTaskFromId(id uuid.UUID) (err error) {
+	if err := t.tx.ZRem(constants.TaskListBucket, id.String()); err != nil {
 		return err
 	}
 	return nil
@@ -124,7 +124,7 @@ func (t *Tx) DeleteAllTasksWhereSpiderName(spiderName string) (err error) {
 				return err
 			}
 			if task.SpiderName == spiderName {
-				if err := t.tx.ZRem(constants.TaskListBucket, task.Id); err != nil {
+				if err := t.tx.ZRem(constants.TaskListBucket, task.Id.String()); err != nil {
 					return err
 				}
 				return nil

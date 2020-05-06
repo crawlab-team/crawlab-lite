@@ -5,7 +5,7 @@ import (
 	"crawlab-lite/models"
 	"crawlab-lite/utils"
 	"encoding/json"
-	"github.com/google/uuid"
+	uuid "github.com/satori/go.uuid"
 	"github.com/xujiajun/nutsdb"
 	"time"
 )
@@ -60,8 +60,8 @@ func (t *Tx) CountSchedules() (total int, err error) {
 }
 
 // 根据 ID 查询定时调度
-func (t *Tx) SelectScheduleWhereId(id string) (schedule *models.Schedule, err error) {
-	if node, err := t.tx.ZGetByKey(constants.ScheduleListBucket, []byte(id)); err != nil {
+func (t *Tx) SelectScheduleWhereId(id uuid.UUID) (schedule *models.Schedule, err error) {
+	if node, err := t.tx.ZGetByKey(constants.ScheduleListBucket, id.Bytes()); err != nil {
 		if err == nutsdb.ErrBucket || err == nutsdb.ErrNotFoundKey {
 			return nil, nil
 		}
@@ -74,13 +74,13 @@ func (t *Tx) SelectScheduleWhereId(id string) (schedule *models.Schedule, err er
 
 // 插入新定时调度
 func (t *Tx) InsertSchedule(schedule *models.Schedule) (err error) {
-	schedule.Id = uuid.New().String()
+	schedule.Id = uuid.NewV4()
 	schedule.CreateTs = time.Now()
 	schedule.UpdateTs = time.Now()
 
 	score := utils.ConvertTimestamp(schedule.UpdateTs)
 	value, _ := json.Marshal(&schedule)
-	if err = t.tx.ZAdd(constants.ScheduleListBucket, []byte(schedule.Id), score, value); err != nil {
+	if err = t.tx.ZAdd(constants.ScheduleListBucket, schedule.Id.Bytes(), score, value); err != nil {
 		return err
 	}
 	return nil
@@ -91,15 +91,15 @@ func (t *Tx) UpdateSchedule(schedule *models.Schedule) (err error) {
 	schedule.UpdateTs = time.Now()
 	score := utils.ConvertTimestamp(schedule.UpdateTs)
 	value, _ := json.Marshal(&schedule)
-	if err = t.tx.ZAdd(constants.ScheduleListBucket, []byte(schedule.Id), score, value); err != nil {
+	if err = t.tx.ZAdd(constants.ScheduleListBucket, schedule.Id.Bytes(), score, value); err != nil {
 		return err
 	}
 	return nil
 }
 
 // 通过 ID 删除定时调度
-func (t *Tx) DeleteScheduleFromId(id string) (err error) {
-	if err := t.tx.ZRem(constants.ScheduleListBucket, id); err != nil {
+func (t *Tx) DeleteScheduleFromId(id uuid.UUID) (err error) {
+	if err := t.tx.ZRem(constants.ScheduleListBucket, id.String()); err != nil {
 		return err
 	}
 	return nil
@@ -119,7 +119,7 @@ func (t *Tx) DeleteAllSchedulesWhereSpiderName(spiderName string) (err error) {
 				return err
 			}
 			if schedule.SpiderName == spiderName {
-				if err := t.tx.ZRem(constants.ScheduleListBucket, schedule.Id); err != nil {
+				if err := t.tx.ZRem(constants.ScheduleListBucket, schedule.Id.String()); err != nil {
 					return err
 				}
 				return nil

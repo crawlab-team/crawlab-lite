@@ -1,11 +1,12 @@
 package models
 
 import (
+	uuid "github.com/satori/go.uuid"
 	"time"
 )
 
 type Spider struct {
-	Id       string    `json:"id"`
+	Id       uuid.UUID `json:"id"`
 	Name     string    `json:"name"`
 	CreateTs time.Time `json:"create_ts"`
 	UpdateTs time.Time `json:"update_ts"`

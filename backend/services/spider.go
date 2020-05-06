@@ -6,7 +6,7 @@ import (
 	"crawlab-lite/models"
 	"crawlab-lite/utils"
 	"errors"
-	"github.com/google/uuid"
+	uuid "github.com/satori/go.uuid"
 	"github.com/spf13/viper"
 	"io/ioutil"
 	"os"
@@ -160,7 +160,7 @@ func AddSpiderVersion(spiderName string, form forms.SpiderUploadForm) (version *
 			return errors.New("spider not found")
 		}
 
-		dirName := uuid.New().String()
+		dirName := uuid.NewV4().String()
 		tmpPath := filepath.Join(viper.GetString("other.tmppath"), spiderName)
 		zipPath := filepath.Join(tmpPath, dirName+".zip")
 

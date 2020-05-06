@@ -8,6 +8,7 @@ import (
 	"errors"
 	"github.com/jinzhu/copier"
 	"github.com/robfig/cron/v3"
+	uuid "github.com/satori/go.uuid"
 )
 
 func QuerySchedulePage(page forms.PageForm) (total int, schedules []*models.Schedule, err error) {
@@ -28,7 +29,7 @@ func QuerySchedulePage(page forms.PageForm) (total int, schedules []*models.Sche
 	return total, schedules, nil
 }
 
-func QueryScheduleById(id string) (schedule *models.Schedule, err error) {
+func QueryScheduleById(id uuid.UUID) (schedule *models.Schedule, err error) {
 	if err := dao.ReadTx(func(tx dao.Tx) error {
 		if schedule, err = tx.SelectScheduleWhereId(id); err != nil {
 			return err
@@ -85,7 +86,7 @@ func AddSchedule(form forms.ScheduleCreateForm) (schedule *models.Schedule, err 
 	return schedule, nil
 }
 
-func ModifySchedule(id string, form forms.ScheduleUpdateForm) (schedule *models.Schedule, err error) {
+func ModifySchedule(id uuid.UUID, form forms.ScheduleUpdateForm) (schedule *models.Schedule, err error) {
 	if form.Cron != "" && CheckCron(form.Cron) == false {
 		return nil, errors.New("schedule cron is invalid")
 	}
@@ -123,7 +124,7 @@ func ModifySchedule(id string, form forms.ScheduleUpdateForm) (schedule *models.
 	return schedule, nil
 }
 
-func RemoveSchedule(id string) (res interface{}, err error) {
+func RemoveSchedule(id uuid.UUID) (res interface{}, err error) {
 	if err := dao.WriteTx(func(tx dao.Tx) error {
 		// 检查调度是否存在
 		if schedule, err := tx.SelectScheduleWhereId(id); err != nil {

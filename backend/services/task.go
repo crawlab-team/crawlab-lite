@@ -6,6 +6,7 @@ import (
 	"crawlab-lite/forms"
 	"crawlab-lite/models"
 	"errors"
+	uuid "github.com/satori/go.uuid"
 )
 
 func QueryTaskPage(page forms.PageForm) (total int, tasks []*models.Task, err error) {
@@ -26,7 +27,7 @@ func QueryTaskPage(page forms.PageForm) (total int, tasks []*models.Task, err er
 	return total, tasks, nil
 }
 
-func QueryTaskById(id string) (task *models.Task, err error) {
+func QueryTaskById(id uuid.UUID) (task *models.Task, err error) {
 	if err := dao.ReadTx(func(tx dao.Tx) error {
 		if task, err = tx.SelectTaskWhereId(id); err != nil {
 			return err
@@ -76,7 +77,7 @@ func AddTask(form forms.TaskForm) (task *models.Task, err error) {
 	return task, nil
 }
 
-func CancelTask(id string, status constants.TaskStatus) (task *models.Task, err error) {
+func CancelTask(id uuid.UUID, status constants.TaskStatus) (task *models.Task, err error) {
 	if err := dao.WriteTx(func(tx dao.Tx) error {
 		if task, err = tx.SelectTaskWhereId(id); err != nil {
 			return err

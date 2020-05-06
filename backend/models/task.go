@@ -2,14 +2,15 @@ package models
 
 import (
 	"crawlab-lite/constants"
+	uuid "github.com/satori/go.uuid"
 	"time"
 )
 
 type Task struct {
-	Id              string               `json:"id"`
+	Id              uuid.UUID            `json:"id"`
 	SpiderName      string               `json:"spider_name"`
 	SpiderVersionId string               `json:"spider_version_id"`
-	ScheduleId      string               `json:"schedule_id"`
+	ScheduleId      uuid.UUID            `json:"schedule_id"`
 	Status          constants.TaskStatus `json:"status"`
 	Cmd             string               `json:"cmd"`
 	Error           string               `json:"error"`
