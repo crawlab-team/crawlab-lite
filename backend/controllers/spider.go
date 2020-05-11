@@ -5,6 +5,7 @@ import (
 	"crawlab-lite/services"
 	"errors"
 	"github.com/gin-gonic/gin"
+	uuid "github.com/satori/go.uuid"
 	"net/http"
 	"regexp"
 	"strings"
@@ -27,9 +28,13 @@ func GetSpiderList(c *gin.Context) {
 }
 
 func GetSpider(c *gin.Context) {
-	name := c.Param("name")
+	id, err := uuid.FromString(c.Param("id"))
+	if err != nil {
+		HandleError(http.StatusBadRequest, c, errors.New("invalid id"))
+		return
+	}
 
-	if spider, err := services.QuerySpiderByName(name); err != nil {
+	if spider, err := services.QuerySpider(id); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
 		return
 	} else {
@@ -52,6 +57,7 @@ func CreateSpider(c *gin.Context) {
 	// 正则校验爬虫名称
 	if ok, err := regexp.MatchString("[\\w_-]", form.Name); err != nil || ok == false {
 		HandleError(http.StatusBadRequest, c, errors.New("invalid spider name"))
+		return
 	}
 
 	// 如果不为 zip 文件，返回错误
@@ -64,8 +70,8 @@ func CreateSpider(c *gin.Context) {
 		HandleError(http.StatusBadRequest, c, err)
 		return
 	} else {
-		if _, err := services.AddSpiderVersion(form.Name, form.SpiderUploadForm); err != nil {
-			HandleError(http.StatusBadRequest, c, err)
+		if _, err2 := services.AddSpiderVersion(res.Id, form.SpiderUploadForm); err2 != nil {
+			HandleError(http.StatusBadRequest, c, err2)
 			return
 		}
 		HandleSuccess(c, res)
@@ -73,9 +79,13 @@ func CreateSpider(c *gin.Context) {
 }
 
 func DeleteSpider(c *gin.Context) {
-	name := c.Param("name")
+	id, err := uuid.FromString(c.Param("id"))
+	if err != nil {
+		HandleError(http.StatusBadRequest, c, errors.New("invalid id"))
+		return
+	}
 
-	if res, err := services.RemoveSpider(name); err != nil {
+	if res, err := services.RemoveSpider(id); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
 		return
 	} else {
@@ -84,9 +94,13 @@ func DeleteSpider(c *gin.Context) {
 }
 
 func GetSpiderVersionList(c *gin.Context) {
-	name := c.Param("name")
+	id, err := uuid.FromString(c.Param("id"))
+	if err != nil {
+		HandleError(http.StatusBadRequest, c, errors.New("invalid id"))
+		return
+	}
 
-	if res, err := services.QuerySpiderVersionList(name); err != nil {
+	if res, err := services.QuerySpiderVersionList(id); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
 		return
 	} else {
@@ -94,7 +108,7 @@ func GetSpiderVersionList(c *gin.Context) {
 	}
 }
 
-func UploadSpiderVersion(c *gin.Context) {
+func CreateSpiderVersion(c *gin.Context) {
 	var form forms.SpiderUploadForm
 
 	if err := c.ShouldBind(&form); err != nil {
@@ -108,8 +122,13 @@ func UploadSpiderVersion(c *gin.Context) {
 		return
 	}
 
-	spiderName := c.Param("name")
-	if res, err := services.AddSpiderVersion(spiderName, form); err != nil {
+	id, err := uuid.FromString(c.Param("id"))
+	if err != nil {
+		HandleError(http.StatusBadRequest, c, errors.New("invalid id"))
+		return
+	}
+
+	if res, err := services.AddSpiderVersion(id, form); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
 		return
 	} else {
@@ -118,10 +137,18 @@ func UploadSpiderVersion(c *gin.Context) {
 }
 
 func DeleteSpiderVersion(c *gin.Context) {
-	name := c.Param("name")
-	versionId := c.Param("versionId")
+	id, err := uuid.FromString(c.Param("id"))
+	if err != nil {
+		HandleError(http.StatusBadRequest, c, errors.New("invalid spider id"))
+		return
+	}
+	versionId, err := uuid.FromString(c.Param("versionId"))
+	if err != nil {
+		HandleError(http.StatusBadRequest, c, errors.New("invalid version id"))
+		return
+	}
 
-	if res, err := services.RemoveSpiderVersion(name, versionId); err != nil {
+	if res, err := services.RemoveSpiderVersion(id, versionId); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
 		return
 	} else {

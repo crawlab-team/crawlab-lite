@@ -8,8 +8,8 @@ import (
 
 type Schedule struct {
 	Id              uuid.UUID    `json:"id"`
-	SpiderName      string       `json:"spider_name"`
-	SpiderVersionId string       `json:"spider_version_id"`
+	SpiderId        uuid.UUID    `json:"spider_id"`
+	SpiderVersionId uuid.UUID    `json:"spider_version_id"`
 	Cron            string       `json:"cron"`
 	EntryId         cron.EntryID `json:"entry_id"`
 	Cmd             string       `json:"cmd"`

@@ -102,7 +102,7 @@ func InitScheduler() error {
 func scheduleTask(schedule models.Schedule) func() {
 	return func() {
 		task := &models.Task{
-			SpiderName:      schedule.SpiderName,
+			SpiderId:        schedule.SpiderId,
 			SpiderVersionId: schedule.SpiderVersionId,
 			ScheduleId:      schedule.Id,
 			Cmd:             schedule.Cmd,

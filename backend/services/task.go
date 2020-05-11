@@ -29,7 +29,7 @@ func QueryTaskPage(page forms.PageForm) (total int, tasks []*models.Task, err er
 
 func QueryTaskById(id uuid.UUID) (task *models.Task, err error) {
 	if err := dao.ReadTx(func(tx dao.Tx) error {
-		if task, err = tx.SelectTaskWhereId(id); err != nil {
+		if task, err = tx.SelectTask(id); err != nil {
 			return err
 		}
 		return nil
@@ -42,15 +42,15 @@ func QueryTaskById(id uuid.UUID) (task *models.Task, err error) {
 func AddTask(form forms.TaskForm) (task *models.Task, err error) {
 	if err := dao.WriteTx(func(tx dao.Tx) error {
 		// 检查爬虫是否存在
-		if spider, err := tx.SelectSpiderWhereName(form.SpiderName); err != nil {
+		if spider, err := tx.SelectSpider(form.SpiderId); err != nil {
 			return err
 		} else if spider == nil {
 			return errors.New("spider not found")
 		}
 
-		if form.SpiderVersionId != "" {
+		if form.SpiderVersionId != uuid.Nil {
 			// 检查爬虫版本是否存在
-			version, err := tx.SelectSpiderVersionWhereSpiderNameAndId(form.SpiderName, form.SpiderVersionId)
+			version, err := tx.SelectSpiderVersion(form.SpiderId, form.SpiderVersionId)
 			if err != nil {
 				return err
 			} else if version == nil {
@@ -59,7 +59,7 @@ func AddTask(form forms.TaskForm) (task *models.Task, err error) {
 		}
 
 		task = &models.Task{
-			SpiderName:      form.SpiderName,
+			SpiderId:        form.SpiderId,
 			SpiderVersionId: form.SpiderVersionId,
 			ScheduleId:      form.ScheduleId,
 			Cmd:             form.Cmd,
@@ -79,7 +79,7 @@ func AddTask(form forms.TaskForm) (task *models.Task, err error) {
 
 func CancelTask(id uuid.UUID, status constants.TaskStatus) (task *models.Task, err error) {
 	if err := dao.WriteTx(func(tx dao.Tx) error {
-		if task, err = tx.SelectTaskWhereId(id); err != nil {
+		if task, err = tx.SelectTask(id); err != nil {
 			return err
 		}
 		if task == nil {

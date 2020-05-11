@@ -9,7 +9,7 @@ Content-Type: application/json
 Authorization: {{token}}
 
 {
-  "spider_name": "{{spider_name}}",
+  "spider_id": "{{spider_id}}",
   "cron": "*/10 * * * * *",
   "cmd": "sh run.sh"
 }

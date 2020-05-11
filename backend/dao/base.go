@@ -32,3 +32,23 @@ func WriteTx(fn func(tx Tx) error) (err error) {
 	}
 	return nil
 }
+
+type tx struct {
+	*nutsdb.Tx
+}
+
+func (t *tx) HGet(bucket string, key string) (value string, err error) {
+	if node, err := t.ZGetByKey(bucket, []byte(key)); err != nil {
+		return "", err
+	} else {
+		return string(node.Value), nil
+	}
+}
+
+//func (t *tx) HGetAll(bucket string) (value string, err error) {
+//	if node, err := t.ZGetByKey(bucket, []byte(key)); err != nil {
+//		return
+//	} else {
+//		return string(node.Value), nil
+//	}
+//}

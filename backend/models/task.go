@@ -8,8 +8,8 @@ import (
 
 type Task struct {
 	Id              uuid.UUID            `json:"id"`
-	SpiderName      string               `json:"spider_name"`
-	SpiderVersionId string               `json:"spider_version_id"`
+	SpiderId        uuid.UUID            `json:"spider_id"`
+	SpiderVersionId uuid.UUID            `json:"spider_version_id"`
 	ScheduleId      uuid.UUID            `json:"schedule_id"`
 	Status          constants.TaskStatus `json:"status"`
 	Cmd             string               `json:"cmd"`

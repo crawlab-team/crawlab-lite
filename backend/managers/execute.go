@@ -7,6 +7,7 @@ import (
 	"crawlab-lite/utils"
 	"github.com/apex/log"
 	"github.com/robfig/cron/v3"
+	uuid "github.com/satori/go.uuid"
 	"github.com/spf13/viper"
 	"os/exec"
 	"path/filepath"
@@ -101,14 +102,14 @@ func (ex *Executor) ExecuteTask(id int) {
 
 	// 获取爬虫版本
 	var version *models.SpiderVersion
-	if task.SpiderVersionId != "" {
-		version, err = querySpiderVersionById(task.SpiderName, task.SpiderVersionId)
+	if task.SpiderVersionId != uuid.Nil {
+		version, err = querySpiderVersionById(task.SpiderId, task.SpiderVersionId)
 		if err != nil {
 			log.Errorf("execute task, query spider version error: %s", err.Error())
 			return
 		}
 	} else {
-		version, err = queryLatestSpiderVersion(task.SpiderName)
+		version, err = queryLatestSpiderVersion(task.SpiderId)
 		if err != nil {
 			log.Errorf("execute task, query spider version error: %s", err.Error())
 			return
@@ -219,9 +220,9 @@ func executeShellCmd(cwd string, task models.Task) (err error) {
 	return nil
 }
 
-func querySpiderVersionById(spiderName string, versionId string) (version *models.SpiderVersion, err error) {
+func querySpiderVersionById(spiderId uuid.UUID, versionId uuid.UUID) (version *models.SpiderVersion, err error) {
 	if err := dao.ReadTx(func(tx dao.Tx) error {
-		if version, err = tx.SelectSpiderVersionWhereSpiderNameAndId(spiderName, versionId); err != nil {
+		if version, err = tx.SelectSpiderVersion(spiderId, versionId); err != nil {
 			return err
 		}
 		return nil
@@ -232,9 +233,9 @@ func querySpiderVersionById(spiderName string, versionId string) (version *model
 	return version, nil
 }
 
-func queryLatestSpiderVersion(spiderName string) (version *models.SpiderVersion, err error) {
+func queryLatestSpiderVersion(spiderId uuid.UUID) (version *models.SpiderVersion, err error) {
 	if err := dao.ReadTx(func(tx dao.Tx) error {
-		if version, err = tx.SelectLatestSpiderVersionWhereSpiderName(spiderName); err != nil {
+		if version, err = tx.SelectLatestSpiderVersion(spiderId); err != nil {
 			return err
 		}
 		return nil

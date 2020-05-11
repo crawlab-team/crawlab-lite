@@ -30,6 +30,7 @@ func GetTask(c *gin.Context) {
 	id, err := uuid.FromString(c.Param("id"))
 	if err != nil {
 		HandleError(http.StatusBadRequest, c, errors.New("invalid id"))
+		return
 	}
 
 	if task, err := services.QueryTaskById(id); err != nil {
@@ -64,6 +65,7 @@ func UpdateTaskCancel(c *gin.Context) {
 	id, err := uuid.FromString(c.Param("id"))
 	if err != nil {
 		HandleError(http.StatusBadRequest, c, errors.New("invalid id"))
+		return
 	}
 
 	if res, err := services.CancelTask(id, constants.TaskStatusCancelled); err != nil {

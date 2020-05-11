@@ -31,7 +31,7 @@ func QuerySchedulePage(page forms.PageForm) (total int, schedules []*models.Sche
 
 func QueryScheduleById(id uuid.UUID) (schedule *models.Schedule, err error) {
 	if err := dao.ReadTx(func(tx dao.Tx) error {
-		if schedule, err = tx.SelectScheduleWhereId(id); err != nil {
+		if schedule, err = tx.SelectSchedule(id); err != nil {
 			return err
 		}
 		return nil
@@ -47,15 +47,15 @@ func AddSchedule(form forms.ScheduleCreateForm) (schedule *models.Schedule, err 
 	}
 	if err := dao.WriteTx(func(tx dao.Tx) error {
 		// 检查爬虫是否存在
-		if spider, err := tx.SelectSpiderWhereName(form.SpiderName); err != nil {
+		if spider, err := tx.SelectSpider(form.SpiderId); err != nil {
 			return err
 		} else if spider == nil {
 			return errors.New("spider not found")
 		}
 
-		if form.SpiderVersionId != "" {
+		if form.SpiderVersionId != uuid.Nil {
 			// 检查爬虫版本是否存在
-			version, err := tx.SelectSpiderVersionWhereSpiderNameAndId(form.SpiderName, form.SpiderVersionId)
+			version, err := tx.SelectSpiderVersion(form.SpiderId, form.SpiderVersionId)
 			if err != nil {
 				return err
 			} else if version == nil {
@@ -64,7 +64,7 @@ func AddSchedule(form forms.ScheduleCreateForm) (schedule *models.Schedule, err 
 		}
 
 		schedule = &models.Schedule{
-			SpiderName:      form.SpiderName,
+			SpiderId:        form.SpiderId,
 			SpiderVersionId: form.SpiderVersionId,
 			Cron:            form.Cron,
 			Cmd:             form.Cmd,
@@ -92,15 +92,11 @@ func ModifySchedule(id uuid.UUID, form forms.ScheduleUpdateForm) (schedule *mode
 	}
 	if err := dao.WriteTx(func(tx dao.Tx) error {
 		// 检查调度是否存在
-		if schedule, err = tx.SelectScheduleWhereId(id); err != nil {
+		if schedule, err = tx.SelectSchedule(id); err != nil {
 			return err
 		}
 		if schedule == nil {
 			return errors.New("schedule not found")
-		}
-		// TODO 不能忽略空值
-		if err := copier.Copy(schedule, form); err != nil {
-			return err
 		}
 		// 如果更新调度的可用状态，同步增删定时
 		if form.Enabled != schedule.Enabled {
@@ -111,6 +107,10 @@ func ModifySchedule(id uuid.UUID, form forms.ScheduleUpdateForm) (schedule *mode
 			} else {
 				managers.Scheduler.Remove(schedule)
 			}
+		}
+		// TODO 不能忽略空值
+		if err := copier.Copy(schedule, form); err != nil {
+			return err
 		}
 		// 更新调度信息
 		if err := tx.UpdateSchedule(schedule); err != nil {
@@ -127,13 +127,13 @@ func ModifySchedule(id uuid.UUID, form forms.ScheduleUpdateForm) (schedule *mode
 func RemoveSchedule(id uuid.UUID) (res interface{}, err error) {
 	if err := dao.WriteTx(func(tx dao.Tx) error {
 		// 检查调度是否存在
-		if schedule, err := tx.SelectScheduleWhereId(id); err != nil {
+		if schedule, err := tx.SelectSchedule(id); err != nil {
 			return err
 		} else if schedule == nil {
 			return errors.New("schedule not found")
 		} else {
 			// 删除调度
-			if err = tx.DeleteScheduleFromId(id); err != nil {
+			if err = tx.DeleteSchedule(id); err != nil {
 				return err
 			}
 			// 清除定时

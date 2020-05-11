@@ -18,21 +18,23 @@ Content-Disposition: form-data; name="name"
 {{spider_name}}
 --WebAppBoundary--
 
+> {% client.global.set("spider_id", response.body.data.id); %}
+
 ###
 
-DELETE {{base_url}}/api/spiders/{{spider_name}}
+DELETE {{base_url}}/api/spiders/{{spider_id}}
 Accept: application/json
 Authorization: {{token}}
 
 ###
 
-GET {{base_url}}/api/spiders/{{spider_name}}/versions
+GET {{base_url}}/api/spiders/{{spider_id}}/versions
 Accept: application/json
 Authorization: {{token}}
 
 ###
 
-POST {{base_url}}/api/spiders/{{spider_name}}/versions
+POST {{base_url}}/api/spiders/{{spider_id}}/versions
 Content-Type: multipart/form-data; boundary=WebAppBoundary
 Authorization: {{token}}
 
@@ -43,12 +45,14 @@ Content-Disposition: form-data; name="file"; filename="test.zip"
 --WebAppBoundary
 Content-Disposition: form-data; name="name"
 
-{{spider_name}}
+{{spider_id}}
 --WebAppBoundary--
+
+> {% client.global.set("spider_version_id", response.body.data.id); %}
 
 ###
 
-DELETE {{base_url}}/api/spiders/{{spider_name}}/versions/b7e5cd3a5e8a017ca8be86fc6da7a09f
+DELETE {{base_url}}/api/spiders/{{spider_id}}/versions/{{spider_version_id}}
 Accept: application/json
 Authorization: {{token}}
 

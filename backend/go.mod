@@ -14,6 +14,6 @@ require (
 	github.com/satori/go.uuid v1.2.0
 	github.com/smartystreets/goconvey v1.6.4
 	github.com/spf13/viper v1.6.2
-	github.com/xujiajun/nutsdb v0.5.0
+	github.com/xujiajun/nutsdb v0.5.1-0.20200428011756-8c60cb1c18c7
 	gopkg.in/go-playground/validator.v9 v9.31.0
 )

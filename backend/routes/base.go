@@ -23,13 +23,13 @@ func InitRoutes(app *gin.Engine) {
 		{
 			// 爬虫
 			{
-				authGroup.GET("/spiders", controllers.GetSpiderList)                                    // 爬虫列表
-				authGroup.POST("/spiders", controllers.CreateSpider)                                    // 创建爬虫
-				authGroup.GET("/spiders/:name", controllers.GetSpider)                                  // 爬虫详情
-				authGroup.DELETE("/spiders/:name", controllers.DeleteSpider)                            // 删除爬虫
-				authGroup.GET("/spiders/:name/versions", controllers.GetSpiderVersionList)              // 爬虫版本列表
-				authGroup.POST("/spiders/:name/versions", controllers.UploadSpiderVersion)              // 上传爬虫版本
-				authGroup.DELETE("/spiders/:name/versions/:versionId", controllers.DeleteSpiderVersion) // 删除爬虫版本
+				authGroup.GET("/spiders", controllers.GetSpiderList)                                  // 爬虫列表
+				authGroup.POST("/spiders", controllers.CreateSpider)                                  // 创建爬虫
+				authGroup.GET("/spiders/:id", controllers.GetSpider)                                  // 爬虫详情
+				authGroup.DELETE("/spiders/:id", controllers.DeleteSpider)                            // 删除爬虫
+				authGroup.GET("/spiders/:id/versions", controllers.GetSpiderVersionList)              // 爬虫版本列表
+				authGroup.POST("/spiders/:id/versions", controllers.CreateSpiderVersion)              // 上传爬虫版本
+				authGroup.DELETE("/spiders/:id/versions/:versionId", controllers.DeleteSpiderVersion) // 删除爬虫版本
 			}
 			// 任务
 			{

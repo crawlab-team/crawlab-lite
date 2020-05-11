@@ -29,6 +29,7 @@ func GetSchedule(c *gin.Context) {
 	id, err := uuid.FromString(c.Param("id"))
 	if err != nil {
 		HandleError(http.StatusBadRequest, c, errors.New("invalid id"))
+		return
 	}
 
 	if schedule, err := services.QueryScheduleById(id); err != nil {
@@ -63,6 +64,7 @@ func UpdateSchedule(c *gin.Context) {
 	id, err := uuid.FromString(c.Param("id"))
 	if err != nil {
 		HandleError(http.StatusBadRequest, c, errors.New("invalid id"))
+		return
 	}
 
 	var form forms.ScheduleUpdateForm
@@ -84,6 +86,7 @@ func DeleteSchedule(c *gin.Context) {
 	id, err := uuid.FromString(c.Param("id"))
 	if err != nil {
 		HandleError(http.StatusBadRequest, c, errors.New("invalid id"))
+		return
 	}
 
 	if res, err := services.RemoveSchedule(id); err != nil {
