@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"crawlab-lite/config"
 	"crawlab-lite/constants"
-	"crawlab-lite/controllers"
 	"crawlab-lite/dao"
 	"crawlab-lite/lib/validate_bridge"
+	"crawlab-lite/results"
 	"crawlab-lite/routes"
 	"encoding/json"
 	"errors"
@@ -71,8 +71,8 @@ func PostJsonWithToken(url string, form interface{}, token string) (*http.Reques
 	return req, nil
 }
 
-func GetResponse(body *bytes.Buffer) *controllers.Response {
-	var resp *controllers.Response
+func GetResponse(body *bytes.Buffer) *results.ResponseBody {
+	var resp *results.ResponseBody
 	_ = json.Unmarshal(body.Bytes(), &resp)
 	return resp
 }

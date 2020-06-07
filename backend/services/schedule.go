@@ -1,22 +1,44 @@
 package services
 
 import (
+	"crawlab-lite/constants"
 	"crawlab-lite/dao"
 	"crawlab-lite/forms"
 	"crawlab-lite/managers"
 	"crawlab-lite/models"
+	"crawlab-lite/results"
 	"errors"
 	"github.com/jinzhu/copier"
 	"github.com/robfig/cron/v3"
 	uuid "github.com/satori/go.uuid"
 )
 
-func QuerySchedulePage(page forms.PageForm) (total int, schedules []*models.Schedule, err error) {
+func QuerySchedulePage(page forms.PageForm) (total int, resultList []*results.Schedule, err error) {
 	start, end := page.Range()
 
 	if err := dao.ReadTx(func(tx dao.Tx) error {
-		if schedules, err = tx.SelectAllSchedulesLimit(start, end); err != nil {
+		schedules, err := tx.SelectAllSchedulesLimit(start, end)
+		if err != nil {
 			return err
+		}
+		cache := map[uuid.UUID]*models.Spider{}
+		for _, schedule := range schedules {
+			var result results.Schedule
+			if err := copier.Copy(&result, schedule); err != nil {
+				return err
+			}
+			var spider *models.Spider
+			spider, exists := cache[schedule.SpiderId]
+			if !exists {
+				if spider, err = tx.SelectSpider(schedule.SpiderId); err != nil {
+					return err
+				}
+			}
+			if spider == nil {
+				return errors.New("spider not found")
+			}
+			result.SpiderName = spider.Name
+			resultList = append(resultList, &result)
 		}
 		if total, err = tx.CountSchedules(); err != nil {
 			return err
@@ -26,22 +48,31 @@ func QuerySchedulePage(page forms.PageForm) (total int, schedules []*models.Sche
 		return 0, nil, err
 	}
 
-	return total, schedules, nil
+	return total, resultList, nil
 }
 
-func QueryScheduleById(id uuid.UUID) (schedule *models.Schedule, err error) {
+func QueryScheduleById(id uuid.UUID) (result *results.Schedule, err error) {
 	if err := dao.ReadTx(func(tx dao.Tx) error {
-		if schedule, err = tx.SelectSchedule(id); err != nil {
+		schedule, err := tx.SelectSchedule(id)
+		if err != nil {
 			return err
 		}
+		if err := copier.Copy(&result, schedule); err != nil {
+			return err
+		}
+		spider, err := tx.SelectSpider(schedule.SpiderId)
+		if err != nil {
+			return err
+		}
+		result.SpiderName = spider.Name
 		return nil
 	}); err != nil {
 		return nil, err
 	}
-	return schedule, nil
+	return result, nil
 }
 
-func AddSchedule(form forms.ScheduleCreateForm) (schedule *models.Schedule, err error) {
+func AddSchedule(form forms.ScheduleCreateForm) (result *results.Schedule, err error) {
 	if form.Cron != "" && CheckCron(form.Cron) == false {
 		return nil, errors.New("schedule cron is invalid")
 	}
@@ -63,7 +94,7 @@ func AddSchedule(form forms.ScheduleCreateForm) (schedule *models.Schedule, err 
 			}
 		}
 
-		schedule = &models.Schedule{
+		schedule := &models.Schedule{
 			SpiderId:        form.SpiderId,
 			SpiderVersionId: form.SpiderVersionId,
 			Cron:            form.Cron,
@@ -78,21 +109,30 @@ func AddSchedule(form forms.ScheduleCreateForm) (schedule *models.Schedule, err 
 		if err := tx.InsertSchedule(schedule); err != nil {
 			return err
 		}
+		if err := copier.Copy(&result, schedule); err != nil {
+			return err
+		}
+		spider, err := tx.SelectSpider(schedule.SpiderId)
+		if err != nil {
+			return err
+		}
+		result.SpiderName = spider.Name
 		return nil
 	}); err != nil {
 		return nil, err
 	}
 
-	return schedule, nil
+	return result, nil
 }
 
-func ModifySchedule(id uuid.UUID, form forms.ScheduleUpdateForm) (schedule *models.Schedule, err error) {
+func ModifySchedule(id uuid.UUID, form forms.ScheduleUpdateForm) (result *results.Schedule, err error) {
 	if form.Cron != "" && CheckCron(form.Cron) == false {
 		return nil, errors.New("schedule cron is invalid")
 	}
 	if err := dao.WriteTx(func(tx dao.Tx) error {
 		// 检查调度是否存在
-		if schedule, err = tx.SelectSchedule(id); err != nil {
+		schedule, err := tx.SelectSchedule(id)
+		if err != nil {
 			return err
 		}
 		if schedule == nil {
@@ -116,12 +156,20 @@ func ModifySchedule(id uuid.UUID, form forms.ScheduleUpdateForm) (schedule *mode
 		if err := tx.UpdateSchedule(schedule); err != nil {
 			return err
 		}
+		if err := copier.Copy(&result, schedule); err != nil {
+			return err
+		}
+		spider, err := tx.SelectSpider(schedule.SpiderId)
+		if err != nil {
+			return err
+		}
+		result.SpiderName = spider.Name
 		return nil
 	}); err != nil {
 		return nil, err
 	}
 
-	return schedule, nil
+	return result, nil
 }
 
 func RemoveSchedule(id uuid.UUID) (res interface{}, err error) {

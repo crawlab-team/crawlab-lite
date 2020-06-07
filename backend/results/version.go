@@ -1,4 +1,4 @@
-package entity
+package results
 
 type Release struct {
 	Name        string `json:"name"`

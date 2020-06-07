@@ -1,25 +1,13 @@
 package controllers
 
 import (
+	"crawlab-lite/results"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-type Response struct {
-	Code    int         `json:"code"`
-	Data    interface{} `json:"data"`
-	Message string      `json:"message"`
-}
-
-type ListResponse struct {
-	Code    int         `json:"code"`
-	Data    interface{} `json:"data"`
-	Total   int         `json:"total"`
-	Message string      `json:"message"`
-}
-
 func HandleSuccess(ctx *gin.Context, data interface{}) {
-	ctx.AbortWithStatusJSON(http.StatusOK, Response{
+	ctx.AbortWithStatusJSON(http.StatusOK, results.ResponseBody{
 		Code:    http.StatusOK,
 		Data:    data,
 		Message: "success",
@@ -27,16 +15,21 @@ func HandleSuccess(ctx *gin.Context, data interface{}) {
 }
 
 func HandleSuccessList(ctx *gin.Context, total int, data interface{}) {
-	ctx.AbortWithStatusJSON(http.StatusOK, ListResponse{
-		Code:    http.StatusOK,
-		Data:    data,
-		Total:   total,
+	ctx.AbortWithStatusJSON(http.StatusOK, results.ResponseBody{
+		Code: http.StatusOK,
+		Data: struct {
+			List  interface{} `json:"list"`
+			Total int         `json:"total"`
+		}{
+			List:  data,
+			Total: total,
+		},
 		Message: "success",
 	})
 }
 
 func HandleError(code int, ctx *gin.Context, err error) {
-	ctx.AbortWithStatusJSON(code, Response{
+	ctx.AbortWithStatusJSON(code, results.ResponseBody{
 		Code:    code,
 		Message: err.Error(),
 	})

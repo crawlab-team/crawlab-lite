@@ -1,9 +1,7 @@
 package utils
 
-import "crawlab-lite/entity"
-
-func GetLangList() []entity.Lang {
-	list := []entity.Lang{
+func GetLangList() []Lang {
+	list := []Lang{
 		{
 			Name:              "Python",
 			ExecutableName:    "python",
@@ -45,18 +43,28 @@ func GetLangList() []entity.Lang {
 }
 
 // 获取语言列表
-func GetLangListPlain() []entity.Lang {
+func GetLangListPlain() []Lang {
 	list := GetLangList()
 	return list
 }
 
 // 根据语言名获取语言实例，不包含状态
-func GetLangFromLangNamePlain(name string) entity.Lang {
+func GetLangFromLangNamePlain(name string) Lang {
 	langList := GetLangListPlain()
 	for _, lang := range langList {
 		if lang.ExecutableName == name {
 			return lang
 		}
 	}
-	return entity.Lang{}
+	return Lang{}
+}
+
+type Lang struct {
+	Name              string   `json:"name"`
+	ExecutableName    string   `json:"executable_name"`
+	ExecutablePaths   []string `json:"executable_paths"`
+	DepExecutablePath string   `json:"dep_executable_path"`
+	LockPath          string   `json:"lock_path"`
+	InstallScript     string   `json:"install_script"`
+	InstallStatus     string   `json:"install_status"`
 }

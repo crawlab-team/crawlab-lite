@@ -4,8 +4,10 @@ import (
 	"crawlab-lite/dao"
 	"crawlab-lite/forms"
 	"crawlab-lite/models"
+	"crawlab-lite/results"
 	"crawlab-lite/utils"
 	"errors"
+	"github.com/jinzhu/copier"
 	uuid "github.com/satori/go.uuid"
 	"github.com/spf13/viper"
 	"io/ioutil"
@@ -13,44 +15,70 @@ import (
 	"path/filepath"
 )
 
-func QuerySpiderPage(page forms.PageForm) (total int, spiders []*models.Spider, err error) {
+func QuerySpiderPage(page forms.PageForm) (total int, resultList []*results.Spider, err error) {
 	start, end := page.Range()
 
 	if err := dao.ReadTx(func(tx dao.Tx) error {
-		if spiders, err = tx.SelectAllSpidersLimit(start, end); err != nil {
+		spiders, err := tx.SelectAllSpidersLimit(start, end)
+		if err != nil {
 			return err
 		}
 		if total, err = tx.CountSpiders(); err != nil {
 			return err
+		}
+		cache := map[uuid.UUID]*models.Task{}
+		for _, spider := range spiders {
+			var result results.Spider
+			if err := copier.Copy(&result, spider); err != nil {
+				return err
+			}
+			var task *models.Task
+			task, exists := cache[spider.Id]
+			if !exists {
+				if task, err = tx.SelectLatestTaskWhereSpiderId(spider.Id); err != nil {
+					return err
+				}
+			}
+			if task != nil {
+				result.LastRunTs = task.StartTs
+				result.LastStatus = task.Status
+			}
+			resultList = append(resultList, &result)
 		}
 		return nil
 	}); err != nil {
 		return 0, nil, err
 	}
 
-	return total, spiders, nil
+	return total, resultList, nil
 }
 
-func QuerySpider(id uuid.UUID) (spider *models.Spider, err error) {
+func QuerySpider(id uuid.UUID) (result *results.Spider, err error) {
 	if err := dao.ReadTx(func(tx dao.Tx) error {
-		if spider, err = tx.SelectSpider(id); err != nil {
+		spider, err := tx.SelectSpider(id)
+		if err != nil {
+			return err
+		}
+		if err := copier.Copy(&result, spider); err != nil {
 			return err
 		}
 		return nil
 	}); err != nil {
 		return nil, err
 	}
-	return spider, nil
+	return result, nil
 }
 
-func AddSpider(form forms.SpiderForm) (spider *models.Spider, err error) {
+func AddSpider(form forms.SpiderForm) (result *results.Spider, err error) {
 	spiderName := form.Name
 
 	if err := dao.WriteTx(func(tx dao.Tx) error {
 		// 检查爬虫是否已存在
-		if spider, err = tx.SelectSpiderWhereName(spiderName); err != nil {
+		spider, err := tx.SelectSpiderWhereName(spiderName)
+		if err != nil {
 			return err
-		} else if spider != nil {
+		}
+		if spider != nil {
 			return errors.New("spider name already exists")
 		}
 
@@ -61,12 +89,16 @@ func AddSpider(form forms.SpiderForm) (spider *models.Spider, err error) {
 		if err = tx.InsertSpider(spider); err != nil {
 			return err
 		}
+
+		if err := copier.Copy(&result, spider); err != nil {
+			return err
+		}
 		return nil
 	}); err != nil {
 		return nil, err
 	}
 
-	return spider, nil
+	return result, nil
 }
 
 func RemoveSpider(id uuid.UUID) (res interface{}, err error) {
@@ -112,9 +144,34 @@ func RemoveSpider(id uuid.UUID) (res interface{}, err error) {
 	return nil, nil
 }
 
-func QuerySpiderVersionList(spiderId uuid.UUID) (versions []*models.SpiderVersion, err error) {
+func QuerySpiderVersionList(spiderId uuid.UUID) (resultList []*results.SpiderVersion, err error) {
 	if err := dao.ReadTx(func(tx dao.Tx) error {
-		if versions, err = tx.SelectAllSpiderVersions(spiderId); err != nil {
+		versions, err := tx.SelectAllSpiderVersions(spiderId)
+		if err != nil {
+			return err
+		}
+		for _, version := range versions {
+			var result results.SpiderVersion
+			if err := copier.Copy(&result, version); err != nil {
+				return err
+			}
+			resultList = append(resultList, &result)
+		}
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+
+	return resultList, nil
+}
+
+func QuerySpiderVersion(spiderId uuid.UUID, versionId uuid.UUID) (result *results.SpiderVersion, err error) {
+	if err := dao.ReadTx(func(tx dao.Tx) error {
+		version, err := tx.SelectSpiderVersion(spiderId, versionId)
+		if err != nil {
+			return err
+		}
+		if err := copier.Copy(&result, version); err != nil {
 			return err
 		}
 		return nil
@@ -122,12 +179,16 @@ func QuerySpiderVersionList(spiderId uuid.UUID) (versions []*models.SpiderVersio
 		return nil, err
 	}
 
-	return versions, nil
+	return result, nil
 }
 
-func QuerySpiderVersion(spiderId uuid.UUID, versionId uuid.UUID) (version *models.SpiderVersion, err error) {
+func QueryLatestSpiderVersion(spiderId uuid.UUID) (result *results.SpiderVersion, err error) {
 	if err := dao.ReadTx(func(tx dao.Tx) error {
-		if version, err = tx.SelectSpiderVersion(spiderId, versionId); err != nil {
+		version, err := tx.SelectLatestSpiderVersion(spiderId)
+		if err != nil {
+			return err
+		}
+		if err := copier.Copy(&result, version); err != nil {
 			return err
 		}
 		return nil
@@ -135,23 +196,10 @@ func QuerySpiderVersion(spiderId uuid.UUID, versionId uuid.UUID) (version *model
 		return nil, err
 	}
 
-	return version, nil
+	return result, nil
 }
 
-func QueryLatestSpiderVersion(spiderId uuid.UUID) (version *models.SpiderVersion, err error) {
-	if err := dao.ReadTx(func(tx dao.Tx) error {
-		if version, err = tx.SelectLatestSpiderVersion(spiderId); err != nil {
-			return err
-		}
-		return nil
-	}); err != nil {
-		return nil, err
-	}
-
-	return version, nil
-}
-
-func AddSpiderVersion(spiderId uuid.UUID, form forms.SpiderUploadForm) (version *models.SpiderVersion, err error) {
+func AddSpiderVersion(spiderId uuid.UUID, form forms.SpiderUploadForm) (result *results.SpiderVersion, err error) {
 	if err := dao.WriteTx(func(tx dao.Tx) error {
 		// 检查爬虫是否存在
 		if spider, err := tx.SelectSpider(spiderId); err != nil {
@@ -195,7 +243,7 @@ func AddSpiderVersion(spiderId uuid.UUID, form forms.SpiderUploadForm) (version 
 			_ = os.RemoveAll(tmpPath)
 		}()
 
-		version = &models.SpiderVersion{
+		version := &models.SpiderVersion{
 			Id:       uid,
 			FileHash: utils.GetFileMD5(zipFile),
 			SpiderId: spiderId,
@@ -231,12 +279,15 @@ func AddSpiderVersion(spiderId uuid.UUID, form forms.SpiderUploadForm) (version 
 			return err
 		}
 
+		if err := copier.Copy(&result, version); err != nil {
+			return err
+		}
 		return nil
 	}); err != nil {
 		return nil, err
 	}
 
-	return version, nil
+	return result, nil
 }
 
 func RemoveSpiderVersion(spiderId uuid.UUID, versionId uuid.UUID) (res interface{}, err error) {
