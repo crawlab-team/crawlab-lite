@@ -1,10 +1,10 @@
-GET {{base_url}}/api/tasks
+GET {{base_url}}/tasks
 Accept: application/json
 Authorization: {{token}}
 
 ###
 
-POST {{base_url}}/api/tasks
+POST {{base_url}}/tasks
 Content-Type: application/json
 Authorization: {{token}}
 
@@ -17,13 +17,13 @@ Authorization: {{token}}
 
 ###
 
-GET {{base_url}}/api/tasks/{{task_id}}
+GET {{base_url}}/tasks/{{task_id}}
 Accept: application/json
 Authorization: {{token}}
 
 ###
 
-POST {{base_url}}/api/tasks/{{task_id}}/cancel
+POST {{base_url}}/tasks/{{task_id}}/cancel
 Accept: application/json
 Authorization: {{token}}
 

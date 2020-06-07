@@ -17,6 +17,6 @@ type ScheduleUpdateForm struct {
 
 	Cron        string `form:"cron" json:"cron"`
 	Cmd         string `form:"cmd" json:"cmd"`
-	Enabled     bool   `form:"enabled" json:"enabled"`
+	Enabled     int    `form:"enabled" json:"enabled"`
 	Description string `form:"description" json:"description"`
 }

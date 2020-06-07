@@ -138,9 +138,10 @@ func ModifySchedule(id uuid.UUID, form forms.ScheduleUpdateForm) (result *result
 		if schedule == nil {
 			return errors.New("schedule not found")
 		}
+		isEnabled := form.Enabled == constants.Enabled
 		// 如果更新调度的可用状态，同步增删定时
-		if form.Enabled != schedule.Enabled {
-			if form.Enabled {
+		if form.Enabled != 0 {
+			if isEnabled {
 				if err = managers.Scheduler.Add(schedule); err != nil {
 					return err
 				}
@@ -148,9 +149,17 @@ func ModifySchedule(id uuid.UUID, form forms.ScheduleUpdateForm) (result *result
 				managers.Scheduler.Remove(schedule)
 			}
 		}
-		// TODO 不能忽略空值
-		if err := copier.Copy(schedule, form); err != nil {
-			return err
+		if form.Cmd != "" {
+			schedule.Cmd = form.Cmd
+		}
+		if form.Cron != "" {
+			schedule.Cron = form.Cron
+		}
+		if form.Enabled != 0 {
+			schedule.Enabled = isEnabled
+		}
+		if form.Description != "" {
+			schedule.Description = form.Description
 		}
 		// 更新调度信息
 		if err := tx.UpdateSchedule(schedule); err != nil {

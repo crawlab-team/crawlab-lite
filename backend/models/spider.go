@@ -8,6 +8,7 @@ import (
 type Spider struct {
 	Id       uuid.UUID `json:"id"`
 	Name     string    `json:"name"`
+	Remark   string    `json:"remark"`
 	CreateTs time.Time `json:"create_ts"`
 	UpdateTs time.Time `json:"update_ts"`
 }

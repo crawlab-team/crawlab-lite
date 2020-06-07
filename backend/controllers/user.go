@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"crawlab-lite/constants"
 	"crawlab-lite/forms"
 	"crawlab-lite/services"
 	"github.com/gin-gonic/gin"
@@ -35,4 +36,12 @@ func Login(c *gin.Context) {
 	}
 
 	HandleSuccess(c, tokenStr)
+}
+
+func GetMe(c *gin.Context) {
+	user, exists := c.Get(constants.ContextUser)
+	if exists == false || user == nil {
+		HandleError(http.StatusUnauthorized, c, errors.New("not authorized"))
+	}
+	HandleSuccess(c, user)
 }

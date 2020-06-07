@@ -12,7 +12,7 @@ import (
 
 // 查询区间内的所有任务
 func (t *Tx) SelectAllTasksLimit(start int, end int) (tasks []*models.Task, err error) {
-	if nodes, err := t.tx.ZRangeByRank(constants.TaskListBucket, start, end); err != nil {
+	if nodes, err := t.tx.ZRangeByRank(constants.TaskListBucket, -(start + 1), -(end + 1)); err != nil {
 		if err == nutsdb.ErrBucket {
 			return nil, nil
 		}
@@ -69,7 +69,28 @@ func (t *Tx) SelectTaskWhereStatus(status constants.TaskStatus) (task *models.Ta
 				return nil, err
 			}
 			if _task.Status == status {
-				task = _task
+				return _task, nil
+			}
+		}
+	}
+	return task, nil
+}
+
+// 根据爬虫 ID 查询最近的任务
+func (t *Tx) SelectLatestTaskWhereSpiderId(spiderId uuid.UUID) (task *models.Task, err error) {
+	if nodes, err := t.tx.ZMembers(constants.TaskListBucket); err != nil {
+		if err == nutsdb.ErrBucket {
+			return nil, nil
+		}
+		return nil, err
+	} else {
+		for _, node := range nodes {
+			var _task *models.Task
+			if err = json.Unmarshal(node.Value, &_task); err != nil {
+				return nil, err
+			}
+			if _task.SpiderId == spiderId {
+				return _task, nil
 			}
 		}
 	}

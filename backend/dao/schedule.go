@@ -12,7 +12,7 @@ import (
 
 // 查询区间内的所有定时调度
 func (t *Tx) SelectAllSchedulesLimit(start int, end int) (schedules []*models.Schedule, err error) {
-	if nodes, err := t.tx.ZRangeByRank(constants.ScheduleListBucket, start, end); err != nil {
+	if nodes, err := t.tx.ZRangeByRank(constants.ScheduleListBucket, -(start + 1), -(end + 1)); err != nil {
 		if err == nutsdb.ErrBucket {
 			return nil, nil
 		}

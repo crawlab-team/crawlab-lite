@@ -9,7 +9,7 @@ import (
 func InitRoutes(app *gin.Engine) {
 	app.Use(middlewares.CORSMiddleware())
 
-	root := app.Group("/api")
+	root := app.Group("/")
 	{
 		anonymousGroup := root.Group("/")
 		{
@@ -21,6 +21,10 @@ func InitRoutes(app *gin.Engine) {
 
 		authGroup := root.Group("/", middlewares.AuthorizationMiddleware())
 		{
+			// 用户
+			{
+				authGroup.GET("/me", controllers.GetMe) // 获取自己账户
+			}
 			// 爬虫
 			{
 				authGroup.GET("/spiders", controllers.GetSpiderList)                                  // 爬虫列表

@@ -61,7 +61,7 @@ func (s *scheduler) Flush() error {
 			return err
 		} else {
 			for _, schedule := range schedules {
-				if schedule.Cron == "" {
+				if schedule.Cron == "" || schedule.Enabled == false {
 					continue
 				}
 				// 添加到定时调度

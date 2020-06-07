@@ -1,10 +1,10 @@
-GET {{base_url}}/api/spiders
+GET {{base_url}}/spiders
 Accept: application/json
 Authorization: {{token}}
 
 ###
 
-POST {{base_url}}/api/spiders
+POST {{base_url}}/spiders
 Content-Type: multipart/form-data; boundary=WebAppBoundary
 Authorization: {{token}}
 
@@ -22,19 +22,19 @@ Content-Disposition: form-data; name="name"
 
 ###
 
-DELETE {{base_url}}/api/spiders/{{spider_id}}
+DELETE {{base_url}}/spiders/{{spider_id}}
 Accept: application/json
 Authorization: {{token}}
 
 ###
 
-GET {{base_url}}/api/spiders/{{spider_id}}/versions
+GET {{base_url}}/spiders/{{spider_id}}/versions
 Accept: application/json
 Authorization: {{token}}
 
 ###
 
-POST {{base_url}}/api/spiders/{{spider_id}}/versions
+POST {{base_url}}/spiders/{{spider_id}}/versions
 Content-Type: multipart/form-data; boundary=WebAppBoundary
 Authorization: {{token}}
 
@@ -52,7 +52,7 @@ Content-Disposition: form-data; name="name"
 
 ###
 
-DELETE {{base_url}}/api/spiders/{{spider_id}}/versions/{{spider_version_id}}
+DELETE {{base_url}}/spiders/{{spider_id}}/versions/{{spider_version_id}}
 Accept: application/json
 Authorization: {{token}}
 

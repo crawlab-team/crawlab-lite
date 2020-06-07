@@ -1,10 +1,10 @@
-GET {{base_url}}/api/schedules
+GET {{base_url}}/schedules
 Accept: application/json
 Authorization: {{token}}
 
 ###
 
-POST {{base_url}}/api/schedules
+POST {{base_url}}/schedules
 Content-Type: application/json
 Authorization: {{token}}
 
@@ -18,23 +18,23 @@ Authorization: {{token}}
 
 ###
 
-GET {{base_url}}/api/schedules/{{schedule_id}}
+GET {{base_url}}/schedules/{{schedule_id}}
 Accept: application/json
 Authorization: {{token}}
 
 ###
 
-PUT {{base_url}}/api/schedules/{{schedule_id}}
+PUT {{base_url}}/schedules/{{schedule_id}}
 Accept: application/json
 Authorization: {{token}}
 
 {
-  "enabled": false
+  "enabled": 2
 }
 
 ###
 
-DELETE {{base_url}}/api/schedules/{{schedule_id}}
+DELETE {{base_url}}/schedules/{{schedule_id}}
 Accept: application/json
 Authorization: {{token}}
 

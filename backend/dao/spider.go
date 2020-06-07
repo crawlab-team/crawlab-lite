@@ -12,7 +12,7 @@ import (
 
 // 查询区间内的所有爬虫
 func (t *Tx) SelectAllSpidersLimit(start int, end int) (spiders []*models.Spider, err error) {
-	if nodes, err := t.tx.ZRangeByRank(constants.SpiderListBucket, start, end); err != nil {
+	if nodes, err := t.tx.ZRangeByRank(constants.SpiderListBucket, -(start + 1), -(end + 1)); err != nil {
 		if err == nutsdb.ErrBucket {
 			return nil, nil
 		}
