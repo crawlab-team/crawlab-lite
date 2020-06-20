@@ -1,11 +1,5 @@
 <template>
   <div class="crawl-confirm-dialog-wrapper">
-    <parameters-dialog
-      :visible="isParametersVisible"
-      :param="form.param"
-      @confirm="onParametersConfirm"
-      @close="isParametersVisible = false"
-    />
     <el-dialog
       :title="$t('Notification')"
       :visible="visible"
@@ -14,7 +8,12 @@
       :before-close="beforeClose"
     >
       <div style="margin-bottom: 20px;">{{$t('Are you sure to run this spider?')}}</div>
-      <el-form :model="form" ref="form">
+      <el-form :model="form" label-width="100px" ref="form">
+        <el-form-item :label="$t('Execute Command')" inline-message prop="cmd" required>
+          <template>
+            <el-input :placeholder="$t('Execute Command')" v-model="form.cmd"/>
+          </template>
+        </el-form-item>
         <el-form-item class="checkbox-wrapper">
           <div>
             <el-checkbox v-model="isAllowDisclaimer"/>
@@ -32,10 +31,10 @@
               </a>
             </span>
           </div>
-          <div>
-            <el-checkbox v-model="isRedirect"/>
-            <span style="margin-left: 5px">{{$t('Redirect to task detail')}}</span>
-          </div>
+          <!--          <div>-->
+          <!--            <el-checkbox v-model="isRedirect"/>-->
+          <!--            <span style="margin-left: 5px">{{$t('Redirect to task detail')}}</span>-->
+          <!--          </div>-->
         </el-form-item>
       </el-form>
       <template slot="footer">
@@ -50,11 +49,9 @@
 
 <script>
   import {mapState} from 'vuex'
-  import ParametersDialog from './ParametersDialog'
 
   export default {
   name: 'CrawlConfirmDialog',
-  components: { ParametersDialog },
   props: {
     spiderId: {
       type: String,
@@ -78,19 +75,13 @@
   data () {
     return {
       form: {
-        runType: 'random',
-        nodeIds: undefined,
         spider: undefined,
-        scrapy_log_level: 'INFO',
-        param: '',
-        nodeList: []
+        cmd: ''
       },
       isAllowDisclaimer: true,
       isRetry: false,
-      isRedirect: true,
-      isLoading: false,
-      isParametersVisible: false,
-      scrapySpidersNamesDict: {}
+      isRedirect: false,
+      isLoading: false
     }
   },
   computed: {
@@ -105,27 +96,12 @@
     ]),
     isConfirmDisabled () {
       if (this.isLoading) return true
-      if (!this.isAllowDisclaimer) return true
-      return false
-    },
-    scrapySpiders () {
-      return this.spiders.filter(d => d.type === 'customized' && d.is_scrapy)
-    }
-  },
-  watch: {
-    visible (value) {
-      if (value) {
-        this.onOpen()
-      }
+      return !this.isAllowDisclaimer
     }
   },
   methods: {
     beforeClose () {
       this.$emit('close')
-    },
-    async fetchScrapySpiderName (id) {
-      const res = await this.$request.get(`/spiders/${id}/scrapy/spiders`)
-      this.scrapySpidersNamesDict[id] = res.data.data
     },
     onConfirm () {
       this.$refs['form'].validate(async valid => {
@@ -138,29 +114,25 @@
           // 运行单个爬虫
 
           // 参数
-          let param = this.form.param
+          const cmd = this.form.cmd
 
           // 发起请求
           res = await this.$store.dispatch('spider/crawlSpider', {
             spiderId: this.spiderId,
-            nodeIds: this.form.nodeIds,
-            param,
-            runType: this.form.runType
+            cmd
           })
         } else {
           // 运行多个爬虫
 
           // 发起请求
           res = await this.$store.dispatch('spider/crawlSelectedSpiders', {
-            nodeIds: this.form.nodeIds,
-            runType: this.form.runType,
             taskParams: this.spiders.map(d => {
               // 参数
-              let param = this.form.param
+              const cmd = this.form.cmd
 
               return {
                 spider_id: d.id,
-                param
+                cmd
               }
             })
           })
@@ -170,11 +142,6 @@
         this.$message.success(this.$t('A task has been scheduled successfully'))
 
         this.$emit('close')
-        if (this.multiple) {
-          this.$st.sendEv('爬虫确认', '确认批量运行', this.form.runType)
-        } else {
-          this.$st.sendEv('爬虫确认', '确认运行', this.form.runType)
-        }
 
         // 是否重定向
         if (
@@ -193,50 +160,7 @@
     },
     onClickDisclaimer () {
       this.$router.push('/disclaimer')
-    },
-    async onOpen () {
-      // 节点列表
-      this.$request.get('/nodes', {}).then(response => {
-        this.nodeList = response.data.data.map(d => {
-          d.systemInfo = {
-            os: '',
-            arch: '',
-            num_cpu: '',
-            executables: []
-          }
-          return d
-        })
-      })
-
-      // 爬虫列表
-      if (!this.multiple) {
-        // 单个爬虫
-        this.isLoading = true
-        try {
-          await this.$store.dispatch('spider/getSpiderData', this.spiderId)
-        } finally {
-          this.isLoading = false
-        }
-      } else {
-        // 多个爬虫
-        this.isLoading = true
-        try {
-          // 遍历 Scrapy 爬虫列表
-          await Promise.all(this.scrapySpiders.map(async d => {
-            return this.fetchScrapySpiderName(d.id)
-          }))
-        } finally {
-          this.isLoading = false
-        }
-      }
-    },
-    onOpenParameters () {
-      this.isParametersVisible = true
-    },
-    onParametersConfirm (value) {
-      this.form.param = value
-      this.isParametersVisible = false
-    },
+    }
   }
 }
 </script>

@@ -14,7 +14,4 @@ module.exports = {
   parserOptions: {
     parser: 'babel-eslint'
   },
-  globals: {
-    '_hmt': 1
-  }
 }

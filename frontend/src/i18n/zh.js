@@ -159,7 +159,6 @@ export default {
   'List': '列表',
   'Pagination': '分页',
   'Settings': '设置',
-  'Display Name': '显示名称',
   'Template': '模版',
   'Is Scrapy': '是否为 Scrapy',
   'Scrapy Spider': 'Scrapy 爬虫',

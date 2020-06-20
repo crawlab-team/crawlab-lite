@@ -1,12 +1,5 @@
 <template>
   <div class="app-container schedule-list">
-    <parameters-dialog
-      :visible="isParametersVisible"
-      :param="scheduleForm.param"
-      @confirm="onParametersConfirm"
-      @close="isParametersVisible = false"
-    />
-
     <!--tour-->
     <v-tour
       name="schedule-list"
@@ -95,12 +88,11 @@
             {{$t('Edit')}}
           </el-button>
         </el-form-item>
-        <el-form-item :label="$t('Execute Command')" prop="cmd">
+        <el-form-item :label="$t('Execute Command')" prop="cmd" required>
           <el-input
             id="cmd"
-            v-model="spiderForm.cmd"
+            v-model="scheduleForm.cmd"
             :placeholder="$t('Execute Command')"
-            disabled
           />
         </el-form-item>
         <el-form-item :label="$t('Schedule Description')" prop="description">
@@ -242,7 +234,6 @@
   import request from '../../api/request'
   import VueCronLinux from '../../components/Cron'
   import {mapState} from 'vuex'
-  import ParametersDialog from '../../components/Common/ParametersDialog'
   import ScheduleTaskList from '../../components/Schedule/ScheduleTaskList'
   import CrawlConfirmDialog from '../../components/Common/CrawlConfirmDialog'
 
@@ -251,8 +242,7 @@
   components: {
     CrawlConfirmDialog,
     ScheduleTaskList,
-    VueCronLinux,
-    ParametersDialog
+    VueCronLinux
   },
   data () {
     return {
@@ -272,7 +262,6 @@
       spiderList: [],
       isShowCron: false,
       isLoading: false,
-      isParametersVisible: false,
       isViewTasksDialogVisible: false,
       crawlConfirmDialogVisible: false,
 
@@ -441,7 +430,7 @@
           const form = JSON.parse(JSON.stringify(this.scheduleForm))
           form.cron = '0 ' + this.scheduleForm.cron
           if (this.isEdit) {
-            request.post(`/schedules/${this.scheduleForm.id}`, form).then(response => {
+            request.put(`/schedules/${this.scheduleForm.id}`, form).then(response => {
               if (response.data.error) {
                 this.$message.error(response.data.error)
                 return
@@ -451,7 +440,7 @@
               this.$message.success(this.$t('The schedule has been saved'))
             })
           } else {
-            request.put('/schedules', form).then(response => {
+            request.post('/schedules', form).then(response => {
               if (response.data.error) {
                 this.$message.error(response.data.error)
                 return
@@ -474,9 +463,6 @@
       this.$st.sendEv('定时任务', '修改定时任务')
 
       this.isLoading = true
-      if (!this.scheduleForm.scrapy_log_level) {
-        this.$set(this.scheduleForm, 'scrapy_log_level', 'INFO')
-      }
       await this.$store.dispatch('spider/getSpiderData', row.spider_id)
       this.isLoading = false
     },
@@ -527,13 +513,6 @@
       if (valid) {
         this.cronDialogVisible = false
       }
-    },
-    onOpenParameters () {
-      this.isParametersVisible = true
-    },
-    onParametersConfirm (value) {
-      this.scheduleForm.param = value
-      this.isParametersVisible = false
     },
     async onSpiderChange (spiderId) {
       await this.$store.dispatch('spider/getSpiderData', spiderId)

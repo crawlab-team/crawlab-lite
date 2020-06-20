@@ -120,12 +120,10 @@ const actions = {
       })
   },
   crawlSpider ({ state, dispatch }, payload) {
-    const { spiderId, runType, nodeIds, param } = payload
+    const {spiderId, cmd} = payload
     return request.post(`/tasks`, {
       spider_id: spiderId,
-      run_type: runType,
-      node_ids: nodeIds,
-      param: param
+      cmd: cmd
     })
   },
   crawlSelectedSpiders ({ state, dispatch }, payload) {
@@ -137,13 +135,13 @@ const actions = {
     })
   },
   getTaskList ({ state, commit }, id) {
-    return request.get(`/spiders/${id}/tasks`)
+    return request.get(`/tasks`, {'spider_id': id})
       .then(response => {
         commit('task/SET_TASK_LIST',
           response.data.data ? response.data.data.map(d => {
             return d
           }).sort((a, b) => a.create_ts < b.create_ts ? 1 : -1) : [],
-          { root: true })
+          {root: true})
       })
   },
   getDir ({ state, commit }, path) {

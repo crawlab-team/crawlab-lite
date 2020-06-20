@@ -20,128 +20,74 @@
                width="40%"
                :visible.sync="addDialogVisible"
                :before-close="onAddDialogClose">
-      <el-tabs :active-name="activeTabName">
-        <!-- customized -->
-        <el-tab-pane name="customized" :label="$t('Customized')">
-          <el-form :model="spiderForm" ref="addCustomizedForm" inline-message label-width="120px">
-            <el-form-item :label="$t('Spider Name')" prop="name" required>
-              <el-input id="spider-name" v-model="spiderForm.name" :placeholder="$t('Spider Name')"/>
-            </el-form-item>
-            <el-form-item :label="$t('Display Name')" prop="display_name" required>
-              <el-input id="display-name" v-model="spiderForm.display_name" :placeholder="$t('Display Name')"/>
-            </el-form-item>
-            <el-form-item :label="$t('Execute Command')" prop="cmd" required>
-              <el-input
-                id="cmd"
-                v-model="spiderForm.cmd"
-                :placeholder="$t('Execute Command')"
-                :disabled="spiderForm.is_scrapy"
-              />
-            </el-form-item>
-            <el-form-item :label="$t('Results')" prop="col">
-              <el-input
-                id="col"
-                v-model="spiderForm.col"
-                :placeholder="$t('By default: ') + 'results_<spider_name>'"
-              />
-            </el-form-item>
-            <el-form-item :label="$t('Upload Zip File')" label-width="120px" name="site">
-              <el-upload
-                :action="$request.baseUrl + '/spiders'"
-                :data="uploadForm"
-                :headers="{Authorization:token}"
-                :on-success="onUploadSuccess"
-                :file-list="fileList"
-                :before-upload="beforeUpload"
-              >
-                <el-button id="upload" size="small" type="primary" icon="el-icon-upload">
-                  {{$t('Upload')}}
-                </el-button>
-              </el-upload>
-            </el-form-item>
-<!--            <el-row>-->
-<!--              <el-col :span="8">-->
-<!--                <el-form-item :label="$t('Is Scrapy')" prop="is_scrapy">-->
-<!--                  <el-switch-->
-<!--                    v-model="spiderForm.is_scrapy"-->
-<!--                    active-color="#13ce66"-->
-<!--                    @change="onIsScrapy"-->
-<!--                  />-->
-<!--                </el-form-item>-->
-<!--              </el-col>-->
-<!--              <el-col :span="8">-->
-<!--                <el-form-item :label="$t('Is Git')" prop="is_git">-->
-<!--                  <el-switch-->
-<!--                    v-model="spiderForm.is_git"-->
-<!--                    active-color="#13ce66"-->
-<!--                  />-->
-<!--                </el-form-item>-->
-<!--              </el-col>-->
-<!--              <el-col :span="8">-->
-<!--                <el-form-item :label="$t('Is Long Task')" prop="is_long_task">-->
-<!--                  <el-switch-->
-<!--                    v-model="spiderForm.is_long_task"-->
-<!--                    active-color="#13ce66"-->
-<!--                  />-->
-<!--                </el-form-item>-->
-<!--              </el-col>-->
-<!--            </el-row>-->
-          </el-form>
-          <el-alert
-            type="warning"
-            :closable="false"
-            style="margin-bottom: 10px"
+      <el-form :model="spiderForm" inline-message label-width="120px" ref="addSpiderForm">
+        <el-form-item :label="$t('Spider Name')" prop="name" required>
+          <el-input :placeholder="$t('Spider Name')" id="spider-name" v-model="spiderForm.name"/>
+        </el-form-item>
+        <el-form-item :label="$t('Description')" prop="description">
+          <el-input :placeholder="$t('Description')" id="spider-description" v-model="spiderForm.description"/>
+        </el-form-item>
+        <!--        <el-form-item :label="$t('Results')" prop="col">-->
+        <!--          <el-input-->
+        <!--            id="col"-->
+        <!--            v-model="spiderForm.col"-->
+        <!--            :placeholder="$t('By default: ') + 'results_<spider_name>'"-->
+        <!--          />-->
+        <!--        </el-form-item>-->
+        <el-form-item :label="$t('Upload Zip File')" label-width="120px" name="site">
+          <el-upload
+            :action="$request.baseUrl + '/spiders'"
+            :before-upload="beforeUpload"
+            :data="uploadForm"
+            :file-list="fileList"
+            :headers="{Authorization:token}"
+            :on-success="onUploadSuccess"
           >
-            <p>{{$t('You can click "Add" to create an empty spider and upload files later.')}}</p>
-            <p>{{$t('OR, you can also click "Upload" and upload a zip file containing your spider project.')}}</p>
-            <p>
-              <i class="fa fa-exclamation-triangle"></i> {{$t('NOTE: When uploading a zip file, please zip your' +
-              ' spider files from the ROOT DIRECTORY.')}}
-            </p>
-            <p style="font-weight: bolder">
-              <template v-if="lang === 'en'">
-                Recommend uploading spiders using <a href="https://docs.crawlab.cn/SDK/CLI.html" target="_blank"
-                                                     style="color: #409eff;font-weight: bolder">CLI Tool</a>.
-              </template>
-              <template v-else-if="lang === 'zh'">
-                推荐使用 <a href="https://docs.crawlab.cn/SDK/CLI.html" target="_blank"
-                          style="color: #409eff;font-weight: bolder">CLI 工具</a> 上传爬虫。
-              </template>
-            </p>
-          </el-alert>
-          <div class="actions">
-            <el-button size="small" type="primary" @click="onAddCustomized">{{$t('Add')}}</el-button>
-          </div>
-        </el-tab-pane>
-        <!-- configurable -->
-        <el-tab-pane name="configurable" :label="$t('Configurable')">
-          <el-form :model="spiderForm" ref="addConfigurableForm" inline-message label-width="120px">
-            <el-form-item :label="$t('Spider Name')" prop="name" required>
-              <el-input v-model="spiderForm.name" :placeholder="$t('Spider Name')"/>
-            </el-form-item>
-            <el-form-item :label="$t('Display Name')" prop="display_name" required>
-              <el-input v-model="spiderForm.display_name" :placeholder="$t('Display Name')"/>
-            </el-form-item>
-            <el-form-item :label="$t('Template')" prop="template" required>
-              <el-select id="template" v-model="spiderForm.template" :value="spiderForm.template"
-                         :placeholder="$t('Template')">
-                <el-option
-                  v-for="template in templateList"
-                  :key="template"
-                  :label="template"
-                  :value="template"
-                />
-              </el-select>
-            </el-form-item>
-            <el-form-item :label="$t('Results')" prop="col" required>
-              <el-input v-model="spiderForm.col" :placeholder="$t('Results')"/>
-            </el-form-item>
-          </el-form>
-          <div class="actions">
-            <el-button id="add" size="small" type="primary" @click="onAddConfigurable">{{$t('Add')}}</el-button>
-          </div>
-        </el-tab-pane>
-      </el-tabs>
+            <el-button icon="el-icon-upload" id="upload" size="small" type="primary">
+              {{$t('Upload')}}
+            </el-button>
+          </el-upload>
+        </el-form-item>
+        <!--            <el-row>-->
+        <!--              <el-col :span="8">-->
+        <!--                <el-form-item :label="$t('Is Scrapy')" prop="is_scrapy">-->
+        <!--                  <el-switch-->
+        <!--                    v-model="spiderForm.is_scrapy"-->
+        <!--                    active-color="#13ce66"-->
+        <!--                    @change="onIsScrapy"-->
+        <!--                  />-->
+        <!--                </el-form-item>-->
+        <!--              </el-col>-->
+        <!--              <el-col :span="8">-->
+        <!--                <el-form-item :label="$t('Is Git')" prop="is_git">-->
+        <!--                  <el-switch-->
+        <!--                    v-model="spiderForm.is_git"-->
+        <!--                    active-color="#13ce66"-->
+        <!--                  />-->
+        <!--                </el-form-item>-->
+        <!--              </el-col>-->
+        <!--              <el-col :span="8">-->
+        <!--                <el-form-item :label="$t('Is Long Task')" prop="is_long_task">-->
+        <!--                  <el-switch-->
+        <!--                    v-model="spiderForm.is_long_task"-->
+        <!--                    active-color="#13ce66"-->
+        <!--                  />-->
+        <!--                </el-form-item>-->
+        <!--              </el-col>-->
+        <!--            </el-row>-->
+      </el-form>
+      <el-alert
+        :closable="false"
+        style="margin-bottom: 10px"
+        type="warning"
+      >
+        <p>{{$t('You can click "Add" to create an empty spider and upload files later.')}}</p>
+        <p>{{$t('OR, you can also click "Upload" and upload a zip file containing your spider project.')}}</p>
+        <p>
+          <i class="fa fa-exclamation-triangle"></i> {{$t('NOTE: When uploading a zip file, please zip your' +
+          ' spider files from the ROOT DIRECTORY.')}}
+        </p>
+      </el-alert>
     </el-dialog>
     <!--./add dialog-->
 
@@ -159,8 +105,66 @@
         <el-tab-pane name="cancelled" :label="$t('Cancelled')"/>
         <el-tab-pane name="abnormal" :label="$t('Abnormal')"/>
       </el-tabs>
+      <template slot-scope="scope">
+        <el-table
+          :data="getTasks(scope.row)"
+          border
+          class="table"
+          max-height="240px"
+          style="margin: 5px 10px"
+        >
+          <el-table-column
+            :label="$t('Create Time')"
+            prop="create_ts"
+            width="140px"
+          />
+          <el-table-column
+            :label="$t('Start Time')"
+            prop="start_ts"
+            width="140px"
+          />
+          <el-table-column
+            :label="$t('Finish Time')"
+            prop="finish_ts"
+            width="140px"
+          />
+          <el-table-column
+            :label="$t('Parameters')"
+            prop="param"
+            width="120px"
+          />
+          <el-table-column
+            :label="$t('Status')"
+            width="120px"
+          >
+            <template slot-scope="scope">
+              <status-tag :status="scope.row.status"/>
+            </template>
+          </el-table-column>
+          <el-table-column
+            :label="$t('Results Count')"
+            prop="result_count"
+            width="80px"
+          />
+          <el-table-column
+            :label="$t('Action')"
+            width="auto"
+          >
+            <template slot-scope="scope">
+              <el-button
+                @click="onStop(scope.row, $event)"
+                icon="el-icon-video-pause"
+                size="mini"
+                type="danger"
+                v-if="['pending', 'running'].includes(scope.row.status)"
+              />
+            </template>
+          </el-table-column>
+        </el-table>
+      </template>
+
       <template slot="footer">
-        <el-button type="primary" size="small" @click="isRunningTasksDialogVisible = false">{{$t('Ok')}}</el-button>
+        <el-button @click="isRunningTasksDialogVisible = false" size="small" type="primary">{{ $t('Ok') }}</el-button>
       </template>
     </el-dialog>
     <!--./running tasks dialog-->
@@ -176,39 +180,30 @@
     />
     <!--./crawl confirm dialog-->
 
-    <!--copy dialog-->
-    <copy-spider-dialog
-      :visible="copyDialogVisible"
-      :spider-id="activeSpiderId"
-      @close="copyDialogVisible = false"
-      @confirm="onCopyConfirm"
-    />
-    <!--./copy dialog-->
-
     <el-card style="border-radius: 0">
       <!--filter-->
       <div class="filter">
         <div class="left">
-          <el-form :inline="true">
-            <el-form-item>
-              <el-input
-                v-model="filter.keyword"
-                size="small"
-                :placeholder="$t('Spider Name')"
-                clearable
-                @keyup.enter.native="onSearch"
-              >
-                <i slot="suffix" class="el-input__icon el-icon-search"></i>
-              </el-input>
-            </el-form-item>
-            <el-form-item>
-              <el-button size="small" type="success"
-                         class="btn refresh"
-                         @click="onRefresh">
-                {{$t('Search')}}
-              </el-button>
-            </el-form-item>
-          </el-form>
+          <!--          <el-form :inline="true">-->
+          <!--            <el-form-item>-->
+          <!--              <el-input-->
+          <!--                v-model="filter.keyword"-->
+          <!--                size="small"-->
+          <!--                :placeholder="$t('Spider Name')"-->
+          <!--                clearable-->
+          <!--                @keyup.enter.native="onSearch"-->
+          <!--              >-->
+          <!--                <i slot="suffix" class="el-input__icon el-icon-search"></i>-->
+          <!--              </el-input>-->
+          <!--            </el-form-item>-->
+          <!--            <el-form-item>-->
+          <!--              <el-button size="small" type="success"-->
+          <!--                         class="btn refresh"-->
+          <!--                         @click="onRefresh">-->
+          <!--                {{$t('Search')}}-->
+          <!--              </el-button>-->
+          <!--            </el-form-item>-->
+          <!--          </el-form>-->
         </div>
         <div class="right">
           <el-button
@@ -259,12 +254,12 @@
       <!--./filter-->
 
       <!--tabs-->
-<!--      <el-tabs v-model="filter.type" @tab-click="onClickTab" class="tabs">-->
-<!--        <el-tab-pane :label="$t('All')" name="all" class="all"></el-tab-pane>-->
-<!--        <el-tab-pane :label="$t('Customized')" name="customized" class="customized"></el-tab-pane>-->
-<!--        <el-tab-pane :label="$t('Configurable')" name="configurable" class="configurable"></el-tab-pane>-->
-<!--        <el-tab-pane :label="$t('Long Task')" name="long-task" class="long-task"></el-tab-pane>-->
-<!--      </el-tabs>-->
+      <!--      <el-tabs v-model="filter.type" @tab-click="onClickTab" class="tabs">-->
+      <!--        <el-tab-pane :label="$t('All')" name="all" class="all"></el-tab-pane>-->
+      <!--        <el-tab-pane :label="$t('Customized')" name="customized" class="customized"></el-tab-pane>-->
+      <!--        <el-tab-pane :label="$t('Configurable')" name="configurable" class="configurable"></el-tab-pane>-->
+      <!--        <el-tab-pane :label="$t('Long Task')" name="long-task" class="long-task"></el-tab-pane>-->
+      <!--      </el-tabs>-->
       <!--./tabs-->
 
       <!--legend-->
@@ -347,22 +342,22 @@
               <status-tag :status="scope.row.last_status"/>
             </template>
           </el-table-column>
-<!--          <el-table-column-->
-<!--            v-else-if="['is_scrapy', 'is_long_task'].includes(col.name)"-->
-<!--            :key="col.name"-->
-<!--            :label="$t(col.label)"-->
-<!--            align="left"-->
-<!--            :width="col.width"-->
-<!--          >-->
-<!--            <template slot-scope="scope">-->
-<!--              <el-switch-->
-<!--                v-if="scope.row.type === 'customized'"-->
-<!--                v-model="scope.row[col.name]"-->
-<!--                active-color="#13ce66"-->
-<!--                disabled-->
-<!--              />-->
-<!--            </template>-->
-<!--          </el-table-column>-->
+          <!--          <el-table-column-->
+          <!--            v-else-if="['is_scrapy', 'is_long_task'].includes(col.name)"-->
+          <!--            :key="col.name"-->
+          <!--            :label="$t(col.label)"-->
+          <!--            align="left"-->
+          <!--            :width="col.width"-->
+          <!--          >-->
+          <!--            <template slot-scope="scope">-->
+          <!--              <el-switch-->
+          <!--                v-if="scope.row.type === 'customized'"-->
+          <!--                v-model="scope.row[col.name]"-->
+          <!--                active-color="#13ce66"-->
+          <!--                disabled-->
+          <!--              />-->
+          <!--            </template>-->
+          <!--          </el-table-column>-->
           <el-table-column
             v-else-if="col.name === 'latest_tasks'"
             :key="col.name"
@@ -434,15 +429,15 @@
         </template>
         <el-table-column :label="$t('Action')" align="left" fixed="right" min-width="130px">
           <template slot-scope="scope">
-<!--            <el-tooltip :content="$t('View')" placement="top">-->
-<!--              <el-button-->
-<!--                type="primary"-->
-<!--                icon="el-icon-search"-->
-<!--                size="mini"-->
-<!--                :disabled="isDisabled(scope.row)"-->
-<!--                @click="onView(scope.row, $event)"-->
-<!--              />-->
-<!--            </el-tooltip>-->
+            <!--            <el-tooltip :content="$t('View')" placement="top">-->
+            <!--              <el-button-->
+            <!--                type="primary"-->
+            <!--                icon="el-icon-search"-->
+            <!--                size="mini"-->
+            <!--                :disabled="isDisabled(scope.row)"-->
+            <!--                @click="onView(scope.row, $event)"-->
+            <!--              />-->
+            <!--            </el-tooltip>-->
             <el-tooltip :content="$t('Remove')" placement="top">
               <el-button
                 type="danger"
@@ -468,15 +463,15 @@
                 @click="onCrawl(scope.row, $event)"
               />
             </el-tooltip>
-            <el-tooltip :content="$t('Latest Tasks')" placement="top">
-              <el-button
-                type="warning"
-                icon="fa fa-tasks"
-                size="mini"
-                :disabled="isDisabled(scope.row)"
-                @click="onViewRunningTasks(scope.row, $event)"
-              />
-            </el-tooltip>
+            <!--            <el-tooltip :content="$t('Latest Tasks')" placement="top">-->
+            <!--              <el-button-->
+            <!--                type="warning"-->
+            <!--                icon="fa fa-tasks"-->
+            <!--                size="mini"-->
+            <!--                :disabled="isDisabled(scope.row)"-->
+            <!--                @click="onViewRunningTasks(scope.row, $event)"-->
+            <!--              />-->
+            <!--            </el-tooltip>-->
           </template>
         </el-table-column>
       </el-table>
@@ -502,12 +497,10 @@
   import CrawlConfirmDialog from '../../components/Common/CrawlConfirmDialog'
   import StatusTag from '../../components/Status/StatusTag'
   import StatusLegend from '../../components/Status/StatusLegend'
-  import CopySpiderDialog from '../../components/Spider/CopySpiderDialog'
 
   export default {
   name: 'SpiderList',
   components: {
-    CopySpiderDialog,
     StatusLegend,
     CrawlConfirmDialog,
     StatusTag
@@ -664,8 +657,7 @@
       selectedSpiders: [],
       isStopLoading: false,
       isRemoveLoading: false,
-      isMultiple: false,
-      copyDialogVisible: false
+      isMultiple: false
     }
   },
   computed: {
@@ -686,19 +678,18 @@
     uploadForm () {
       return {
         name: this.spiderForm.name,
-        col: this.spiderForm.col,
-        cmd: this.spiderForm.cmd
+        description: this.spiderForm.description
       }
     },
     columns () {
       const columns = []
-      columns.push({ name: 'name', label: 'Name', width: '160', align: 'left' })
+      columns.push({name: 'name', label: 'Name', width: '160', align: 'left'})
       // columns.push({ name: 'latest_tasks', label: 'Latest Tasks', width: '180' })
-      columns.push({ name: 'last_status', label: 'Last Status', width: '120' })
-      columns.push({ name: 'last_run_ts', label: 'Last Run', width: '140' })
-      columns.push({ name: 'update_ts', label: 'Update Time', width: '140' })
-      columns.push({ name: 'create_ts', label: 'Create Time', width: '140' })
-      columns.push({ name: 'remark', label: 'Remark', width: '140' })
+      columns.push({name: 'last_status', label: 'Last Status', width: '120'})
+      columns.push({name: 'last_run_ts', label: 'Last Run', width: '140'})
+      columns.push({name: 'update_ts', label: 'Update Time', width: '140'})
+      columns.push({name: 'create_ts', label: 'Create Time', width: '140'})
+      columns.push({name: 'description', label: 'Description', width: '140'})
       return columns
     }
   },
@@ -746,8 +737,8 @@
         this.$st.sendEv('爬虫列表', '添加爬虫', '可配置爬虫')
       })
     },
-    onAddCustomized () {
-      this.$refs['addCustomizedForm'].validate(async res => {
+    onAddSpider() {
+      this.$refs['addSpiderForm'].validate(async res => {
         if (!res) return
         let res2
         try {
@@ -824,17 +815,6 @@
         this.getList()
       }, 1000)
     },
-    onCopy (row, ev) {
-      ev.stopPropagation()
-      this.copyDialogVisible = true
-      this.activeSpiderId = row.id
-      this.$st.sendEv('爬虫列表', '点击复制')
-    },
-    onCopyConfirm () {
-      setTimeout(() => {
-        this.getList()
-      }, 1000)
-    },
     onView (row, ev) {
       ev.stopPropagation()
       this.$router.push('/spiders/' + row.id)
@@ -893,15 +873,12 @@
         this.getList()
       }, 500)
 
-      // message
       this.$message.success(this.$t('Uploaded spider files successfully'))
-
-      // navigate to spider detail
-      this.$router.push(`/spiders/${res.data.id}`)
+      this.addDialogVisible = false
     },
     beforeUpload (file) {
       return new Promise((resolve, reject) => {
-        this.$refs['addCustomizedForm'].validate(res => {
+        this.$refs['addSpiderForm'].validate(res => {
           if (res) {
             resolve()
           } else {

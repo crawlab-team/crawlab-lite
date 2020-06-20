@@ -61,7 +61,7 @@ export const constantRouterMap = [
           title: 'Spiders',
           icon: 'fa fa-bug'
         }
-      },
+      }
       // {
       //   path: ':id',
       //   name: 'SpiderDetail',
@@ -90,7 +90,7 @@ export const constantRouterMap = [
           title: 'Tasks',
           icon: 'fa fa-list'
         }
-      },
+      }
     ]
   },
   {
