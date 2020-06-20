@@ -40,6 +40,7 @@ func InitRoutes(app *gin.Engine) {
 				authGroup.GET("/tasks", controllers.GetTaskList)                  // 任务列表
 				authGroup.GET("/tasks/:id", controllers.GetTask)                  // 任务详情
 				authGroup.POST("/tasks", controllers.CreateTask)                  // 创建任务
+				authGroup.DELETE("/tasks/:id", controllers.DeleteTask)            // 删除任务
 				authGroup.POST("/tasks/:id/cancel", controllers.UpdateTaskCancel) // 取消任务
 				authGroup.POST("/tasks/:id/restart", controllers.PostTaskRestart) // 重启任务
 			}

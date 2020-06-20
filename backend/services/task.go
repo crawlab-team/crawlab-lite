@@ -138,6 +138,27 @@ func AddTask(form forms.TaskForm) (result *results.Task, err error) {
 	return result, nil
 }
 
+func RemoveTask(id uuid.UUID) (res interface{}, err error) {
+	if err := dao.WriteTx(func(tx dao.Tx) error {
+		// 检查任务是否存在
+		if task, err := tx.SelectTask(id); err != nil {
+			return err
+		} else if task == nil {
+			return errors.New("task not found")
+		} else {
+			// 删除任务
+			if err = tx.DeleteTask(id); err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
 func CancelTask(id uuid.UUID, status constants.TaskStatus) (task *models.Task, err error) {
 	if err := dao.WriteTx(func(tx dao.Tx) error {
 		if task, err = tx.SelectTask(id); err != nil {

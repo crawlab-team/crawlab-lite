@@ -61,6 +61,21 @@ func CreateTask(c *gin.Context) {
 	}
 }
 
+func DeleteTask(c *gin.Context) {
+	id, err := uuid.FromString(c.Param("id"))
+	if err != nil {
+		HandleError(http.StatusBadRequest, c, errors.New("invalid id"))
+		return
+	}
+
+	if res, err := services.RemoveTask(id); err != nil {
+		HandleError(http.StatusBadRequest, c, err)
+		return
+	} else {
+		HandleSuccess(c, res)
+	}
+}
+
 func UpdateTaskCancel(c *gin.Context) {
 	id, err := uuid.FromString(c.Param("id"))
 	if err != nil {
