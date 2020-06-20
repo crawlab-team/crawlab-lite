@@ -78,19 +78,23 @@ func (t *Tx) SelectTaskWhereStatus(status constants.TaskStatus) (task *models.Ta
 
 // 根据爬虫 ID 查询最近的任务
 func (t *Tx) SelectLatestTaskWhereSpiderId(spiderId uuid.UUID) (task *models.Task, err error) {
-	if nodes, err := t.tx.ZMembers(constants.TaskListBucket); err != nil {
-		if err == nutsdb.ErrBucket {
-			return nil, nil
-		}
+	if total, err := t.CountTasks(); err != nil {
 		return nil, err
 	} else {
-		for _, node := range nodes {
-			var _task *models.Task
-			if err = json.Unmarshal(node.Value, &_task); err != nil {
-				return nil, err
+		if nodes, err := t.tx.ZRangeByRank(constants.TaskListBucket, -1, -total); err != nil {
+			if err == nutsdb.ErrBucket {
+				return nil, nil
 			}
-			if _task.SpiderId == spiderId {
-				return _task, nil
+			return nil, err
+		} else {
+			for _, node := range nodes {
+				var _task *models.Task
+				if err = json.Unmarshal(node.Value, &_task); err != nil {
+					return nil, err
+				}
+				if _task.SpiderId == spiderId {
+					return _task, nil
+				}
 			}
 		}
 	}
