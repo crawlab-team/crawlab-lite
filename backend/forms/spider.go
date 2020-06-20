@@ -5,8 +5,8 @@ import "mime/multipart"
 type SpiderForm struct {
 	SpiderUploadForm
 
-	Name   string `form:"name" json:"name" binding:"required,min=1,max=32"`
-	Remark string `form:"remark" json:"remark"`
+	Name        string `form:"name" json:"name" binding:"required,min=1,max=32"`
+	Description string `form:"description" json:"description"`
 }
 
 type SpiderUploadForm struct {

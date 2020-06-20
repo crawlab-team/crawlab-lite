@@ -7,13 +7,13 @@ import (
 )
 
 type Spider struct {
-	Id         uuid.UUID            `json:"id"`
-	Name       string               `json:"name"`
-	Remark     string               `json:"remark"`
-	CreateTs   time.Time            `json:"create_ts"`
-	UpdateTs   time.Time            `json:"update_ts"`
-	LastRunTs  time.Time            `json:"last_run_ts"` // 最后一次执行时间
-	LastStatus constants.TaskStatus `json:"last_status"` // 最后执行状态
+	Id          uuid.UUID            `json:"id"`
+	Name        string               `json:"name"`
+	Description string               `json:"description"`
+	CreateTs    time.Time            `json:"create_ts"`
+	UpdateTs    time.Time            `json:"update_ts"`
+	LastRunTs   time.Time            `json:"last_run_ts"` // 最后一次执行时间
+	LastStatus  constants.TaskStatus `json:"last_status"` // 最后执行状态
 }
 
 type SpiderVersion struct {

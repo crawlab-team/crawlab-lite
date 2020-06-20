@@ -6,11 +6,11 @@ import (
 )
 
 type Spider struct {
-	Id       uuid.UUID `json:"id"`
-	Name     string    `json:"name"`
-	Remark   string    `json:"remark"`
-	CreateTs time.Time `json:"create_ts"`
-	UpdateTs time.Time `json:"update_ts"`
+	Id          uuid.UUID `json:"id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	CreateTs    time.Time `json:"create_ts"`
+	UpdateTs    time.Time `json:"update_ts"`
 }
 
 type SpiderVersion struct {

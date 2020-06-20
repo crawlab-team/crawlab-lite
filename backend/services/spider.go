@@ -85,7 +85,8 @@ func AddSpider(form forms.SpiderForm) (result *results.Spider, err error) {
 
 		// 存储爬虫信息
 		spider = &models.Spider{
-			Name: spiderName,
+			Name:        spiderName,
+			Description: form.Description,
 		}
 		if err = tx.InsertSpider(spider); err != nil {
 			return err

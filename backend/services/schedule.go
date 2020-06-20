@@ -100,6 +100,7 @@ func AddSchedule(form forms.ScheduleCreateForm) (result *results.Schedule, err e
 			SpiderVersionId: form.SpiderVersionId,
 			Cron:            form.Cron,
 			Cmd:             form.Cmd,
+			Description:     form.Description,
 			Enabled:         true,
 		}
 		// 添加定时
