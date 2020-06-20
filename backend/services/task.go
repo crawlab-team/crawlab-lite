@@ -160,3 +160,42 @@ func CancelTask(id uuid.UUID, status constants.TaskStatus) (task *models.Task, e
 
 	return task, nil
 }
+
+func RestartTask(id uuid.UUID) (result *results.Task, err error) {
+	if err := dao.WriteTx(func(tx dao.Tx) error {
+		var task *models.Task
+		if task, err = tx.SelectTask(id); err != nil {
+			return err
+		}
+		if task == nil {
+			return errors.New("task not found")
+		}
+
+		newTask := &models.Task{
+			SpiderId:        task.SpiderId,
+			SpiderVersionId: task.SpiderVersionId,
+			ScheduleId:      task.ScheduleId,
+			Cmd:             task.Cmd,
+		}
+
+		// 存储任务信息
+		if err := tx.InsertTask(newTask); err != nil {
+			return err
+		}
+
+		result = &results.Task{}
+		if err := copier.Copy(&result, newTask); err != nil {
+			return err
+		}
+		spider, err := tx.SelectSpider(newTask.SpiderId)
+		if err != nil {
+			return err
+		}
+		result.SpiderName = spider.Name
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}

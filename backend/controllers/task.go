@@ -75,3 +75,18 @@ func UpdateTaskCancel(c *gin.Context) {
 		HandleSuccess(c, res)
 	}
 }
+
+func PostTaskRestart(c *gin.Context) {
+	id, err := uuid.FromString(c.Param("id"))
+	if err != nil {
+		HandleError(http.StatusBadRequest, c, errors.New("invalid id"))
+		return
+	}
+
+	if res, err := services.RestartTask(id); err != nil {
+		HandleError(http.StatusBadRequest, c, err)
+		return
+	} else {
+		HandleSuccess(c, res)
+	}
+}
