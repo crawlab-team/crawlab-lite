@@ -11,11 +11,24 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-func QueryTaskPage(page forms.PageForm) (total int, resultList []*results.Task, err error) {
+func QueryTaskPage(page forms.TaskPageForm) (total int, resultList []*results.Task, err error) {
+	spiderId := uuid.Nil
+	if page.SpiderId != "" {
+		spiderId, err = uuid.FromString(page.SpiderId)
+		if err != nil {
+			return 0, nil, err
+		}
+	}
+
 	start, end := page.Range()
 
 	if err := dao.ReadTx(func(tx dao.Tx) error {
-		tasks, err := tx.SelectAllTasksLimit(start, end)
+		tasks := make([]*models.Task, 0)
+		if spiderId == uuid.Nil {
+			tasks, err = tx.SelectAllTasksLimit(start, end)
+		} else {
+			tasks, err = tx.SelectTasksWhereSpiderIdLimit(spiderId, start, end)
+		}
 		if err != nil {
 			return err
 		}
@@ -33,13 +46,19 @@ func QueryTaskPage(page forms.PageForm) (total int, resultList []*results.Task, 
 				}
 			}
 			if spider == nil {
-				return errors.New("spider not found")
+				continue
 			}
 			result.SpiderName = spider.Name
 			resultList = append(resultList, &result)
 		}
-		if total, err = tx.CountTasks(); err != nil {
-			return err
+		if spiderId == uuid.Nil {
+			if total, err = tx.CountTasks(); err != nil {
+				return err
+			}
+		} else {
+			if total, err = tx.CountTasksBySpiderId(spiderId); err != nil {
+				return err
+			}
 		}
 		return nil
 	}); err != nil {
@@ -57,6 +76,10 @@ func QueryTaskById(id uuid.UUID) (result *results.Task, err error) {
 		}
 		spider, err := tx.SelectSpider(task.SpiderId)
 		if err != nil {
+			return err
+		}
+		result = &results.Task{}
+		if err := copier.Copy(&result, task); err != nil {
 			return err
 		}
 		result.SpiderName = spider.Name
@@ -98,6 +121,7 @@ func AddTask(form forms.TaskForm) (result *results.Task, err error) {
 			return err
 		}
 
+		result = &results.Task{}
 		if err := copier.Copy(&result, task); err != nil {
 			return err
 		}

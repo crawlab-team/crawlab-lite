@@ -2,6 +2,12 @@ package forms
 
 import uuid "github.com/satori/go.uuid"
 
+type TaskPageForm struct {
+	PageForm
+
+	SpiderId string `form:"spider_id" json:"spider_id"`
+}
+
 type TaskForm struct {
 	BaseForm
 

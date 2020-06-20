@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	uuid "github.com/satori/go.uuid"
 	"github.com/xujiajun/nutsdb"
+	"math"
 	"time"
 )
 
@@ -30,7 +31,36 @@ func (t *Tx) SelectAllTasksLimit(start int, end int) (tasks []*models.Task, err 
 	return tasks, nil
 }
 
-// 所有任务的总数目
+// 根据爬虫 ID 查询所有任务
+func (t *Tx) SelectTasksWhereSpiderIdLimit(spiderId uuid.UUID, start int, end int) (tasks []*models.Task, err error) {
+	if total, err := t.CountTasks(); err != nil {
+		return nil, err
+	} else {
+		if nodes, err := t.tx.ZRangeByRank(constants.TaskListBucket, -1, -total); err != nil {
+			if err == nutsdb.ErrBucket {
+				return nil, nil
+			}
+			return nil, err
+		} else {
+			for _, node := range nodes {
+				var task *models.Task
+				if err = json.Unmarshal(node.Value, &task); err != nil {
+					return nil, err
+				}
+				if task.SpiderId == spiderId {
+					tasks = append(tasks, task)
+				}
+			}
+			if len(tasks) < start {
+				return nil, nil
+			}
+			end = int(math.Min(float64(end), float64(len(tasks))))
+			return tasks[start:end], nil
+		}
+	}
+}
+
+// 根据爬虫 ID 查询所有任务的总数目
 func (t *Tx) CountTasks() (total int, err error) {
 	if total, err = t.tx.ZCard(constants.TaskListBucket); err != nil {
 		if err == nutsdb.ErrBucket {
@@ -40,6 +70,32 @@ func (t *Tx) CountTasks() (total int, err error) {
 	}
 
 	return total, nil
+}
+
+// 所有任务的总数目
+func (t *Tx) CountTasksBySpiderId(spiderId uuid.UUID) (total int, err error) {
+	if total, err := t.CountTasks(); err != nil {
+		return 0, err
+	} else {
+		if nodes, err := t.tx.ZRangeByRank(constants.TaskListBucket, -1, -total); err != nil {
+			if err == nutsdb.ErrBucket {
+				return 0, nil
+			}
+			return 0, err
+		} else {
+			tasks := make([]*models.Task, 0, len(nodes))
+			for _, node := range nodes {
+				var task *models.Task
+				if err = json.Unmarshal(node.Value, &task); err != nil {
+					return 0, err
+				}
+				if task.SpiderId == spiderId {
+					tasks = append(tasks, task)
+				}
+			}
+			return len(tasks), nil
+		}
+	}
 }
 
 // 根据 ID 查询任务
@@ -147,7 +203,7 @@ func (t *Tx) DeleteTask(id uuid.UUID) (err error) {
 }
 
 // 根据爬虫 ID 删除所有任务
-func (t *Tx) DeleteAllTasksWhereSpiderId(spiderId uuid.UUID) (err error) {
+func (t *Tx) DeleteTasksWhereSpiderId(spiderId uuid.UUID) (err error) {
 	if nodes, err := t.tx.ZMembers(constants.TaskListBucket); err != nil {
 		if err == nutsdb.ErrBucket {
 			return nil
@@ -163,7 +219,6 @@ func (t *Tx) DeleteAllTasksWhereSpiderId(spiderId uuid.UUID) (err error) {
 				if err = t.tx.ZRem(constants.TaskListBucket, task.Id.String()); err != nil {
 					return err
 				}
-				return nil
 			}
 		}
 	}

@@ -57,6 +57,7 @@ func QueryScheduleById(id uuid.UUID) (result *results.Schedule, err error) {
 		if err != nil {
 			return err
 		}
+		result = &results.Schedule{}
 		if err := copier.Copy(&result, schedule); err != nil {
 			return err
 		}
@@ -109,6 +110,8 @@ func AddSchedule(form forms.ScheduleCreateForm) (result *results.Schedule, err e
 		if err := tx.InsertSchedule(schedule); err != nil {
 			return err
 		}
+
+		result = &results.Schedule{}
 		if err := copier.Copy(&result, schedule); err != nil {
 			return err
 		}
@@ -165,6 +168,8 @@ func ModifySchedule(id uuid.UUID, form forms.ScheduleUpdateForm) (result *result
 		if err := tx.UpdateSchedule(schedule); err != nil {
 			return err
 		}
+
+		result = &results.Schedule{}
 		if err := copier.Copy(&result, schedule); err != nil {
 			return err
 		}

@@ -134,7 +134,6 @@ func (t *Tx) DeleteAllSchedulesWhereSpiderId(spiderId uuid.UUID) (err error) {
 				if err = t.tx.ZRem(constants.ScheduleListBucket, schedule.Id.String()); err != nil {
 					return err
 				}
-				return nil
 			}
 		}
 	}

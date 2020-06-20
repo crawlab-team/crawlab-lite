@@ -11,7 +11,7 @@ import (
 )
 
 func GetTaskList(c *gin.Context) {
-	var page forms.PageForm
+	var page forms.TaskPageForm
 
 	if err := c.ShouldBindQuery(&page); err != nil {
 		HandleError(http.StatusBadRequest, c, err)

@@ -59,6 +59,7 @@ func QuerySpider(id uuid.UUID) (result *results.Spider, err error) {
 		if err != nil {
 			return err
 		}
+		result = &results.Spider{}
 		if err := copier.Copy(&result, spider); err != nil {
 			return err
 		}
@@ -90,7 +91,8 @@ func AddSpider(form forms.SpiderForm) (result *results.Spider, err error) {
 			return err
 		}
 
-		if err := copier.Copy(&result, spider); err != nil {
+		result = &results.Spider{}
+		if err := copier.Copy(result, spider); err != nil {
 			return err
 		}
 		return nil
@@ -121,7 +123,7 @@ func RemoveSpider(id uuid.UUID) (res interface{}, err error) {
 		}
 
 		// 删除爬虫的所有任务
-		if err = tx.DeleteAllTasksWhereSpiderId(id); err != nil {
+		if err = tx.DeleteTasksWhereSpiderId(id); err != nil {
 			return err
 		}
 
@@ -171,6 +173,7 @@ func QuerySpiderVersion(spiderId uuid.UUID, versionId uuid.UUID) (result *result
 		if err != nil {
 			return err
 		}
+		result = &results.SpiderVersion{}
 		if err := copier.Copy(&result, version); err != nil {
 			return err
 		}
@@ -188,6 +191,7 @@ func QueryLatestSpiderVersion(spiderId uuid.UUID) (result *results.SpiderVersion
 		if err != nil {
 			return err
 		}
+		result = &results.SpiderVersion{}
 		if err := copier.Copy(&result, version); err != nil {
 			return err
 		}
@@ -279,6 +283,7 @@ func AddSpiderVersion(spiderId uuid.UUID, form forms.SpiderUploadForm) (result *
 			return err
 		}
 
+		result = &results.SpiderVersion{}
 		if err := copier.Copy(&result, version); err != nil {
 			return err
 		}
