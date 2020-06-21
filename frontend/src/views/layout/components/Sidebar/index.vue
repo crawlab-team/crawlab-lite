@@ -2,7 +2,7 @@
   <el-scrollbar wrap-class="scrollbar-wrapper">
     <div class="sidebar-logo" :class="isCollapse ? 'collapsed' : ''">
       <div><span>C</span><span v-show="!isCollapse">rawlab</span></div>
-      <div v-show="!isCollapse"><span style="font-size: 80%">Lite</span><span class="version">v{{version}}</span></div>
+      <div v-show="!isCollapse"><span style="font-size: 80%">Lite</span><span class="version">v{{ version }}</span></div>
     </div>
     <el-menu
       :show-timeout="200"
@@ -15,8 +15,8 @@
     >
       <sidebar-item
         v-for="route in routes"
-        :class="route.path.replace('/', '')"
         :key="route.path"
+        :class="route.path.replace('/', '')"
         :item="route"
         :base-path="route.path"
       />
@@ -25,48 +25,45 @@
 </template>
 
 <script>
-  import {mapGetters, mapState} from 'vuex'
+  import { mapGetters, mapState } from 'vuex'
   import variables from '@/styles/variables.scss'
   import SidebarItem from './SidebarItem'
 
   export default {
-  components: { SidebarItem },
-  computed: {
-    ...mapState('user', [
-      'adminPaths'
-    ]),
-    ...mapGetters([
-      'sidebar'
-    ]),
-    routeLevel1 () {
-      let pathArray = this.$route.path.split('/')
-      return `/${pathArray[1]}`
+    components: { SidebarItem },
+    computed: {
+      ...mapState('user', [
+        'adminPaths'
+      ]),
+      ...mapGetters([
+        'sidebar'
+      ]),
+      routeLevel1() {
+        const pathArray = this.$route.path.split('/')
+        return `/${pathArray[1]}`
+      },
+      routes() {
+        return this.$router.options.routes.filter(d => {
+          const role = this.$store.getters['user/userInfo'].role
+          if (role === 'admin') return true
+          return !this.adminPaths.includes(d.path)
+        })
+      },
+      variables() {
+        return variables
+      },
+      isCollapse() {
+        return !this.sidebar.opened
+      },
+      version() {
+        return this.$store.state.version.version || window.sessionStorage.getItem('v')
+      }
     },
-    routes () {
-      return this.$router.options.routes.filter(d => {
-        const role = this.$store.getters['user/userInfo'].role
-        if (role === 'admin') return true
-        return !this.adminPaths.includes(d.path)
-      })
+    async created() {
     },
-    variables () {
-      return variables
-    },
-    isCollapse () {
-      return !this.sidebar.opened
-    },
-    version () {
-      return this.$store.state.version.version || window.sessionStorage.getItem('v')
+    mounted() {
     }
-  },
-  data () {
-    return {}
-  },
-  async created () {
-  },
-  mounted () {
   }
-}
 </script>
 
 <style>

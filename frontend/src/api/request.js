@@ -1,6 +1,6 @@
 import axios from 'axios'
 import router from '../router'
-import {Message} from 'element-ui'
+import { Message } from 'element-ui'
 
 // 根据 VUE_APP_BASE_URL 生成 baseUrl
 let baseUrl = process.env.VUE_APP_BASE_URL ? process.env.VUE_APP_BASE_URL : 'http://localhost:8000'
@@ -32,18 +32,18 @@ const request = (method, path, params, data, others = {}) => {
     }
     return Promise.reject(response)
   }).catch((e) => {
-    let response = e.response
+    const response = e.response
     if (!response) {
       return e
     }
     if (response.status === 400) {
-      Message.error(response.data.error)
+      Message.error(response.data.message)
     }
     if (response.status === 401 && router.currentRoute.path !== '/login') {
       router.push('/login')
     }
     if (response.status === 500) {
-      Message.error(response.data.error)
+      Message.error(response.data.message)
     }
     return e
   })

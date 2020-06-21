@@ -7,13 +7,13 @@ const state = {
 const getters = {}
 
 const mutations = {
-  SET_DOC_DATA (state, value) {
+  SET_DOC_DATA(state, value) {
     state.docData = value
   }
 }
 
 const actions = {
-  async getDocData ({ commit }) {
+  async getDocData({ commit }) {
     const res = await request.get('/docs')
     if (res.code !== 200) {
       return
@@ -25,7 +25,7 @@ const actions = {
     const cache = {}
 
     // iterate paths
-    for (let path in data) {
+    for (const path in data) {
       if (data.hasOwnProperty(path)) {
         const d = data[path]
         if (path.match(/\/$/)) {

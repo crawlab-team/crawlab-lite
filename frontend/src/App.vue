@@ -1,33 +1,32 @@
 <template>
   <div id="app">
-    <router-view/>
+    <router-view />
   </div>
 </template>
 
 <script>
-  import {mapState} from 'vuex'
+  import { mapState } from 'vuex'
 
   export default {
     name: 'App',
-    data () {
+    data() {
       return {
         msgPopup: undefined
       }
     },
     computed: {
       ...mapState('setting', ['setting']),
-      useStats () {
+      useStats() {
         return localStorage.getItem('useStats')
       },
-      uid () {
+      uid() {
         return localStorage.getItem('uid')
       },
-      sid () {
+      sid() {
         return sessionStorage.getItem('sid')
       }
     },
-    methods: {},
-    async mounted () {
+    async mounted() {
       // set uid if first visit
       if (this.uid === undefined || this.uid === null) {
         localStorage.setItem('uid', this.$utils.encrypt.UUID())
@@ -47,12 +46,8 @@
       // remove loading-placeholder
       const elLoading = document.querySelector('#loading-placeholder')
       elLoading.remove()
-
-      // send visit event
-      await this.$request.put('/actions', {
-        type: 'visit'
-      })
-    }
+    },
+    methods: {}
   }
 </script>
 

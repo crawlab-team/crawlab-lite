@@ -20,9 +20,9 @@ const mutations = {
 }
 
 const actions = {
-  async getLatestRelease ({ commit }) {
+  async getLatestRelease({ commit }) {
     const res = await request.get('/releases/latest')
-    if (!res.data.error) {
+    if (res.data && res.data.code === 200) {
       commit('SET_LATEST_RELEASE', res.data.data)
     }
   }

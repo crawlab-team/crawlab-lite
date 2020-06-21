@@ -8,16 +8,16 @@ const state = {
 const getters = {}
 
 const mutations = {
-  SET_SCHEDULE_LIST (state, value) {
+  SET_SCHEDULE_LIST(state, value) {
     state.scheduleList = value
   },
-  SET_SCHEDULE_FORM (state, value) {
+  SET_SCHEDULE_FORM(state, value) {
     state.scheduleForm = value
   }
 }
 
 const actions = {
-  getScheduleList ({ state, commit }) {
+  getScheduleList({ state, commit }) {
     request.get('/schedules')
       .then(response => {
         if (response.data.data) {
@@ -25,19 +25,19 @@ const actions = {
         }
       })
   },
-  addSchedule ({ state }) {
+  addSchedule({ state }) {
     request.post('/schedules', state.scheduleForm)
   },
-  editSchedule ({ state }, id) {
+  editSchedule({ state }, id) {
     request.put(`/schedules/${id}`, state.scheduleForm)
   },
-  removeSchedule ({ state }, id) {
+  removeSchedule({ state }, id) {
     request.delete(`/schedules/${id}`)
   },
-  enableSchedule ({ state, dispatch }, id) {
+  enableSchedule({ state, dispatch }, id) {
     return request.put(`/schedules/${id}`, { enabled: 1 })
   },
-  disableSchedule ({ state, dispatch }, id) {
+  disableSchedule({ state, dispatch }, id) {
     return request.put(`/schedules/${id}`, { enabled: 2 })
   }
 }

@@ -179,7 +179,7 @@ router.beforeEach((to, from, next) => {
   }
 })
 
-router.afterEach(async (to, from, next) => {
+router.afterEach(async(to, from, next) => {
   if (to.path) {
     const res = await request.get('/version')
     const version = res.data.data

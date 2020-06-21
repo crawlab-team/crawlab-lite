@@ -22,19 +22,19 @@
 
 <script>
 
-export default {
-  name: 'Page404',
-  computed: {
-    message () {
-      return '这个页面似乎不存在......'
+  export default {
+    name: 'Page404',
+    computed: {
+      message() {
+        return '这个页面似乎不存在......'
+      }
+    },
+    mounted() {
+      // remove loading-placeholder
+      const elLoading = document.querySelector('#loading-placeholder')
+      elLoading.remove()
     }
-  },
-  mounted () {
-    // remove loading-placeholder
-    const elLoading = document.querySelector('#loading-placeholder')
-    elLoading.remove()
   }
-}
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
