@@ -1,8 +1,9 @@
 <template>
   <el-scrollbar wrap-class="scrollbar-wrapper">
     <div class="sidebar-logo" :class="isCollapse ? 'collapsed' : ''">
-      <div><span>C</span><span v-show="!isCollapse">rawlab</span></div>
-      <div v-show="!isCollapse"><span style="font-size: 80%">Lite</span><span class="version">v{{ version }}</span></div>
+      <span>C</span><span v-show="!isCollapse">rawlab<span class="version">v{{ version }}</span>
+        <span class="text-lite">Lite</span>
+      </span>
     </div>
     <el-menu
       :show-timeout="200"
@@ -70,26 +71,30 @@
   #app .sidebar-container .el-menu {
     height: calc(100% - 50px);
   }
-
   .sidebar-container .sidebar-logo {
-    height: 80px;
-    padding-left: 20px;
-    padding-top: 20px;
+    height: 52px;
+    display: flex;
+    /*justify-content: center;*/
     align-items: center;
+    padding-left: 20px;
     color: #fff;
     background: rgb(48, 65, 86);
     font-size: 24px;
     font-weight: 600;
     font-family: "Verdana", serif;
   }
-
   .sidebar-container .sidebar-logo.collapsed {
     padding-left: 8px;
   }
-
   .sidebar-container .sidebar-logo .version {
     margin-left: 5px;
     font-weight: normal;
+    font-size: 10px;
+  }
+  .text-lite {
     font-size: 11px;
+    position: absolute;
+    top: 15px;
+    right: 25px;
   }
 </style>

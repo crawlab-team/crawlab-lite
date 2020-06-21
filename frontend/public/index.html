@@ -26,6 +26,7 @@
 
         #loading-placeholder .title-wrapper {
             height: 54px;
+            display: flex;
         }
 
         #loading-placeholder .title {
@@ -42,6 +43,21 @@
         #loading-placeholder .title > span {
             display: inline-block;
             animation: change-shape 1s infinite;
+        }
+
+        #loading-placeholder .text-lite-wrapper {
+            position: relative;
+        }
+
+        #loading-placeholder .text-lite {
+            position: absolute;
+            top: 0;
+            left: 0;
+            margin: 10px 0 0 20px;
+            font-weight: bolder;
+            color: #409EFF;
+            font-family: "Verdana", serif;
+            font-size: 16px;
         }
 
         #loading-placeholder .title > span:nth-child(1) {
@@ -148,6 +164,9 @@
                 <span>A</span>
                 <span>B</span>
             </h3>
+            <span class="text-lite-wrapper">
+                <span class="text-lite">Lite</span>
+            </span>
         </div>
         <div class="sub-title-wrapper">
             <span class="sub-title"><i class="fa fa-check-square-o"></i> Easy crawling</span>
