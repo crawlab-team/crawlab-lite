@@ -7,6 +7,7 @@ import (
 	"crawlab-lite/results"
 	"crawlab-lite/utils"
 	"errors"
+	. "github.com/ahmetb/go-linq"
 	"github.com/jinzhu/copier"
 	uuid "github.com/satori/go.uuid"
 	"github.com/spf13/viper"
@@ -19,15 +20,17 @@ func QuerySpiderPage(page forms.PageForm) (total int, resultList []*results.Spid
 	start, end := page.Range()
 
 	if err := dao.ReadTx(func(tx dao.Tx) error {
-		spiders, err := tx.SelectAllSpidersLimit(start, end)
+		allSpiders, err := tx.SelectAllSpiders()
 		if err != nil {
 			return err
 		}
-		if total, err = tx.CountSpiders(); err != nil {
-			return err
-		}
+		total = len(allSpiders)
+		spiders := From(allSpiders).OrderByDescendingT(func(spider *models.Spider) int64 {
+			return spider.CreateTs.UnixNano()
+		}).Skip(start).Take(end - start).Results()
 		cache := map[uuid.UUID]*models.Task{}
 		for _, spider := range spiders {
+			spider := spider.(*models.Spider)
 			var result results.Spider
 			if err := copier.Copy(&result, spider); err != nil {
 				return err
@@ -35,8 +38,16 @@ func QuerySpiderPage(page forms.PageForm) (total int, resultList []*results.Spid
 			var task *models.Task
 			task, exists := cache[spider.Id]
 			if !exists {
-				if task, err = tx.SelectLatestTaskWhereSpiderId(spider.Id); err != nil {
+				tasks, err := tx.SelectTasksWhereSpiderId(spider.Id)
+				if err != nil {
 					return err
+				}
+				taskI := From(tasks).OrderByDescendingT(func(task *models.Task) int64 {
+					return task.UpdateTs.UnixNano()
+				}).First()
+				if taskI != nil {
+					task = taskI.(*models.Task)
+					cache[spider.Id] = task
 				}
 			}
 			if task != nil {
@@ -171,24 +182,6 @@ func QuerySpiderVersionList(spiderId uuid.UUID) (resultList []*results.SpiderVer
 func QuerySpiderVersion(spiderId uuid.UUID, versionId uuid.UUID) (result *results.SpiderVersion, err error) {
 	if err := dao.ReadTx(func(tx dao.Tx) error {
 		version, err := tx.SelectSpiderVersion(spiderId, versionId)
-		if err != nil {
-			return err
-		}
-		result = &results.SpiderVersion{}
-		if err := copier.Copy(&result, version); err != nil {
-			return err
-		}
-		return nil
-	}); err != nil {
-		return nil, err
-	}
-
-	return result, nil
-}
-
-func QueryLatestSpiderVersion(spiderId uuid.UUID) (result *results.SpiderVersion, err error) {
-	if err := dao.ReadTx(func(tx dao.Tx) error {
-		version, err := tx.SelectLatestSpiderVersion(spiderId)
 		if err != nil {
 			return err
 		}

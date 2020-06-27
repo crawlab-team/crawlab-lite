@@ -3,109 +3,58 @@ package dao
 import (
 	"crawlab-lite/constants"
 	"crawlab-lite/models"
-	"crawlab-lite/utils"
 	"encoding/json"
 	uuid "github.com/satori/go.uuid"
-	"github.com/xujiajun/nutsdb"
-	"math"
 	"time"
 )
 
-// 查询区间内的所有任务
-func (t *Tx) SelectAllTasksLimit(start int, end int) (tasks []*models.Task, err error) {
-	if nodes, err := t.tx.ZRangeByRank(constants.TaskListBucket, -(start + 1), -(end + 1)); err != nil {
-		if err == nutsdb.ErrBucket {
-			return nil, nil
-		}
-		return nil, err
-	} else {
-		for _, node := range nodes {
-			var task *models.Task
-			if err = json.Unmarshal(node.Value, &task); err != nil {
-				return nil, err
-			}
-			tasks = append(tasks, task)
-		}
+// 查询所有任务
+func (t *Tx) SelectAllTasks() (tasks []*models.Task, err error) {
+	b := t.tx.Bucket([]byte(constants.TaskBucket))
+	if b == nil {
+		return tasks, nil
 	}
-
+	c := b.Cursor()
+	for k, v := c.First(); k != nil; k, v = c.Next() {
+		var task *models.Task
+		if err = json.Unmarshal(v, &task); err != nil {
+			return nil, err
+		}
+		tasks = append(tasks, task)
+	}
 	return tasks, nil
 }
 
-// 根据爬虫 ID 查询所有任务
-func (t *Tx) SelectTasksWhereSpiderIdLimit(spiderId uuid.UUID, start int, end int) (tasks []*models.Task, err error) {
-	if total, err := t.CountTasks(); err != nil {
-		return nil, err
-	} else {
-		if nodes, err := t.tx.ZRangeByRank(constants.TaskListBucket, -1, -total); err != nil {
-			if err == nutsdb.ErrBucket {
-				return nil, nil
-			}
+// 根据爬虫 ID 查询任务
+func (t *Tx) SelectTasksWhereSpiderId(spiderId uuid.UUID) (tasks []*models.Task, err error) {
+	b := t.tx.Bucket([]byte(constants.TaskBucket))
+	if b == nil {
+		return tasks, nil
+	}
+	c := b.Cursor()
+	for k, v := c.First(); k != nil; k, v = c.Next() {
+		var task *models.Task
+		if err = json.Unmarshal(v, &task); err != nil {
 			return nil, err
-		} else {
-			for _, node := range nodes {
-				var task *models.Task
-				if err = json.Unmarshal(node.Value, &task); err != nil {
-					return nil, err
-				}
-				if task.SpiderId == spiderId {
-					tasks = append(tasks, task)
-				}
-			}
-			if len(tasks) < start {
-				return nil, nil
-			}
-			end = int(math.Min(float64(end), float64(len(tasks))))
-			return tasks[start:end], nil
+		}
+		if task.SpiderId == spiderId {
+			tasks = append(tasks, task)
 		}
 	}
-}
-
-// 根据爬虫 ID 查询所有任务的总数目
-func (t *Tx) CountTasks() (total int, err error) {
-	if total, err = t.tx.ZCard(constants.TaskListBucket); err != nil {
-		if err == nutsdb.ErrBucket {
-			return 0, nil
-		}
-		return 0, err
-	}
-
-	return total, nil
-}
-
-// 所有任务的总数目
-func (t *Tx) CountTasksBySpiderId(spiderId uuid.UUID) (total int, err error) {
-	if total, err := t.CountTasks(); err != nil {
-		return 0, err
-	} else {
-		if nodes, err := t.tx.ZRangeByRank(constants.TaskListBucket, -1, -total); err != nil {
-			if err == nutsdb.ErrBucket {
-				return 0, nil
-			}
-			return 0, err
-		} else {
-			tasks := make([]*models.Task, 0, len(nodes))
-			for _, node := range nodes {
-				var task *models.Task
-				if err = json.Unmarshal(node.Value, &task); err != nil {
-					return 0, err
-				}
-				if task.SpiderId == spiderId {
-					tasks = append(tasks, task)
-				}
-			}
-			return len(tasks), nil
-		}
-	}
+	return tasks, nil
 }
 
 // 根据 ID 查询任务
 func (t *Tx) SelectTask(id uuid.UUID) (task *models.Task, err error) {
-	if node, err := t.tx.ZGetByKey(constants.TaskListBucket, []byte(id.String())); err != nil {
-		if err == nutsdb.ErrBucket || err == nutsdb.ErrNotFoundKey {
-			return nil, nil
-		}
-		return nil, err
-	} else if err = json.Unmarshal(node.Value, &task); err != nil {
+	b := t.tx.Bucket([]byte(constants.TaskBucket))
+	if b == nil {
+		return nil, nil
+	}
+	value := b.Get([]byte(id.String()))
+	if value == nil {
+		return nil, nil
+	}
+	if err = json.Unmarshal(value, &task); err != nil {
 		return nil, err
 	}
 	return task, nil
@@ -113,48 +62,20 @@ func (t *Tx) SelectTask(id uuid.UUID) (task *models.Task, err error) {
 
 // 根据状态查询任务
 func (t *Tx) SelectTaskWhereStatus(status constants.TaskStatus) (task *models.Task, err error) {
-	if nodes, err := t.tx.ZMembers(constants.TaskListBucket); err != nil {
-		if err == nutsdb.ErrBucket {
-			return nil, nil
-		}
-		return nil, err
-	} else {
-		for _, node := range nodes {
-			var _task *models.Task
-			if err = json.Unmarshal(node.Value, &_task); err != nil {
-				return nil, err
-			}
-			if _task.Status == status {
-				return _task, nil
-			}
-		}
+	b := t.tx.Bucket([]byte(constants.TaskBucket))
+	if b == nil {
+		return nil, nil
 	}
-	return task, nil
-}
-
-// 根据爬虫 ID 查询最近的任务
-func (t *Tx) SelectLatestTaskWhereSpiderId(spiderId uuid.UUID) (task *models.Task, err error) {
-	if total, err := t.CountTasks(); err != nil {
-		return nil, err
-	} else {
-		if nodes, err := t.tx.ZRangeByRank(constants.TaskListBucket, -1, -total); err != nil {
-			if err == nutsdb.ErrBucket {
-				return nil, nil
-			}
+	c := b.Cursor()
+	for k, v := c.First(); k != nil; k, v = c.Next() {
+		if err = json.Unmarshal(v, &task); err != nil {
 			return nil, err
-		} else {
-			for _, node := range nodes {
-				var _task *models.Task
-				if err = json.Unmarshal(node.Value, &_task); err != nil {
-					return nil, err
-				}
-				if _task.SpiderId == spiderId {
-					return _task, nil
-				}
-			}
+		}
+		if task.Status == status {
+			return task, nil
 		}
 	}
-	return task, nil
+	return nil, nil
 }
 
 // 插入新任务
@@ -172,9 +93,15 @@ func (t *Tx) InsertTask(task *models.Task) (err error) {
 		task.Status = constants.TaskStatusPending
 	}
 
-	score := utils.ConvertTimestamp(task.UpdateTs)
-	value, _ := json.Marshal(&task)
-	if err = t.tx.ZAdd(constants.TaskListBucket, []byte(task.Id.String()), score, value); err != nil {
+	value, err := json.Marshal(&task)
+	if err != nil {
+		return err
+	}
+	b, err := t.tx.CreateBucketIfNotExists([]byte(constants.TaskBucket))
+	if err != nil {
+		return err
+	}
+	if err = b.Put([]byte(task.Id.String()), value); err != nil {
 		return err
 	}
 	return nil
@@ -182,10 +109,13 @@ func (t *Tx) InsertTask(task *models.Task) (err error) {
 
 // 更新任务
 func (t *Tx) UpdateTask(task *models.Task) (err error) {
+	b := t.tx.Bucket([]byte(constants.TaskBucket))
+	if b == nil {
+		return nil
+	}
 	task.UpdateTs = time.Now()
-	score := utils.ConvertTimestamp(task.UpdateTs)
 	value, _ := json.Marshal(&task)
-	if err = t.tx.ZAdd(constants.TaskListBucket, []byte(task.Id.String()), score, value); err != nil {
+	if err = b.Put([]byte(task.Id.String()), value); err != nil {
 		return err
 	}
 	return nil
@@ -193,10 +123,11 @@ func (t *Tx) UpdateTask(task *models.Task) (err error) {
 
 // 通过 ID 删除任务
 func (t *Tx) DeleteTask(id uuid.UUID) (err error) {
-	if err = t.tx.ZRem(constants.TaskListBucket, id.String()); err != nil {
-		if err == nutsdb.ErrBucket {
-			return nil
-		}
+	b := t.tx.Bucket([]byte(constants.TaskBucket))
+	if b == nil {
+		return nil
+	}
+	if err = b.Delete([]byte(id.String())); err != nil {
 		return err
 	}
 	return nil
@@ -204,21 +135,19 @@ func (t *Tx) DeleteTask(id uuid.UUID) (err error) {
 
 // 根据爬虫 ID 删除所有任务
 func (t *Tx) DeleteTasksWhereSpiderId(spiderId uuid.UUID) (err error) {
-	if nodes, err := t.tx.ZMembers(constants.TaskListBucket); err != nil {
-		if err == nutsdb.ErrBucket {
-			return nil
+	b := t.tx.Bucket([]byte(constants.TaskBucket))
+	if b == nil {
+		return nil
+	}
+	c := b.Cursor()
+	for k, v := c.First(); k != nil; k, v = c.Next() {
+		var task *models.Task
+		if err = json.Unmarshal(v, &task); err != nil {
+			return err
 		}
-		return err
-	} else {
-		for _, node := range nodes {
-			var task *models.Task
-			if err = json.Unmarshal(node.Value, &task); err != nil {
+		if task.SpiderId == spiderId {
+			if err = b.Delete([]byte(task.Id.String())); err != nil {
 				return err
-			}
-			if task.SpiderId == spiderId {
-				if err = t.tx.ZRem(constants.TaskListBucket, task.Id.String()); err != nil {
-					return err
-				}
 			}
 		}
 	}

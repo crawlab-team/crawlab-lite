@@ -1,8 +1,8 @@
 package constants
 
 const (
-	SpiderListBucket    = "spiders"
-	SpiderVersionBucket = "spider_versions:"
-	TaskListBucket      = "tasks"
-	ScheduleListBucket  = "schedules"
+	SpiderBucket        = "spiders"
+	SpiderVersionBucket = "spider-versions"
+	TaskBucket          = "tasks"
+	ScheduleBucket      = "schedules"
 )

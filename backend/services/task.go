@@ -7,6 +7,7 @@ import (
 	"crawlab-lite/models"
 	"crawlab-lite/results"
 	"errors"
+	. "github.com/ahmetb/go-linq"
 	"github.com/jinzhu/copier"
 	uuid "github.com/satori/go.uuid"
 )
@@ -23,17 +24,22 @@ func QueryTaskPage(page forms.TaskPageForm) (total int, resultList []*results.Ta
 	start, end := page.Range()
 
 	if err := dao.ReadTx(func(tx dao.Tx) error {
-		tasks := make([]*models.Task, 0)
+		allTasks := make([]*models.Task, 0)
 		if spiderId == uuid.Nil {
-			tasks, err = tx.SelectAllTasksLimit(start, end)
+			allTasks, err = tx.SelectAllTasks()
 		} else {
-			tasks, err = tx.SelectTasksWhereSpiderIdLimit(spiderId, start, end)
+			allTasks, err = tx.SelectTasksWhereSpiderId(spiderId)
 		}
 		if err != nil {
 			return err
 		}
+		total = len(allTasks)
+		tasks := From(allTasks).OrderByDescendingT(func(task *models.Task) int64 {
+			return task.UpdateTs.UnixNano()
+		}).Skip(start).Take(end - start).Results()
 		cache := map[uuid.UUID]*models.Spider{}
 		for _, task := range tasks {
+			task := task.(*models.Task)
 			var result results.Task
 			if err := copier.Copy(&result, task); err != nil {
 				return err
@@ -44,21 +50,15 @@ func QueryTaskPage(page forms.TaskPageForm) (total int, resultList []*results.Ta
 				if spider, err = tx.SelectSpider(task.SpiderId); err != nil {
 					return err
 				}
+				if spider != nil {
+					cache[task.SpiderId] = spider
+				}
 			}
 			if spider == nil {
 				continue
 			}
 			result.SpiderName = spider.Name
 			resultList = append(resultList, &result)
-		}
-		if spiderId == uuid.Nil {
-			if total, err = tx.CountTasks(); err != nil {
-				return err
-			}
-		} else {
-			if total, err = tx.CountTasksBySpiderId(spiderId); err != nil {
-				return err
-			}
 		}
 		return nil
 	}); err != nil {

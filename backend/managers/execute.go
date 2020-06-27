@@ -5,6 +5,7 @@ import (
 	"crawlab-lite/dao"
 	"crawlab-lite/models"
 	"crawlab-lite/utils"
+	. "github.com/ahmetb/go-linq"
 	"github.com/apex/log"
 	"github.com/robfig/cron/v3"
 	uuid "github.com/satori/go.uuid"
@@ -214,6 +215,7 @@ func executeShellCmd(cwd string, task models.Task) (err error) {
 
 	// 同步等待进程完成
 	if err := waitTaskProcess(cmd, task); err != nil {
+		log.Errorf("task process error: %s", err.Error())
 		return err
 	}
 	ch <- constants.TaskFinish
@@ -235,8 +237,15 @@ func querySpiderVersionById(spiderId uuid.UUID, versionId uuid.UUID) (version *m
 
 func queryLatestSpiderVersion(spiderId uuid.UUID) (version *models.SpiderVersion, err error) {
 	if err := dao.ReadTx(func(tx dao.Tx) error {
-		if version, err = tx.SelectLatestSpiderVersion(spiderId); err != nil {
+		versions, err := tx.SelectAllSpiderVersions(spiderId)
+		if err != nil {
 			return err
+		}
+		versionI := From(versions).OrderByDescendingT(func(version *models.SpiderVersion) int64 {
+			return version.CreateTs.UnixNano()
+		}).First()
+		if versionI != nil {
+			version = versionI.(*models.SpiderVersion)
 		}
 		return nil
 	}); err != nil {

@@ -1,55 +1,43 @@
 package dao
 
 import (
+	"bytes"
 	"crawlab-lite/constants"
 	"crawlab-lite/models"
-	"crawlab-lite/utils"
 	"encoding/json"
+	"fmt"
 	uuid "github.com/satori/go.uuid"
-	"github.com/xujiajun/nutsdb"
 	"time"
 )
 
-// 查询区间内的所有爬虫
-func (t *Tx) SelectAllSpidersLimit(start int, end int) (spiders []*models.Spider, err error) {
-	if nodes, err := t.tx.ZRangeByRank(constants.SpiderListBucket, -(start + 1), -(end + 1)); err != nil {
-		if err == nutsdb.ErrBucket {
-			return nil, nil
-		}
-		return nil, err
-	} else {
-		for _, node := range nodes {
-			var spider *models.Spider
-			if err = json.Unmarshal(node.Value, &spider); err != nil {
-				return nil, err
-			}
-			spiders = append(spiders, spider)
-		}
+// 查询所有爬虫
+func (t *Tx) SelectAllSpiders() (spiders []*models.Spider, err error) {
+	b := t.tx.Bucket([]byte(constants.SpiderBucket))
+	if b == nil {
+		return spiders, nil
 	}
-
+	c := b.Cursor()
+	for k, v := c.First(); k != nil; k, v = c.Next() {
+		var spider *models.Spider
+		if err = json.Unmarshal(v, &spider); err != nil {
+			return nil, err
+		}
+		spiders = append(spiders, spider)
+	}
 	return spiders, nil
-}
-
-// 所有爬虫的总数目
-func (t *Tx) CountSpiders() (total int, err error) {
-	if total, err = t.tx.ZCard(constants.SpiderListBucket); err != nil {
-		if err == nutsdb.ErrBucket {
-			return 0, nil
-		}
-		return 0, err
-	}
-
-	return total, nil
 }
 
 // 根据 ID 查询爬虫
 func (t *Tx) SelectSpider(id uuid.UUID) (spider *models.Spider, err error) {
-	if node, err := t.tx.ZGetByKey(constants.SpiderListBucket, []byte(id.String())); err != nil {
-		if err == nutsdb.ErrBucket || err == nutsdb.ErrNotFoundKey {
-			return nil, nil
-		}
-		return nil, err
-	} else if err = json.Unmarshal(node.Value, &spider); err != nil {
+	b := t.tx.Bucket([]byte(constants.SpiderBucket))
+	if b == nil {
+		return nil, nil
+	}
+	value := b.Get([]byte(id.String()))
+	if value == nil {
+		return nil, nil
+	}
+	if err = json.Unmarshal(value, &spider); err != nil {
 		return nil, err
 	}
 	return spider, nil
@@ -57,20 +45,17 @@ func (t *Tx) SelectSpider(id uuid.UUID) (spider *models.Spider, err error) {
 
 // 根据名称查询爬虫
 func (t *Tx) SelectSpiderWhereName(spiderName string) (spider *models.Spider, err error) {
-	if nodes, err := t.tx.ZMembers(constants.SpiderListBucket); err != nil {
-		if err == nutsdb.ErrBucket {
-			return nil, nil
+	b := t.tx.Bucket([]byte(constants.SpiderBucket))
+	if b == nil {
+		return nil, nil
+	}
+	c := b.Cursor()
+	for k, v := c.First(); k != nil; k, v = c.Next() {
+		if err = json.Unmarshal(v, &spider); err != nil {
+			return nil, err
 		}
-		return nil, err
-	} else {
-		for _, node := range nodes {
-			var spider *models.Spider
-			if err = json.Unmarshal(node.Value, &spider); err != nil {
-				return nil, err
-			}
-			if spider.Name == spiderName {
-				return spider, nil
-			}
+		if spider.Name == spiderName {
+			return spider, nil
 		}
 	}
 	return nil, nil
@@ -88,9 +73,15 @@ func (t *Tx) InsertSpider(spider *models.Spider) (err error) {
 		spider.UpdateTs = time.Now()
 	}
 
-	score := utils.ConvertTimestamp(spider.UpdateTs)
-	value, _ := json.Marshal(&spider)
-	if err = t.tx.ZAdd(constants.SpiderListBucket, []byte(spider.Id.String()), score, value); err != nil {
+	value, err := json.Marshal(&spider)
+	if err != nil {
+		return err
+	}
+	b, err := t.tx.CreateBucketIfNotExists([]byte(constants.SpiderBucket))
+	if err != nil {
+		return err
+	}
+	if err = b.Put([]byte(spider.Id.String()), value); err != nil {
 		return err
 	}
 	return nil
@@ -98,10 +89,13 @@ func (t *Tx) InsertSpider(spider *models.Spider) (err error) {
 
 // 更新爬虫
 func (t *Tx) UpdateSpider(spider *models.Spider) (err error) {
+	b := t.tx.Bucket([]byte(constants.SpiderBucket))
+	if b == nil {
+		return nil
+	}
 	spider.UpdateTs = time.Now()
-	score := utils.ConvertTimestamp(spider.UpdateTs)
 	value, _ := json.Marshal(&spider)
-	if err = t.tx.ZAdd(constants.SpiderListBucket, []byte(spider.Id.String()), score, value); err != nil {
+	if err = b.Put([]byte(spider.Id.String()), value); err != nil {
 		return err
 	}
 	return nil
@@ -109,10 +103,11 @@ func (t *Tx) UpdateSpider(spider *models.Spider) (err error) {
 
 // 通过 ID 删除爬虫
 func (t *Tx) DeleteSpider(id uuid.UUID) (err error) {
-	if err = t.tx.ZRem(constants.SpiderListBucket, id.String()); err != nil {
-		if err == nutsdb.ErrBucket {
-			return nil
-		}
+	b := t.tx.Bucket([]byte(constants.SpiderBucket))
+	if b == nil {
+		return nil
+	}
+	if err = b.Delete([]byte(id.String())); err != nil {
 		return err
 	}
 	return nil
@@ -120,32 +115,33 @@ func (t *Tx) DeleteSpider(id uuid.UUID) (err error) {
 
 // 查询所有爬虫版本
 func (t *Tx) SelectAllSpiderVersions(spiderId uuid.UUID) (versions []*models.SpiderVersion, err error) {
-	if nodes, err := t.tx.ZMembers(joinVersionBucket(spiderId)); err != nil {
-		if err == nutsdb.ErrBucket {
-			return nil, nil
-		}
-		return nil, err
-	} else {
-		for _, node := range nodes {
-			var version *models.SpiderVersion
-			if err = json.Unmarshal(node.Value, &version); err != nil {
-				return nil, err
-			}
-			versions = append(versions, version)
-		}
+	b := t.tx.Bucket([]byte(constants.SpiderVersionBucket))
+	if b == nil {
+		return versions, nil
 	}
-
+	c := b.Cursor()
+	prefix := []byte(spiderId.String())
+	for k, v := c.Seek(prefix); k != nil && bytes.HasPrefix(k, prefix); k, v = c.Next() {
+		var version *models.SpiderVersion
+		if err = json.Unmarshal(v, &version); err != nil {
+			return nil, err
+		}
+		versions = append(versions, version)
+	}
 	return versions, nil
 }
 
 // 根据 ID 查询爬虫版本
 func (t *Tx) SelectSpiderVersion(spiderId uuid.UUID, versionId uuid.UUID) (version *models.SpiderVersion, err error) {
-	if node, err := t.tx.ZGetByKey(joinVersionBucket(spiderId), []byte(versionId.String())); err != nil {
-		if err == nutsdb.ErrBucket || err == nutsdb.ErrNotFoundKey {
-			return nil, nil
-		}
-		return nil, err
-	} else if err = json.Unmarshal(node.Value, &version); err != nil {
+	b := t.tx.Bucket([]byte(constants.SpiderVersionBucket))
+	if b == nil {
+		return nil, nil
+	}
+	value := b.Get([]byte(joinVersionKey(spiderId, versionId)))
+	if value == nil {
+		return nil, nil
+	}
+	if err = json.Unmarshal(value, &version); err != nil {
 		return nil, err
 	}
 	return version, nil
@@ -153,38 +149,21 @@ func (t *Tx) SelectSpiderVersion(spiderId uuid.UUID, versionId uuid.UUID) (versi
 
 // 根据 MD5 查询爬虫版本
 func (t *Tx) SelectSpiderVersionWhereFileHash(spiderId uuid.UUID, fileHash string) (version *models.SpiderVersion, err error) {
-	if nodes, err := t.tx.ZMembers(joinVersionBucket(spiderId)); err != nil {
-		if err == nutsdb.ErrBucket {
-			return nil, nil
+	b := t.tx.Bucket([]byte(constants.SpiderVersionBucket))
+	if b == nil {
+		return nil, nil
+	}
+	c := b.Cursor()
+	prefix := []byte(spiderId.String())
+	for k, v := c.Seek(prefix); k != nil && bytes.HasPrefix(k, prefix); k, v = c.Next() {
+		if err = json.Unmarshal(v, &version); err != nil {
+			return nil, err
 		}
-		return nil, err
-	} else {
-		for _, node := range nodes {
-			var version *models.SpiderVersion
-			if err = json.Unmarshal(node.Value, &version); err != nil {
-				return nil, err
-			}
-			if version.FileHash == fileHash {
-				return version, nil
-			}
+		if version.FileHash == fileHash {
+			return version, nil
 		}
 	}
 	return nil, nil
-}
-
-// 查询爬虫下最新的爬虫版本
-func (t *Tx) SelectLatestSpiderVersion(spiderId uuid.UUID) (version *models.SpiderVersion, err error) {
-	if node, err := t.tx.ZPeekMax(joinVersionBucket(spiderId)); err != nil {
-		if err == nutsdb.ErrBucket {
-			return nil, nil
-		}
-		return nil, err
-	} else if node != nil {
-		if err = json.Unmarshal(node.Value, &version); err != nil {
-			return nil, err
-		}
-	}
-	return version, nil
 }
 
 // 插入新爬虫版本
@@ -199,9 +178,15 @@ func (t *Tx) InsertSpiderVersion(version *models.SpiderVersion) (err error) {
 		version.UpdateTs = time.Now()
 	}
 
-	score := utils.ConvertTimestamp(version.UpdateTs)
-	value, _ := json.Marshal(&version)
-	if err = t.tx.ZAdd(joinVersionBucket(version.SpiderId), []byte(version.Id.String()), score, value); err != nil {
+	value, err := json.Marshal(&version)
+	if err != nil {
+		return err
+	}
+	b, err := t.tx.CreateBucketIfNotExists([]byte(constants.SpiderVersionBucket))
+	if err != nil {
+		return err
+	}
+	if err = b.Put([]byte(joinVersionKey(version.SpiderId, version.Id)), value); err != nil {
 		return err
 	}
 	return nil
@@ -209,10 +194,11 @@ func (t *Tx) InsertSpiderVersion(version *models.SpiderVersion) (err error) {
 
 // 通过 ID 删除爬虫版本
 func (t *Tx) DeleteSpiderVersion(spiderId uuid.UUID, versionId uuid.UUID) (err error) {
-	if err := t.tx.ZRem(joinVersionBucket(spiderId), versionId.String()); err != nil {
-		if err == nutsdb.ErrBucket {
-			return nil
-		}
+	b := t.tx.Bucket([]byte(constants.SpiderVersionBucket))
+	if b == nil {
+		return nil
+	}
+	if err = b.Delete([]byte(joinVersionKey(spiderId, versionId))); err != nil {
 		return err
 	}
 	return nil
@@ -220,24 +206,24 @@ func (t *Tx) DeleteSpiderVersion(spiderId uuid.UUID, versionId uuid.UUID) (err e
 
 // 根据 ID 删除所有爬虫版本
 func (t *Tx) DeleteAllSpiderVersions(spiderId uuid.UUID) (err error) {
-	verBucket := joinVersionBucket(spiderId)
-	if nodes, err := t.tx.ZMembers(verBucket); err != nil {
-		if err == nutsdb.ErrBucket {
-			return nil
+	b := t.tx.Bucket([]byte(constants.SpiderVersionBucket))
+	if b == nil {
+		return nil
+	}
+	c := b.Cursor()
+	prefix := []byte(spiderId.String())
+	for k, v := c.Seek(prefix); k != nil && bytes.HasPrefix(k, prefix); k, v = c.Next() {
+		var version models.SpiderVersion
+		if err = json.Unmarshal(v, &version); err != nil {
+			return err
 		}
-		return err
-	} else {
-		for _, node := range nodes {
-			print(node.Key())
-
-			if err = t.tx.ZRem(verBucket, node.Key()); err != nil {
-				return err
-			}
+		if err = b.Delete(k); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func joinVersionBucket(spiderId uuid.UUID) string {
-	return constants.SpiderVersionBucket + spiderId.String()
+func joinVersionKey(spiderId uuid.UUID, versionId uuid.UUID) string {
+	return fmt.Sprintf("%s:%s", spiderId.String(), versionId.String())
 }

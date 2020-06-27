@@ -1,17 +1,24 @@
 package database
 
 import (
+	"crawlab-lite/utils"
 	"github.com/spf13/viper"
-	"github.com/xujiajun/nutsdb"
+	bolt "go.etcd.io/bbolt"
+	"os"
+	"path/filepath"
+	"time"
 )
 
-var KvDB *nutsdb.DB
+var KvDB *bolt.DB
 
 func InitKvDB() error {
-	opt := nutsdb.DefaultOptions
-	opt.SegmentSize = 64 * 1000 * 1000
-	opt.Dir = viper.GetString("kvdb.path")
-	db, err := nutsdb.Open(opt)
+	path := viper.GetString("kvdb.path")
+	if utils.PathExist(path) == false {
+		if err := os.MkdirAll(path, os.ModePerm); err != nil {
+			return err
+		}
+	}
+	db, err := bolt.Open(filepath.Join(path, "kv.db"), 0666, &bolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
 		return err
 	}

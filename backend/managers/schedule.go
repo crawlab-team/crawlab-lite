@@ -29,9 +29,10 @@ func (s *scheduler) Start() error {
 }
 
 func (s *scheduler) Add(schedule *models.Schedule) (err error) {
-	spec := schedule.Cron
+	s.Remove(schedule)
 
 	// 添加定时调度
+	spec := schedule.Cron
 	if schedule.EntryId, err = s.cron.AddFunc(spec, scheduleTask(*schedule)); err != nil {
 		log.Errorf("add func task error: %s", err.Error())
 		debug.PrintStack()

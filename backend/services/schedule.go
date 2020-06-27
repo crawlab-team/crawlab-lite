@@ -8,6 +8,7 @@ import (
 	"crawlab-lite/models"
 	"crawlab-lite/results"
 	"errors"
+	. "github.com/ahmetb/go-linq"
 	"github.com/jinzhu/copier"
 	"github.com/robfig/cron/v3"
 	uuid "github.com/satori/go.uuid"
@@ -17,12 +18,17 @@ func QuerySchedulePage(page forms.PageForm) (total int, resultList []*results.Sc
 	start, end := page.Range()
 
 	if err := dao.ReadTx(func(tx dao.Tx) error {
-		schedules, err := tx.SelectAllSchedulesLimit(start, end)
+		allSchedules, err := tx.SelectAllSchedules()
 		if err != nil {
 			return err
 		}
+		total = len(allSchedules)
+		schedules := From(allSchedules).OrderByDescendingT(func(spider *models.Schedule) int64 {
+			return spider.CreateTs.UnixNano()
+		}).Skip(start).Take(end - start).Results()
 		cache := map[uuid.UUID]*models.Spider{}
 		for _, schedule := range schedules {
+			schedule := schedule.(*models.Schedule)
 			var result results.Schedule
 			if err := copier.Copy(&result, schedule); err != nil {
 				return err
@@ -33,15 +39,15 @@ func QuerySchedulePage(page forms.PageForm) (total int, resultList []*results.Sc
 				if spider, err = tx.SelectSpider(schedule.SpiderId); err != nil {
 					return err
 				}
+				if spider != nil {
+					cache[schedule.SpiderId] = spider
+				}
 			}
 			if spider == nil {
 				return errors.New("spider not found")
 			}
 			result.SpiderName = spider.Name
 			resultList = append(resultList, &result)
-		}
-		if total, err = tx.CountSchedules(); err != nil {
-			return err
 		}
 		return nil
 	}); err != nil {
@@ -142,17 +148,7 @@ func ModifySchedule(id uuid.UUID, form forms.ScheduleUpdateForm) (result *result
 		if schedule == nil {
 			return errors.New("schedule not found")
 		}
-		isEnabled := form.Enabled == constants.Enabled
-		// 如果更新调度的可用状态，同步增删定时
-		if form.Enabled != 0 {
-			if isEnabled {
-				if err = managers.Scheduler.Add(schedule); err != nil {
-					return err
-				}
-			} else {
-				managers.Scheduler.Remove(schedule)
-			}
-		}
+
 		if form.Cmd != "" {
 			schedule.Cmd = form.Cmd
 		}
@@ -160,11 +156,21 @@ func ModifySchedule(id uuid.UUID, form forms.ScheduleUpdateForm) (result *result
 			schedule.Cron = form.Cron
 		}
 		if form.Enabled != 0 {
-			schedule.Enabled = isEnabled
+			schedule.Enabled = form.Enabled == constants.Enabled
 		}
 		if form.Description != "" {
 			schedule.Description = form.Description
 		}
+
+		// 根据最新可用状态更新调度器
+		if schedule.Enabled {
+			if err = managers.Scheduler.Add(schedule); err != nil {
+				return err
+			}
+		} else {
+			managers.Scheduler.Remove(schedule)
+		}
+
 		// 更新调度信息
 		if err := tx.UpdateSchedule(schedule); err != nil {
 			return err
