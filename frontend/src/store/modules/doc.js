@@ -25,16 +25,14 @@ const actions = {
     const cache = {}
 
     // iterate paths
-    for (const path in data) {
-      if (data.hasOwnProperty(path)) {
-        const d = data[path]
-        if (path.match(/\/$/)) {
-          cache[path] = d
-          cache[path].children = []
-        } else if (path.match(/\.html$/)) {
-          const parentPath = path.split('/')[0] + '/'
-          cache[parentPath].children.push(d)
-        }
+    for (const path of data) {
+      const d = data[path]
+      if (path.match(/\/$/)) {
+        cache[path] = d
+        cache[path].children = []
+      } else if (path.match(/\.html$/)) {
+        const parentPath = path.split('/')[0] + '/'
+        cache[parentPath].children.push(d)
       }
     }
 

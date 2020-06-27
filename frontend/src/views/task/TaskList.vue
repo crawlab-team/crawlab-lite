@@ -131,20 +131,14 @@
             :width="col.width"
           >
             <template slot-scope="scope">
-              <status-tag :status="scope.row[col.name]" />
               <template
-                v-if="scope.row.error_log_count > 0"
+                v-if="scope.row.error"
               >
-                <el-tooltip :content="$t('Log Errors') + ': ' + scope.row.error_log_count" placement="top">
-                  <el-tag
-                    type="danger"
-                    style="margin-left: 10px"
-                  >
-                    <i class="el-icon-warning" />
-                    <i class="el-icon-tickets" />
-                  </el-tag>
+                <el-tooltip :content="scope.row.error" placement="top">
+                  <status-tag :status="scope.row[col.name]" />
                 </el-tooltip>
               </template>
+              <status-tag v-else :status="scope.row[col.name]" />
             </template>
           </el-table-column>
           <el-table-column

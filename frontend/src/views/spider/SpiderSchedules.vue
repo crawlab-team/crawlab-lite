@@ -23,7 +23,7 @@
     },
     methods: {
       getSpiderList() {
-        this.$request.get('/spiders', {})
+        this.$store.dispatch(`spider/getSpiderList`)
           .then(response => {
             this.spiderList = response.data.data.list || []
           })

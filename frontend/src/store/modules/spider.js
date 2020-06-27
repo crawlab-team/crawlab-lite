@@ -102,8 +102,11 @@ const actions = {
   getSpiderList({ state, commit }, params = {}) {
     return request.get('/spiders', params)
       .then(response => {
-        commit('SET_SPIDER_LIST', response.data.data.list)
-        commit('SET_SPIDER_TOTAL', response.data.data.total)
+        if (!response || !response.data || !response.data.data) {
+          return
+        }
+        commit('SET_SPIDER_LIST', response.data.data.list || [])
+        commit('SET_SPIDER_TOTAL', response.data.data.total || 0)
       })
   },
   editSpider({ state, dispatch }) {

@@ -742,19 +742,6 @@
       isCustomized(row) {
         return row.type === 'customized'
       },
-      fetchSiteSuggestions(keyword, callback) {
-        this.$request.get('/sites', {
-          keyword: keyword,
-          page_num: 1,
-          page_size: 100
-        }).then(response => {
-          const data = response.data.items.map(d => {
-            d.value = d.name + ' | ' + d.domain
-            return d
-          })
-          callback(data)
-        })
-      },
       onUploadSuccess(res) {
         // clear fileList
         this.fileList = []
@@ -903,7 +890,7 @@
         this.isMultiple = false
       },
       isDisabled(row) {
-        return row.is_public && row.username !== this.userInfo.username && this.userInfo.role !== 'admin'
+        return row.is_public && row.username !== this.userInfo.username
       }
     }
   }

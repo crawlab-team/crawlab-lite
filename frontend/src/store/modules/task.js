@@ -162,8 +162,11 @@ const actions = {
       schedule_id: state.filter.schedule_id || undefined
     })
       .then(response => {
+        if (!response || !response.data || !response.data.data) {
+          return
+        }
         commit('SET_TASK_LIST', response.data.data.list || [])
-        commit('SET_TASK_LIST_TOTAL_COUNT', response.data.total)
+        commit('SET_TASK_LIST_TOTAL_COUNT', response.data.data.total || 0)
       })
   },
   deleteTask({ state, dispatch }, id) {
@@ -190,8 +193,11 @@ const actions = {
       page_size: state.taskLogPageSize
     })
       .then(response => {
+        if (!response || !response.data || !response.data.data) {
+          return
+        }
         commit('SET_TASK_LOG', response.data.data.list || [])
-        commit('SET_TASK_LOG_TOTAL', response.data.total || 0)
+        commit('SET_TASK_LOG_TOTAL', response.data.data.total || 0)
 
         // auto switch to next page if not reaching the end
         if (state.isLogAutoScroll && state.taskLogTotal > (state.taskLogPage * state.taskLogPageSize)) {
@@ -202,6 +208,9 @@ const actions = {
   getTaskErrorLog({ state, commit }, id) {
     return request.get(`/tasks/${id}/error-log`, {})
       .then(response => {
+        if (!response || !response.data || !response.data.data) {
+          return
+        }
         commit('SET_ERROR_LOG_DATA', response.data.data.list || [])
       })
   },
@@ -211,9 +220,11 @@ const actions = {
       page_size: state.resultsPageSize
     })
       .then(response => {
-        commit('SET_TASK_RESULTS_DATA', response.data.data.list)
-        // commit('SET_TASK_RESULTS_COLUMNS', response.data.fields)
-        commit('SET_TASK_RESULTS_TOTAL_COUNT', response.data.total)
+        if (!response || !response.data || !response.data.data) {
+          return
+        }
+        commit('SET_TASK_RESULTS_DATA', response.data.data.list || [])
+        commit('SET_TASK_RESULTS_TOTAL_COUNT', response.data.data.total || 0)
       })
   },
   cancelTask({ state, dispatch }, id) {

@@ -241,7 +241,6 @@
 </template>
 
 <script>
-  import request from '../../api/request'
   import VueCronLinux from '../../components/Cron'
   import { mapState } from 'vuex'
   import ScheduleTaskList from '../../components/Schedule/ScheduleTaskList'
@@ -386,12 +385,6 @@
     },
     created() {
       this.$store.dispatch('schedule/getScheduleList')
-
-      // 爬虫列表
-      request.get('/spiders', { owner_type: 'all' })
-        .then(response => {
-          this.spiderList = response.data.data.list || []
-        })
     },
     mounted() {
       if (!this.isDisabledSpiderSchedule) {
@@ -428,13 +421,17 @@
             }
             form.enabled = form.enabled ? 1 : 0
             if (this.isEdit) {
-              request.put(`/schedules/${this.scheduleForm.id}`, form).then(response => {
+              this.$store.dispatch('schedule/editSchedule', form).then(response => {
+                if (response.data.code !== 200) {
+                  this.$message.error(response.data.message)
+                  return
+                }
                 this.dialogVisible = false
                 this.$store.dispatch('schedule/getScheduleList')
                 this.$message.success(this.$t('The schedule has been saved'))
               })
             } else {
-              request.post('/schedules', form).then(response => {
+              this.$store.dispatch('schedule/addSchedule', form).then(response => {
                 if (response.data.code !== 200) {
                   this.$message.error(response.data.message)
                   return

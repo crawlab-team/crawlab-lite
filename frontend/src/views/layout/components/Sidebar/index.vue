@@ -45,8 +45,6 @@
       },
       routes() {
         return this.$router.options.routes.filter(d => {
-          const role = this.$store.getters['user/userInfo'].role
-          if (role === 'admin') return true
           return !this.adminPaths.includes(d.path)
         })
       },

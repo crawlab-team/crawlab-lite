@@ -9,7 +9,6 @@ import task from './modules/task'
 import file from './modules/file'
 import schedule from './modules/schedule'
 import lang from './modules/lang'
-import site from './modules/site'
 import stats from './modules/stats'
 import version from './modules/version'
 import tour from './modules/tour'
@@ -29,7 +28,6 @@ const store = new Vuex.Store({
     file,
     schedule,
     lang,
-    site,
     version,
     tour,
     doc,
