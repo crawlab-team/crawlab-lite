@@ -104,7 +104,7 @@
             width="140px"
           />
           <el-table-column
-            :label="$t('Parameters')"
+            :label="$t('Cmd')"
             prop="param"
             width="120px"
           />
@@ -113,7 +113,14 @@
             width="120px"
           >
             <template slot-scope="scope">
-              <status-tag :status="scope.row.status" />
+              <template
+                v-if="scope.row.status === 'ERROR'"
+              >
+                <el-tooltip :content="scope.row.error" placement="top">
+                  <status-tag :status="scope.row.status" />
+                </el-tooltip>
+              </template>
+              <status-tag v-else :status="scope.row.status" />
             </template>
           </el-table-column>
           <el-table-column
@@ -314,7 +321,14 @@
             :width="col.width"
           >
             <template slot-scope="scope">
-              <status-tag :status="scope.row.last_status" />
+              <template
+                v-if="scope.row.last_status === 'ERROR'"
+              >
+                <el-tooltip :content="scope.row.last_error" placement="top">
+                  <status-tag :status="scope.row.last_status" />
+                </el-tooltip>
+              </template>
+              <status-tag v-else :status="scope.row.last_status" />
             </template>
           </el-table-column>
           <!--          <el-table-column-->

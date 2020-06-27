@@ -53,6 +53,7 @@ func QuerySpiderPage(page forms.PageForm) (total int, resultList []*results.Spid
 			if task != nil {
 				result.LastRunTs = task.StartTs
 				result.LastStatus = task.Status
+				result.LastError = task.Error
 			}
 			resultList = append(resultList, &result)
 		}

@@ -71,7 +71,8 @@
             :align="col.align"
           >
             <template slot-scope="scope">
-              <a href="javascript:" class="a-tag" @click="onClickSpider(scope.row)">{{ scope.row[col.name] }}</a>
+              <!--<a href="javascript:" class="a-tag" @click="onClickSpider(scope.row)">{{ scope.row[col.name] }}</a>-->
+              {{ scope.row[col.name] }}
             </template>
           </el-table-column>
           <el-table-column
@@ -132,7 +133,7 @@
           >
             <template slot-scope="scope">
               <template
-                v-if="scope.row.error"
+                v-if="scope.row[col.name] === 'ERROR'"
               >
                 <el-tooltip :content="scope.row.error" placement="top">
                   <status-tag :status="scope.row[col.name]" />
