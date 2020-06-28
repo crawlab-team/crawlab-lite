@@ -43,17 +43,17 @@
         return 'NA'
       },
       icon() {
-        if (this.status === 'finished') {
+        if (this.status === 'FINISHED') {
           return 'el-icon-check'
-        } else if (this.status === 'pending') {
+        } else if (this.status === 'PENDING') {
           return 'el-icon-loading'
-        } else if (this.status === 'running') {
+        } else if (this.status === 'RUNNING') {
           return 'el-icon-loading'
-        } else if (this.status === 'error') {
+        } else if (this.status === 'ERROR') {
           return 'el-icon-error'
-        } else if (this.status === 'cancelled') {
+        } else if (this.status === 'CANCELLED') {
           return 'el-icon-video-pause'
-        } else if (this.status === 'abnormal') {
+        } else if (this.status === 'ABNORMAL') {
           return 'el-icon-warning'
         } else {
           return 'el-icon-question'

@@ -155,8 +155,6 @@
     <crawl-confirm-dialog
       :visible="crawlConfirmDialogVisible"
       :spider-id="activeSpiderId"
-      :spiders="selectedSpiders"
-      :multiple="isMultiple"
       @close="onCrawlConfirmDialogClose"
       @confirm="onCrawlConfirm"
     />
@@ -187,66 +185,8 @@
           <!--            </el-form-item>-->
           <!--          </el-form>-->
         </div>
-        <div class="right">
-          <el-button
-            v-if="this.selectedSpiders.length"
-            size="small"
-            type="danger"
-            icon="el-icon-video-play"
-            class="btn add"
-            style="font-weight: bolder"
-            @click="onCrawlSelectedSpiders"
-          >
-            {{ $t('Run') }}
-          </el-button>
-          <el-button
-            v-if="this.selectedSpiders.length"
-            size="small"
-            type="info"
-            :icon="isStopLoading ? 'el-icon-loading' : 'el-icon-video-pause'"
-            class="btn add"
-            style="font-weight: bolder"
-            @click="onStopSelectedSpiders"
-          >
-            {{ $t('Stop') }}
-          </el-button>
-          <el-button
-            v-if="this.selectedSpiders.length"
-            size="small"
-            type="danger"
-            :icon="isRemoveLoading ? 'el-icon-loading' : 'el-icon-delete'"
-            class="btn add"
-            style="font-weight: bolder"
-            @click="onRemoveSelectedSpiders"
-          >
-            {{ $t('Remove') }}
-          </el-button>
-          <el-button
-            size="small"
-            type="success"
-            icon="el-icon-plus"
-            class="btn add"
-            style="font-weight: bolder"
-            @click="onAdd"
-          >
-            {{ $t('Add Spider') }}
-          </el-button>
-        </div>
       </div>
       <!--./filter-->
-
-      <!--tabs-->
-      <!--      <el-tabs v-model="filter.type" @tab-click="onClickTab" class="tabs">-->
-      <!--        <el-tab-pane :label="$t('All')" name="all" class="all"></el-tab-pane>-->
-      <!--        <el-tab-pane :label="$t('Customized')" name="customized" class="customized"></el-tab-pane>-->
-      <!--        <el-tab-pane :label="$t('Configurable')" name="configurable" class="configurable"></el-tab-pane>-->
-      <!--        <el-tab-pane :label="$t('Long Task')" name="long-task" class="long-task"></el-tab-pane>-->
-      <!--      </el-tabs>-->
-      <!--./tabs-->
-
-      <!--legend-->
-      <status-legend />
-      <!--./legend-->
 
       <!--table list-->
       <el-table
@@ -256,14 +196,7 @@
         :header-cell-style="{background:'rgb(48, 65, 86)',color:'white'}"
         row-key="id"
         border
-        @selection-change="onSpiderSelect"
       >
-        <el-table-column
-          type="selection"
-          width="45"
-          align="center"
-          reserve-selection
-        />
         <template v-for="col in columns">
           <el-table-column
             v-if="col.name === 'type'"
@@ -331,22 +264,6 @@
               <status-tag v-else :status="scope.row.last_status" />
             </template>
           </el-table-column>
-          <!--          <el-table-column-->
-          <!--            v-else-if="['is_scrapy', 'is_long_task'].includes(col.name)"-->
-          <!--            :key="col.name"-->
-          <!--            :label="$t(col.label)"-->
-          <!--            align="left"-->
-          <!--            :width="col.width"-->
-          <!--          >-->
-          <!--            <template slot-scope="scope">-->
-          <!--              <el-switch-->
-          <!--                v-if="scope.row.type === 'customized'"-->
-          <!--                v-model="scope.row[col.name]"-->
-          <!--                active-color="#13ce66"-->
-          <!--                disabled-->
-          <!--              />-->
-          <!--            </template>-->
-          <!--          </el-table-column>-->
           <el-table-column
             v-else-if="col.name === 'latest_tasks'"
             :key="col.name"
@@ -486,12 +403,10 @@
   import dayjs from 'dayjs'
   import CrawlConfirmDialog from '../../components/Common/CrawlConfirmDialog'
   import StatusTag from '../../components/Status/StatusTag'
-  import StatusLegend from '../../components/Status/StatusLegend'
 
   export default {
     name: 'SpiderList',
     components: {
-      StatusLegend,
       CrawlConfirmDialog,
       StatusTag
     },
@@ -609,10 +524,8 @@
         },
         handle: undefined,
         activeSpiderTaskStatus: 'running',
-        selectedSpiders: [],
         isStopLoading: false,
-        isRemoveLoading: false,
-        isMultiple: false
+        isRemoveLoading: false
       }
     },
     computed: {
@@ -786,15 +699,10 @@
       onRowClick(row, column, event) {
         this.onView(row, event)
       },
-      onClickTab(tab) {
-        this.filter.type = tab.name
-        this.getList()
-      },
       async getList() {
         const params = {
           page_num: this.pagination.pageNum,
           page_size: this.pagination.pageSize
-        // keyword: this.filter.keyword,
         }
         await this.$store.dispatch('spider/getSpiderList', params)
 
@@ -844,64 +752,13 @@
       async onStop(row, ev) {
         ev.stopPropagation()
         const res = await this.$store.dispatch('task/cancelTask', row.id)
-        if (res.data.code === 200) {
+        if (res.data && res.data.code === 200) {
           this.$message.success(`Task "${row.id}" has been sent signal to stop`)
           this.getList()
         }
       },
-      onSpiderSelect(spiders) {
-        this.selectedSpiders = spiders
-      },
-      async onRemoveSelectedSpiders() {
-        this.$confirm(this.$t('Are you sure to delete selected items?'), this.$t('Notification'), {
-          confirmButtonText: this.$t('Confirm'),
-          cancelButtonText: this.$t('Cancel'),
-          type: 'warning'
-        }).then(async() => {
-          this.isRemoveLoading = true
-          try {
-            const res = await this.$request.delete('/spiders', {
-              spider_ids: this.selectedSpiders.map(d => d.id)
-            })
-            if (res.data.code === 200) {
-              this.$message.success('Delete successfully')
-              this.$refs['table'].clearSelection()
-              await this.getList()
-            }
-          } finally {
-            this.isRemoveLoading = false
-          }
-          this.$st.sendEv('爬虫列表', '批量删除爬虫')
-        })
-      },
-      async onStopSelectedSpiders() {
-        this.$confirm(this.$t('Are you sure to stop selected items?'), this.$t('Notification'), {
-          confirmButtonText: this.$t('Confirm'),
-          cancelButtonText: this.$t('Cancel'),
-          type: 'warning'
-        }).then(async() => {
-          this.isStopLoading = true
-          try {
-            const res = await this.$request.post('/spiders-cancel', {
-              spider_ids: this.selectedSpiders.map(d => d.id)
-            })
-            if (res.data.code === 200) {
-              this.$message.success('Sent signals to cancel selected tasks')
-              await this.getList()
-            }
-          } finally {
-            this.isStopLoading = false
-          }
-          this.$st.sendEv('爬虫列表', '批量删除爬虫')
-        })
-      },
-      onCrawlSelectedSpiders() {
-        this.crawlConfirmDialogVisible = true
-        this.isMultiple = true
-      },
       onCrawlConfirmDialogClose() {
         this.crawlConfirmDialogVisible = false
-        this.isMultiple = false
       },
       isDisabled(row) {
         return row.is_public && row.username !== this.userInfo.username
