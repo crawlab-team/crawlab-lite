@@ -20,7 +20,7 @@
       update() {
         this.isFilterSpiderDisabled = true
         this.$set(this.filter, 'spider_id', this.scheduleForm.spider_id)
-        this.filter.schedule_id = this.scheduleForm.id
+        this.$set(this.filter, 'schedule_id', this.scheduleForm.id)
         this.$store.dispatch('task/getTaskList')
       }
     }

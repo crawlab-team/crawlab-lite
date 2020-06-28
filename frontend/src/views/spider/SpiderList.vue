@@ -66,6 +66,83 @@
     </el-dialog>
     <!--./add dialog-->
 
+    <!--version list dialog-->
+    <el-dialog
+      :visible.sync="versionListDialogVisible"
+      :title="`${$t('Spider Version List')} (${$t('Spider')}: ${activeSpider ? activeSpider.name : ''})`"
+      width="920px"
+    >
+      <template slot-scope="scope">
+        <el-table
+          :data="getTasks(scope.row)"
+          border
+          class="table"
+          max-height="240px"
+          style="margin: 5px 10px"
+        >
+          <el-table-column
+            :label="$t('Create Time')"
+            prop="create_ts"
+            width="140px"
+          />
+          <el-table-column
+            :label="$t('Start Time')"
+            prop="start_ts"
+            width="140px"
+          />
+          <el-table-column
+            :label="$t('Finish Time')"
+            prop="finish_ts"
+            width="140px"
+          />
+          <el-table-column
+            :label="$t('Cmd')"
+            prop="param"
+            width="120px"
+          />
+          <el-table-column
+            :label="$t('Status')"
+            width="120px"
+          >
+            <template slot-scope="scope">
+              <template
+                v-if="scope.row.status === 'ERROR'"
+              >
+                <el-tooltip :content="scope.row.error" placement="top">
+                  <status-tag :status="scope.row.status" />
+                </el-tooltip>
+              </template>
+              <status-tag v-else :status="scope.row.status" />
+            </template>
+          </el-table-column>
+          <el-table-column
+            :label="$t('Results Count')"
+            prop="result_count"
+            width="80px"
+          />
+          <el-table-column
+            :label="$t('Action')"
+            width="auto"
+          >
+            <template slot-scope="scope">
+              <el-button
+                v-if="['pending', 'running'].includes(scope.row.status)"
+                icon="el-icon-video-pause"
+                size="mini"
+                type="danger"
+                @click="onStop(scope.row, $event)"
+              />
+            </template>
+          </el-table-column>
+        </el-table>
+      </template>
+
+      <template slot="footer">
+        <el-button size="small" type="primary" @click="isRunningTasksDialogVisible = false">{{ $t('Ok') }}</el-button>
+      </template>
+    </el-dialog>
+    <!--./version list dialog-->
+
     <!--running tasks dialog-->
     <el-dialog
       :visible.sync="isRunningTasksDialogVisible"
@@ -422,6 +499,7 @@
         dialogVisible: false,
         addDialogVisible: false,
         crawlConfirmDialogVisible: false,
+        versionListDialogVisible: false,
         isRunningTasksDialogVisible: false,
         activeSpiderId: undefined,
         activeSpider: undefined,
@@ -756,6 +834,20 @@
           this.$message.success(`Task "${row.id}" has been sent signal to stop`)
           this.getList()
         }
+      },
+      getVersions(row) {
+        if (!this.activeSpider.latest_tasks) {
+          return []
+        }
+        return this.activeSpider.latest_tasks
+          .filter(d => d.status === this.activeSpiderTaskStatus)
+          .map(d => {
+            d = JSON.parse(JSON.stringify(d))
+            d.create_ts = d.create_ts.match('^0001') ? 'NA' : dayjs(d.create_ts).format('YYYY-MM-DD HH:mm:ss')
+            d.start_ts = d.start_ts.match('^0001') ? 'NA' : dayjs(d.start_ts).format('YYYY-MM-DD HH:mm:ss')
+            d.finish_ts = d.finish_ts.match('^0001') ? 'NA' : dayjs(d.finish_ts).format('YYYY-MM-DD HH:mm:ss')
+            return d
+          })
       },
       onCrawlConfirmDialogClose() {
         this.crawlConfirmDialogVisible = false

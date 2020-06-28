@@ -29,6 +29,7 @@ export default {
   // 块标题
   'Latest Tasks': '最近任务',
   'Latest Deploys': '最近部署',
+  'Spider Version List': '爬虫版本列表',
 
   // 任务状态
   Pending: '待定',

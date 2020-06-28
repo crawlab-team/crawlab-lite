@@ -44,14 +44,20 @@ const state = {
 const getters = {}
 
 const mutations = {
-  SET_SPIDER_TOTAL(state, value) {
-    state.spiderTotal = value
-  },
   SET_SPIDER_FORM(state, value) {
     state.spiderForm = value
   },
   SET_SPIDER_LIST(state, value) {
     state.spiderList = value
+  },
+  SET_SPIDER_TOTAL(state, value) {
+    state.spiderTotal = value
+  },
+  SET_SPIDER_VERSION_LIST(state, value) {
+    state.spiderVersionList = value
+  },
+  SET_SPIDER_VERSION_TOTAL(state, value) {
+    state.spiderVersionTotal = value
   },
   SET_IMPORT_FORM(state, value) {
     state.importForm = value
@@ -65,9 +71,6 @@ const mutations = {
   SET_DAILY_STATS(state, value) {
     state.dailyStats = value
   },
-  SET_FILTER_SITE(state, value) {
-    state.filterSite = value
-  },
   SET_PREVIEW_CRAWL_DATA(state, value) {
     state.previewCrawlData = value
   },
@@ -78,20 +81,8 @@ const mutations = {
     })
     Vue.set(state.spiderForm.config, 'settings', settings)
   },
-  SET_TEMPLATE_LIST(state, value) {
-    state.templateList = value
-  },
   SET_FILE_TREE(state, value) {
     state.fileTree = value
-  },
-  SET_SPIDER_SCRAPY_SETTINGS(state, value) {
-    state.spiderScrapySettings = value
-  },
-  SET_SPIDER_SCRAPY_ITEMS(state, value) {
-    state.spiderScrapyItems = value
-  },
-  SET_SPIDER_SCRAPY_PIPELINES(state, value) {
-    state.spiderScrapyPipelines = value
   },
   SET_CONFIG_LIST_TS(state, value) {
     state.configListTs = value
@@ -137,16 +128,6 @@ const actions = {
       node_ids: nodeIds
     })
   },
-  getTaskList({ state, commit }, id) {
-    return request.get(`/tasks`, { 'spider_id': id })
-      .then(response => {
-        commit('task/SET_TASK_LIST',
-          response.data.data ? response.data.data.map(d => {
-            return d
-          }).sort((a, b) => a.create_ts < b.create_ts ? 1 : -1) : [],
-          { root: true })
-      })
-  },
   getDir({ state, commit }, path) {
     const id = state.spiderForm.id
     return request.get(`/spiders/${id}/dir`)
@@ -183,15 +164,18 @@ const actions = {
     const content = rootState.file.fileContent
     return request.post(`/config_spiders/${state.spiderForm.id}/spiderfile`, { content })
   },
-  addConfigSpider({ state }) {
-    return request.post(`/config_spiders`, state.spiderForm)
-  },
   addSpider({ state }) {
     return request.post(`/spiders`, state.spiderForm)
   },
-  async getTemplateList({ state, commit }) {
-    const res = await request.get(`/config_spiders_templates`)
-    commit('SET_TEMPLATE_LIST', res.data.data)
+  getSpiderVersions({ state, commit }) {
+    return request.get(`/spiders/${state.spiderForm.id}/versions`)
+      .then(response => {
+        if (!response || !response.data || !response.data.data) {
+          return
+        }
+        commit('SET_SPIDER_VERSION_LIST', response.data.data.list || [])
+        commit('SET_SPIDER_VERSION_TOTAL', response.data.data.total || 0)
+      })
   },
   async getScheduleList({ state, commit }, payload) {
     const { id } = payload

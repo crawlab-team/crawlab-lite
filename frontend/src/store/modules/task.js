@@ -141,6 +141,9 @@ const mutations = {
   },
   SET_ACTIVE_ERROR_LOG_ITEM(state, value) {
     state.activeErrorLogItem = value
+  },
+  SET_FILTER(state, value) {
+    state.filter = value
   }
 }
 
@@ -235,6 +238,9 @@ const actions = {
           resolve(res)
         })
     })
+  },
+  resetFilter({ state, commit }) {
+    commit('SET_FILTER', {})
   }
 }
 

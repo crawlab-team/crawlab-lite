@@ -15,7 +15,7 @@
     />
     <!--./tour-->
 
-    <!--add popup-->
+    <!--add schedule dialog-->
     <el-dialog
       :title="$t(dialogTitle)"
       :visible.sync="dialogVisible"
@@ -30,13 +30,13 @@
         :inline-message="true"
         label-position="right"
       >
-        <el-form-item v-if="!isDisabledSpiderSchedule" :label="$t('Spider')" prop="spider_id" required>
+        <el-form-item :label="$t('Spider')" prop="spider_id" required>
           <el-select
             id="spider-id"
             v-model="scheduleForm.spider_id"
             :placeholder="$t('Spider')"
-            filterable
-            :disabled="isDisabledSpiderSchedule"
+            :loading="loadingSpiders"
+            @focus="onSelectSpider"
             @change="onSpiderChange"
           >
             <el-option
@@ -44,23 +44,6 @@
               :key="op.id"
               :value="op.id"
               :label="`${op.name}`"
-              :disabled="isDisabledSpider(op)"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item v-else :label="$t('Spider')" required>
-          <el-select
-            :value="spiderId"
-            :placeholder="$t('Spider')"
-            filterable
-            :disabled="isDisabledSpiderSchedule"
-          >
-            <el-option
-              v-for="op in spiderList"
-              :key="op.id"
-              :value="op.id"
-              :label="`${op.name}`"
-              :disabled="isDisabledSpider(op)"
             />
           </el-select>
         </el-form-item>
@@ -102,12 +85,12 @@
       <!--取消、保存-->
       <span slot="footer" class="dialog-footer">
         <el-button size="small" @click="onCancel">{{ $t('Cancel') }}</el-button>
-        <el-button id="btn-submit" size="small" type="primary" :disabled="isLoading" @click="onAddSubmit">{{ $t('Submit') }}</el-button>
+        <el-button id="btn-submit" size="small" type="primary" :disabled="submitting" @click="onAddSubmit">{{ $t('Submit') }}</el-button>
       </span>
     </el-dialog>
-    <!--./add popup-->
+    <!--./add schedule dialog-->
 
-    <!--view tasks popup-->
+    <!--view tasks dialog-->
     <el-dialog
       :title="$t('Tasks')"
       :visible.sync="isViewTasksDialogVisible"
@@ -116,9 +99,9 @@
     >
       <schedule-task-list ref="schedule-task-list" />
     </el-dialog>
-    <!--./view tasks popup-->
+    <!--./view tasks dialog-->
 
-    <!--cron generation popup-->
+    <!--cron generation dialog-->
     <el-dialog title="生成 Cron" :visible.sync="cronDialogVisible">
       <vue-cron-linux ref="vue-cron-linux" :data="scheduleForm.cron" :i18n="lang" @submit="onCronChange" />
       <span slot="footer" class="dialog-footer">
@@ -126,7 +109,7 @@
         <el-button size="small" type="primary" @click="onCronDialogSubmit">{{ $t('Confirm') }}</el-button>
       </span>
     </el-dialog>
-    <!--./cron generation popup-->
+    <!--./cron generation dialog-->
 
     <!--crawl confirm dialog-->
     <crawl-confirm-dialog
@@ -268,9 +251,9 @@
         dialogVisible: false,
         cronDialogVisible: false,
         expression: '',
-        spiderList: [],
         isShowCron: false,
-        isLoading: false,
+        submitting: false,
+        loadingSpiders: false,
         isViewTasksDialogVisible: false,
         crawlConfirmDialogVisible: false,
 
@@ -355,12 +338,13 @@
       }
     },
     computed: {
-      ...mapState('spider', [
-        'spiderForm'
-      ]),
       ...mapState('schedule', [
         'scheduleList',
         'scheduleForm'
+      ]),
+      ...mapState('spider', [
+        'spiderList',
+        'spiderForm'
       ]),
       lang() {
         const lang = this.$store.state.lang.lang || window.localStorage.getItem('lang')
@@ -378,19 +362,14 @@
           }
         }
         return {}
-      },
-      isDisabledSpiderSchedule() {
-        return false
       }
     },
     created() {
       this.$store.dispatch('schedule/getScheduleList')
     },
     mounted() {
-      if (!this.isDisabledSpiderSchedule) {
-        if (!this.$utils.tour.isFinishedTour('schedule-list')) {
-          this.$utils.tour.startTour(this, 'schedule-list')
-        }
+      if (!this.$utils.tour.isFinishedTour('schedule-list')) {
+        this.$utils.tour.startTour(this, 'schedule-list')
       }
     },
     methods: {
@@ -445,17 +424,15 @@
         })
         this.$st.sendEv('定时任务', '提交定时任务')
       },
-      isShowRun(row) {
-      },
       async onEdit(row) {
         this.$store.commit('schedule/SET_SCHEDULE_FORM', row)
         this.dialogVisible = true
         this.isEdit = true
         this.$st.sendEv('定时任务', '修改定时任务')
 
-        this.isLoading = true
+        this.submitting = true
         await this.$store.dispatch('spider/getSpiderData', row.spider_id)
-        this.isLoading = false
+        this.submitting = false
       },
       onRemove(row) {
         this.$confirm(this.$t('Are you sure to delete the schedule task?'), this.$t('Notification'), {
@@ -474,12 +451,10 @@
         })
         this.$st.sendEv('定时任务', '删除定时任务')
       },
-      isDisabledSpider(spider) {
-        if (spider.type === 'customized') {
-          return !spider.cmd
-        } else {
-          return false
-        }
+      async onSelectSpider() {
+        this.loadingSpiders = true
+        await this.$store.dispatch('spider/getSpiderList')
+        this.loadingSpiders = false
       },
       async onEnabledChange(row) {
         let res

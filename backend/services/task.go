@@ -13,30 +13,30 @@ import (
 )
 
 func QueryTaskPage(page forms.TaskPageForm) (total int, resultList []*results.Task, err error) {
-	spiderId := uuid.Nil
-	if page.SpiderId != "" {
-		spiderId, err = uuid.FromString(page.SpiderId)
-		if err != nil {
-			return 0, nil, err
-		}
-	}
-
+	spiderId := uuid.FromStringOrNil(page.SpiderId)
+	scheduleId := uuid.FromStringOrNil(page.ScheduleId)
 	start, end := page.Range()
 
 	if err := dao.ReadTx(func(tx dao.Tx) error {
-		allTasks := make([]*models.Task, 0)
-		if spiderId == uuid.Nil {
-			allTasks, err = tx.SelectAllTasks()
-		} else {
-			allTasks, err = tx.SelectTasksWhereSpiderId(spiderId)
-		}
+		allTasks, err := tx.SelectAllTasks()
 		if err != nil {
 			return err
 		}
-		total = len(allTasks)
-		tasks := From(allTasks).OrderByDescendingT(func(task *models.Task) int64 {
+		query := From(allTasks)
+		if spiderId != uuid.Nil {
+			query = query.WhereT(func(task *models.Task) bool {
+				return task.SpiderId == spiderId
+			})
+		}
+		if scheduleId != uuid.Nil {
+			query = query.WhereT(func(task *models.Task) bool {
+				return task.ScheduleId == scheduleId
+			})
+		}
+		tasks := query.OrderByDescendingT(func(task *models.Task) int64 {
 			return task.UpdateTs.UnixNano()
 		}).Skip(start).Take(end - start).Results()
+
 		cache := map[uuid.UUID]*models.Spider{}
 		for _, task := range tasks {
 			task := task.(*models.Task)

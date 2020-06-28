@@ -303,6 +303,7 @@
       }
     },
     created() {
+      this.$store.dispatch('task/resetFilter')
       this.$store.dispatch('task/getTaskList')
       this.$store.dispatch('spider/getSpiderList')
     },
@@ -319,8 +320,6 @@
       clearInterval(this.handle)
     },
     methods: {
-      onSearch(value) {
-      },
       onRefresh() {
         this.$store.dispatch('task/getTaskList')
         this.$st.sendEv('任务列表', '搜索')

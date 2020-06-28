@@ -121,9 +121,7 @@
       },
       onRefresh() {
         if (this.$route.path.split('/')[1] === 'spiders') {
-          this.$store.dispatch('spider/getTaskList', this.$route.params.id)
-        } else if (this.$route.path.split('/')[1] === 'nodes') {
-          this.$store.dispatch('node/getTaskList', this.$route.params.id)
+          this.$store.dispatch('task/getTaskList', this.$route.params.spider_id)
         }
       },
       getTime(str) {
