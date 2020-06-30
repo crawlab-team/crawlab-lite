@@ -113,25 +113,6 @@ export const constantRouterMap = [
       }
     ]
   },
-  {
-    path: '/disclaimer',
-    component: Layout,
-    meta: {
-      title: 'Disclaimer',
-      icon: 'fa fa-exclamation-triangle'
-    },
-    children: [
-      {
-        path: '',
-        name: 'Disclaimer',
-        component: () => import('../views/doc/Disclaimer'),
-        meta: {
-          title: 'Disclaimer',
-          icon: 'fa fa-exclamation-triangle'
-        }
-      }
-    ]
-  },
   // {
   //   path: '/setting',
   //   component: Layout,

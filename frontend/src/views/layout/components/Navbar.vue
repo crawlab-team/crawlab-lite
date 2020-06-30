@@ -1,5 +1,6 @@
 <template>
   <div class="navbar">
+    <disclaimer-dialog v-model="disclaimerVisible" />
     <el-dialog
       :visible.sync="isLatestReleaseNoteVisible"
       :title="$t('Release') + ` ${this.latestRelease.name}`"
@@ -47,12 +48,18 @@
         </el-dropdown-item>
       </el-dropdown-menu>
     </el-dropdown>
-<!--    <div class="documentation right">-->
-<!--      <a href="http://docs.crawlab.cn" target="_blank">-->
-<!--        <font-awesome-icon :icon="['far', 'question-circle']" />-->
-<!--        <span style="margin-left: 5px;">{{ $t('Documentation') }}</span>-->
-<!--      </a>-->
-<!--    </div>-->
+    <!--    <div class="documentation right">-->
+    <!--      <a href="http://docs.crawlab.cn" target="_blank">-->
+    <!--        <font-awesome-icon :icon="['far', 'question-circle']" />-->
+    <!--        <span style="margin-left: 5px;">{{ $t('Documentation') }}</span>-->
+    <!--      </a>-->
+    <!--    </div>-->
+    <div class="disclaimer right">
+      <div @click="disclaimerVisible=true">
+        <font-awesome-icon :icon="['fa', 'exclamation-circle']" />
+        <span style="margin-left: 5px;">{{ $t('Disclaimer') }}</span>
+      </div>
+    </div>
     <div v-if="isUpgradable" class="upgrade right" @click="onClickUpgrade">
       <font-awesome-icon :icon="['fas', 'arrow-up']" />
       <el-badge is-dot>
@@ -93,6 +100,7 @@
   import { mapGetters, mapState } from 'vuex'
   import Breadcrumb from '@/components/Breadcrumb'
   import Hamburger from '@/components/Hamburger'
+  import DisclaimerDialog from '@/components/Disclaimer'
   import GithubButton from 'vue-github-button'
   import showdown from 'showdown'
   import 'github-markdown-css/github-markdown.css'
@@ -101,12 +109,14 @@
     components: {
       Breadcrumb,
       Hamburger,
-      GithubButton
+      GithubButton,
+      DisclaimerDialog
     },
     data() {
       const converter = new showdown.Converter()
       return {
         isLatestReleaseNoteVisible: false,
+        disclaimerVisible: false,
         converter,
         activeTabName: 'release-note',
         howToUpgradeHtmlZh: `
@@ -259,10 +269,11 @@ docker-compose up -d
       /*right: 35px;*/
     }
 
-    .documentation {
+    .documentation, .disclaimer {
       margin-right: 35px;
       color: #606266;
       font-size: 14px;
+      cursor: pointer;
 
       .span {
         margin-left: 5px;
