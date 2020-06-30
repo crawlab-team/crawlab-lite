@@ -71,7 +71,7 @@
       }
     },
     async created() {
-      await this.$store.dispatch('doc/getDocData')
+      // await this.$store.dispatch('doc/getDocData')
     },
     methods: {
       handleClickOutside() {

@@ -7,6 +7,11 @@ const state = {
 
   spiderTotal: 0,
 
+  // list of spider versions
+  spiderVersionList: [],
+
+  spiderVersionTotal: 0,
+
   // active spider data
   spiderForm: {},
 
@@ -30,9 +35,6 @@ const state = {
 
   // preview crawl data
   previewCrawlData: [],
-
-  // template list
-  templateList: [],
 
   // spider file tree
   fileTree: {},
@@ -167,8 +169,9 @@ const actions = {
   addSpider({ state }) {
     return request.post(`/spiders`, state.spiderForm)
   },
-  getSpiderVersions({ state, commit }) {
-    return request.get(`/spiders/${state.spiderForm.id}/versions`)
+  getSpiderVersionList({ state, commit }, payload) {
+    const { spider_id } = payload
+    return request.get(`/spiders/${spider_id}/versions`)
       .then(response => {
         if (!response || !response.data || !response.data.data) {
           return
@@ -176,6 +179,10 @@ const actions = {
         commit('SET_SPIDER_VERSION_LIST', response.data.data.list || [])
         commit('SET_SPIDER_VERSION_TOTAL', response.data.data.total || 0)
       })
+  },
+  deleteSpiderVersion({ state, dispatch }, payload) {
+    const { spider_id, version_id } = payload
+    return request.delete(`/spiders/${spider_id}/versions/${version_id}`)
   },
   async getScheduleList({ state, commit }, payload) {
     const { id } = payload

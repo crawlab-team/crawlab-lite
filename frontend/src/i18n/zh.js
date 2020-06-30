@@ -64,6 +64,7 @@ export default {
   'Download CSV': '下载CSV',
   'Upload Zip File': '上传Zip文件',
   'Upload': '上传',
+  'Upload and Commit': '上传并提交',
   'Item Threshold': '子项阈值',
   'Back': '返回',
   'New File': '新建文件',
@@ -213,6 +214,11 @@ export default {
   'Last Status': '上次运行状态',
   'Remark': '备注',
 
+  // 爬虫版本列表
+  'Upload Time': '上传时间',
+  'Latest': '最新',
+  'MD5': 'MD5',
+
   // 任务
   'Task Info': '任务信息',
   'Task ID': '任务ID',
@@ -348,8 +354,10 @@ export default {
   'Converted successfully': '成功转化',
   'Converted unsuccessfully': '未成功转化',
   'Uploaded spider files successfully': '成功上传爬虫文件',
+  'Failed to upload spider files': '上传爬虫文件失败',
   'A task has been scheduled successfully': '已经成功派发一个任务',
   'Are you sure to delete this spider?': '你确定要删除该爬虫?',
+  'Are you sure to delete this version?': '你确定要删除该版本?',
   'Are you sure to delete this user?': '你确定要删除该用户?',
   'Spider info has been saved successfully': '爬虫信息已成功保存',
   'Do you allow us to collect some statistics to improve Crawlab?': '您允许我们收集统计数据以更好地优化Crawlab？',
@@ -363,9 +371,7 @@ export default {
   'Deleted successfully': '成功删除',
   'Saved successfully': '成功保存',
   'Renamed successfully': '重命名保存',
-  'You can click "Add" to create an empty spider and upload files later.': '您可以点击"添加"按钮创建空的爬虫，之后再上传文件。',
-  'OR, you can also click "Upload" and upload a zip file containing your spider project.': '或者，您也可以点击"上传"按钮并上传一个包含爬虫项目的 zip 文件。',
-  'NOTE: When uploading a zip file, please zip your spider files from the ROOT DIRECTORY.': '注意: 上传 zip 文件时，请从 根目录 下开始压缩爬虫文件。',
+  'NOTE: It is best to zip your spider files from the PROJECT ROOT.': '注意: 建议从项目根目录下开始压缩爬虫文件。',
   'English': 'English',
   'Are you sure to delete the schedule task?': '确定删除定时任务?',
   ' is not installed, do you want to install it?': ' 还没有安装，您是否打算安装它?',

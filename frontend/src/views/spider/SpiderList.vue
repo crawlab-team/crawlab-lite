@@ -36,7 +36,7 @@
         <!--            :placeholder="$t('By default: ') + 'results_<spider_name>'"-->
         <!--          />-->
         <!--        </el-form-item>-->
-        <el-form-item :label="$t('Upload Zip File')" label-width="120px" name="site">
+        <el-form-item :label="$t('Upload Zip File')" name="site">
           <el-upload
             :action="$request.baseUrl + '/spiders'"
             :before-upload="beforeUpload"
@@ -44,9 +44,10 @@
             :file-list="fileList"
             :headers="{Authorization:token}"
             :on-success="onUploadSuccess"
+            :on-error="onUploadError"
           >
             <el-button id="upload" icon="el-icon-upload" size="small" type="primary">
-              {{ $t('Upload') }}
+              {{ $t('Upload and Commit') }}
             </el-button>
           </el-upload>
         </el-form-item>
@@ -56,11 +57,9 @@
         style="margin-bottom: 10px"
         type="warning"
       >
-        <p>{{ $t('You can click "Add" to create an empty spider and upload files later.') }}</p>
-        <p>{{ $t('OR, you can also click "Upload" and upload a zip file containing your spider project.') }}</p>
         <p>
-          <i class="fa fa-exclamation-triangle" /> {{ $t('NOTE: When uploading a zip file, please zip your' +
-            ' spider files from the ROOT DIRECTORY.') }}
+          <i class="fa fa-exclamation-triangle" />
+          {{ $t('NOTE: It is best to zip your spider files from the PROJECT ROOT.') }}
         </p>
       </el-alert>
     </el-dialog>
@@ -70,75 +69,59 @@
     <el-dialog
       :visible.sync="versionListDialogVisible"
       :title="`${$t('Spider Version List')} (${$t('Spider')}: ${activeSpider ? activeSpider.name : ''})`"
-      width="920px"
+      width="640px"
     >
-      <template slot-scope="scope">
-        <el-table
-          :data="getTasks(scope.row)"
-          border
-          class="table"
-          max-height="240px"
-          style="margin: 5px 10px"
+      <el-upload
+        :action="$request.baseUrl + '/spiders/' + activeSpider.id + '/versions'"
+        :data="uploadForm"
+        :file-list="fileList"
+        :headers="{Authorization:token}"
+        :on-success="onUploadVersionSuccess"
+        :on-error="onUploadError"
+        align="right"
+      >
+        <el-button icon="el-icon-upload" size="small" type="success">
+          {{ $t('Upload') }}
+        </el-button>
+      </el-upload>
+      <el-table
+        :data="spiderVersionList"
+        border
+        class="table"
+        max-height="240px"
+        style="margin: 5px 10px"
+      >
+        <el-table-column
+          :label="$t('Upload Time')"
+          prop="create_ts"
         >
-          <el-table-column
-            :label="$t('Create Time')"
-            prop="create_ts"
-            width="140px"
-          />
-          <el-table-column
-            :label="$t('Start Time')"
-            prop="start_ts"
-            width="140px"
-          />
-          <el-table-column
-            :label="$t('Finish Time')"
-            prop="finish_ts"
-            width="140px"
-          />
-          <el-table-column
-            :label="$t('Cmd')"
-            prop="param"
-            width="120px"
-          />
-          <el-table-column
-            :label="$t('Status')"
-            width="120px"
-          >
-            <template slot-scope="scope">
-              <template
-                v-if="scope.row.status === 'ERROR'"
-              >
-                <el-tooltip :content="scope.row.error" placement="top">
-                  <status-tag :status="scope.row.status" />
-                </el-tooltip>
-              </template>
-              <status-tag v-else :status="scope.row.status" />
-            </template>
-          </el-table-column>
-          <el-table-column
-            :label="$t('Results Count')"
-            prop="result_count"
-            width="80px"
-          />
-          <el-table-column
-            :label="$t('Action')"
-            width="auto"
-          >
-            <template slot-scope="scope">
+          <template slot-scope="scope">
+            {{ `${getTime(scope.row.create_ts)}${ scope.$index === 0 ? ' (' + $t('Latest') + ')' : '' }` }}
+          </template>
+        </el-table-column>
+        <el-table-column
+          :label="$t('MD5')"
+          prop="md5"
+        />
+        <el-table-column
+          :label="$t('Action')"
+          width="120px"
+        >
+          <template slot-scope="scope">
+            <el-tooltip :content="$t('Remove')" placement="top">
               <el-button
-                v-if="['pending', 'running'].includes(scope.row.status)"
-                icon="el-icon-video-pause"
-                size="mini"
                 type="danger"
-                @click="onStop(scope.row, $event)"
+                icon="el-icon-delete"
+                size="mini"
+                @click="onRemoveVersion(scope.row, $event)"
               />
-            </template>
-          </el-table-column>
-        </el-table>
-      </template>
+            </el-tooltip>
+          </template>
+        </el-table-column>
+      </el-table>
 
       <template slot="footer">
-        <el-button size="small" type="primary" @click="isRunningTasksDialogVisible = false">{{ $t('Ok') }}</el-button>
+        <el-button size="small" type="primary" @click="versionListDialogVisible = false">{{ $t('Ok') }}</el-button>
       </template>
     </el-dialog>
     <!--./version list dialog-->
@@ -150,77 +133,81 @@
       width="920px"
     >
       <el-tabs v-model="activeSpiderTaskStatus">
-        <el-tab-pane name="pending" :label="$t('Pending')" />
-        <el-tab-pane name="running" :label="$t('Running')" />
-        <el-tab-pane name="finished" :label="$t('Finished')" />
-        <el-tab-pane name="error" :label="$t('Error')" />
-        <el-tab-pane name="cancelled" :label="$t('Cancelled')" />
-        <el-tab-pane name="abnormal" :label="$t('Abnormal')" />
+        <el-tab-pane name="PENDING" :label="$t('Pending')" />
+        <el-tab-pane name="RUNNING" :label="$t('Running')" />
+        <el-tab-pane name="FINISHED" :label="$t('Finished')" />
+        <el-tab-pane name="ERROR" :label="$t('Error')" />
+        <el-tab-pane name="CANCELLED" :label="$t('Cancelled')" />
+        <el-tab-pane name="ABNORMAL" :label="$t('Abnormal')" />
       </el-tabs>
-      <template slot-scope="scope">
-        <el-table
-          :data="getTasks(scope.row)"
-          border
-          class="table"
-          max-height="240px"
-          style="margin: 5px 10px"
+      <el-table
+        :data="spiderTaskList"
+        border
+        class="table"
+        max-height="240px"
+        style="margin: 5px 10px"
+      >
+        <el-table-column
+          :label="$t('Create Time')"
+          prop="create_ts"
         >
-          <el-table-column
-            :label="$t('Create Time')"
-            prop="create_ts"
-            width="140px"
-          />
-          <el-table-column
-            :label="$t('Start Time')"
-            prop="start_ts"
-            width="140px"
-          />
-          <el-table-column
-            :label="$t('Finish Time')"
-            prop="finish_ts"
-            width="140px"
-          />
-          <el-table-column
-            :label="$t('Cmd')"
-            prop="param"
-            width="120px"
-          />
-          <el-table-column
-            :label="$t('Status')"
-            width="120px"
-          >
-            <template slot-scope="scope">
-              <template
-                v-if="scope.row.status === 'ERROR'"
-              >
-                <el-tooltip :content="scope.row.error" placement="top">
-                  <status-tag :status="scope.row.status" />
-                </el-tooltip>
-              </template>
-              <status-tag v-else :status="scope.row.status" />
+          <template slot-scope="scope">
+            {{ getTime(scope.row.create_ts) }}
+          </template>
+        </el-table-column>
+        <el-table-column
+          :label="$t('Start Time')"
+          prop="start_ts"
+        >
+          <template slot-scope="scope">
+            {{ getTime(scope.row.start_ts) }}
+          </template>
+        </el-table-column>
+        <el-table-column
+          :label="$t('Finish Time')"
+          prop="finish_ts"
+        >
+          <template slot-scope="scope">
+            {{ getTime(scope.row.finish_ts) }}
+          </template>
+        </el-table-column>
+        <el-table-column
+          :label="$t('Cmd')"
+          prop="param"
+        />
+        <el-table-column
+          :label="$t('Status')"
+        >
+          <template slot-scope="scope">
+            <template
+              v-if="scope.row.status === 'ERROR'"
+            >
+              <el-tooltip :content="scope.row.error" placement="top">
+                <status-tag :status="scope.row.status" />
+              </el-tooltip>
             </template>
-          </el-table-column>
-          <el-table-column
-            :label="$t('Results Count')"
-            prop="result_count"
-            width="80px"
-          />
-          <el-table-column
-            :label="$t('Action')"
-            width="auto"
-          >
-            <template slot-scope="scope">
-              <el-button
-                v-if="['pending', 'running'].includes(scope.row.status)"
-                icon="el-icon-video-pause"
-                size="mini"
-                type="danger"
-                @click="onStop(scope.row, $event)"
-              />
-            </template>
-          </el-table-column>
-        </el-table>
-      </template>
+            <status-tag v-else :status="scope.row.status" />
+          </template>
+        </el-table-column>
+        <!--        <el-table-column-->
+        <!--          :label="$t('Results Count')"-->
+        <!--          prop="result_count"-->
+        <!--          width="80px"-->
+        <!--        />-->
+        <el-table-column
+          :label="$t('Action')"
+        >
+          <template slot-scope="scope">
+            <el-button
+              v-if="['PENDING', 'RUNNING'].includes(scope.row.status)"
+              icon="el-icon-video-pause"
+              size="mini"
+              type="danger"
+              @click="onStop(scope.row, $event)"
+            />
+          </template>
+        </el-table-column>
+      </el-table>
 
       <template slot="footer">
         <el-button size="small" type="primary" @click="isRunningTasksDialogVisible = false">{{ $t('Ok') }}</el-button>
@@ -231,7 +218,7 @@
     <!--crawl confirm dialog-->
     <crawl-confirm-dialog
       :visible="crawlConfirmDialogVisible"
-      :spider-id="activeSpiderId"
+      :spider-id="activeSpider.id"
       @close="onCrawlConfirmDialogClose"
       @confirm="onCrawlConfirm"
     />
@@ -261,6 +248,18 @@
           <!--              </el-button>-->
           <!--            </el-form-item>-->
           <!--          </el-form>-->
+        </div>
+        <div class="right">
+          <el-button
+            size="small"
+            type="success"
+            icon="el-icon-plus"
+            class="btn add"
+            style="font-weight: bolder"
+            @click="onAdd"
+          >
+            {{ $t('Add Spider') }}
+          </el-button>
         </div>
       </div>
       <!--./filter-->
@@ -342,65 +341,6 @@
             </template>
           </el-table-column>
           <el-table-column
-            v-else-if="col.name === 'latest_tasks'"
-            :key="col.name"
-            :label="$t(col.label)"
-            :width="col.width"
-            :align="col.align"
-            class-name="latest-tasks"
-          >
-            <template slot-scope="scope">
-              <el-tag
-                v-if="getTaskCountByStatus(scope.row, 'pending') > 0"
-                type="primary"
-                size="small"
-              >
-                <i class="el-icon-loading" />
-                {{ getTaskCountByStatus(scope.row, 'pending') }}
-              </el-tag>
-              <el-tag
-                v-if="getTaskCountByStatus(scope.row, 'running') > 0"
-                type="warning"
-                size="small"
-              >
-                <i class="el-icon-loading" />
-                {{ getTaskCountByStatus(scope.row, 'running') }}
-              </el-tag>
-              <el-tag
-                v-if="getTaskCountByStatus(scope.row, 'finished') > 0"
-                type="success"
-                size="small"
-              >
-                <i class="el-icon-check" />
-                {{ getTaskCountByStatus(scope.row, 'finished') }}
-              </el-tag>
-              <el-tag
-                v-if="getTaskCountByStatus(scope.row, 'error') > 0"
-                type="danger"
-                size="small"
-              >
-                <i class="el-icon-error" />
-                {{ getTaskCountByStatus(scope.row, 'error') }}
-              </el-tag>
-              <el-tag
-                v-if="getTaskCountByStatus(scope.row, 'cancelled') > 0"
-                type="info"
-                size="small"
-              >
-                <i class="el-icon-video-pause" />
-                {{ getTaskCountByStatus(scope.row, 'cancelled') }}
-              </el-tag>
-              <el-tag
-                v-if="getTaskCountByStatus(scope.row, 'abnormal') > 0"
-                type="danger"
-                size="small"
-              >
-                <i class="el-icon-warning" />
-                {{ getTaskCountByStatus(scope.row, 'abnormal') }}
-              </el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column
             v-else
             :key="col.name"
             :property="col.name"
@@ -416,46 +356,41 @@
             <!--                type="primary"-->
             <!--                icon="el-icon-search"-->
             <!--                size="mini"-->
-            <!--                :disabled="isDisabled(scope.row)"-->
             <!--                @click="onView(scope.row, $event)"-->
             <!--              />-->
             <!--            </el-tooltip>-->
+            <el-tooltip :content="$t('Spider Version List')" placement="top">
+              <el-button
+                type="info"
+                icon="fa fa-archive"
+                size="mini"
+                @click="onViewSpiderVersions(scope.row, $event)"
+              />
+            </el-tooltip>
+            <el-tooltip :content="$t('Latest Tasks')" placement="top">
+              <el-button
+                type="warning"
+                icon="fa fa-tasks"
+                size="mini"
+                @click="onViewRunningTasks(scope.row, $event)"
+              />
+            </el-tooltip>
+            <el-tooltip :content="$t('Run')" placement="top">
+              <el-button
+                type="success"
+                icon="fa fa-bug"
+                size="mini"
+                @click="onCrawl(scope.row, $event)"
+              />
+            </el-tooltip>
             <el-tooltip :content="$t('Remove')" placement="top">
               <el-button
                 type="danger"
                 icon="el-icon-delete"
                 size="mini"
-                :disabled="isDisabled(scope.row)"
                 @click="onRemove(scope.row, $event)"
               />
             </el-tooltip>
-            <el-tooltip v-if="!isShowRun(scope.row)" :content="$t('No command line')" placement="top">
-              <el-button
-                disabled
-                type="success"
-                icon="fa fa-bug"
-                size="mini"
-                @click="onCrawl(scope.row, $event)"
-              />
-            </el-tooltip>
-            <el-tooltip v-else :content="$t('Run')" placement="top">
-              <el-button
-                type="success"
-                icon="fa fa-bug"
-                size="mini"
-                :disabled="isDisabled(scope.row)"
-                @click="onCrawl(scope.row, $event)"
-              />
-            </el-tooltip>
-            <!--            <el-tooltip :content="$t('Latest Tasks')" placement="top">-->
-            <!--              <el-button-->
-            <!--                type="warning"-->
-            <!--                icon="fa fa-tasks"-->
-            <!--                size="mini"-->
-            <!--                :disabled="isDisabled(scope.row)"-->
-            <!--                @click="onViewRunningTasks(scope.row, $event)"-->
-            <!--              />-->
-            <!--            </el-tooltip>-->
           </template>
         </el-table-column>
       </el-table>
@@ -501,12 +436,7 @@
         crawlConfirmDialogVisible: false,
         versionListDialogVisible: false,
         isRunningTasksDialogVisible: false,
-        activeSpiderId: undefined,
-        activeSpider: undefined,
-        filter: {
-          keyword: '',
-          type: 'all'
-        },
+        activeSpider: {},
         types: [],
         spiderFormRules: {
           name: [{ required: true, message: 'Required Field', trigger: 'change' }]
@@ -514,20 +444,6 @@
         fileList: [],
         activeTabName: 'customized',
         tourSteps: [
-          // {
-          //   target: '#tab-customized',
-          //   content: this.$t('View a list of <strong>Customized Spiders</strong>'),
-          //   params: {
-          //     highlight: false
-          //   }
-          // },
-          // {
-          //   target: '#tab-configurable',
-          //   content: this.$t('View a list of <strong>Configurable Spiders</strong>'),
-          //   params: {
-          //     highlight: false
-          //   }
-          // },
           // {
           //   target: '.table',
           //   content: this.$t('You can view your created spiders here.<br>Click a table row to view <strong>spider details</strong>.'),
@@ -552,22 +468,6 @@
           }
         },
         tourAddSteps: [
-          // {
-          //   target: '#tab-customized',
-          //   content: this.$t('<strong>Customized Spider</strong> is a highly customized spider, which is able to run on any programming language and any web crawler framework.'),
-          //   params: {
-          //     placement: 'bottom',
-          //     highlight: false
-          //   }
-          // },
-          // {
-          //   target: '#tab-configurable',
-          //   content: this.$t('<strong>Configurable Spider</strong> is a spider defined by config data, aimed at streamlining spider development and improving dev efficiency.'),
-          //   params: {
-          //     placement: 'bottom',
-          //     highlight: false
-          //   }
-          // },
           {
             target: '#spider-name',
             content: this.$t('Unique identifier for the spider'),
@@ -601,7 +501,7 @@
           }
         },
         handle: undefined,
-        activeSpiderTaskStatus: 'running',
+        activeSpiderTaskStatus: 'RUNNING',
         isStopLoading: false,
         isRemoveLoading: false
       }
@@ -609,13 +509,17 @@
     computed: {
       ...mapState('spider', [
         'importForm',
-        'spiderList',
         'spiderForm',
+        'spiderList',
         'spiderTotal',
-        'templateList'
+        'spiderVersionList',
+        'spiderVersionTotal'
+      ]),
+      ...mapState('task', [
+        'filter',
+        'taskList'
       ]),
       ...mapGetters('user', [
-        'userInfo',
         'token'
       ]),
       ...mapState('lang', [
@@ -637,14 +541,14 @@
         columns.push({ name: 'create_ts', label: 'Create Time', width: '140' })
         columns.push({ name: 'description', label: 'Description' })
         return columns
+      },
+      spiderTaskList() {
+        return this.taskList.filter(d => d.status === this.activeSpiderTaskStatus)
       }
     },
     async created() {
       // fetch spider list
       await this.getList()
-
-      // fetch template list
-      // await this.$store.dispatch('spider/getTemplateList')
 
       // periodically fetch spider list
       this.handle = setInterval(() => {
@@ -661,9 +565,6 @@
         this.$utils.tour.startTour(this, 'spider-list')
       }
     },
-    destroyed() {
-      clearInterval(this.handle)
-    },
     methods: {
       onPageSizeChange(val) {
         this.pagination.pageSize = val
@@ -677,9 +578,7 @@
         this.getList()
       },
       onAdd() {
-        this.$store.commit('spider/SET_SPIDER_FORM', {
-          template: this.templateList[0]
-        })
+        this.$store.commit('spider/SET_SPIDER_FORM', {})
         this.addDialogVisible = true
 
         setTimeout(() => {
@@ -714,26 +613,52 @@
           confirmButtonText: this.$t('Confirm'),
           cancelButtonText: this.$t('Cancel'),
           type: 'warning'
-        }).then(async() => {
-          await this.$store.dispatch('spider/deleteSpider', row.id)
-          this.$message({
-            type: 'success',
-            message: this.$t('Deleted successfully')
+        }).then(() => {
+          this.$store.dispatch('spider/deleteSpider', row.id).then(async(response) => {
+            if (!response.data || response.data.code !== 200) {
+              this.$message.error(response.data.message)
+              return
+            }
+            this.$message({
+              type: 'success',
+              message: this.$t('Deleted successfully')
+            })
+            await this.getList()
+            this.$st.sendEv('爬虫列表', '删除爬虫')
           })
-          await this.getList()
-          this.$st.sendEv('爬虫列表', '删除爬虫')
         })
       },
       onCrawl(row, ev) {
         ev.stopPropagation()
         this.crawlConfirmDialogVisible = true
-        this.activeSpiderId = row.id
+        this.activeSpider = row
         this.$st.sendEv('爬虫列表', '点击运行')
       },
       onCrawlConfirm() {
         setTimeout(() => {
           this.getList()
         }, 1000)
+      },
+      onRemoveVersion(row, ev) {
+        ev.stopPropagation()
+        this.$confirm(this.$t('Are you sure to delete this version?'), this.$t('Notification'), {
+          confirmButtonText: this.$t('Confirm'),
+          cancelButtonText: this.$t('Cancel'),
+          type: 'warning'
+        }).then(() => {
+          this.$store.dispatch('spider/deleteSpiderVersion', { spider_id: this.activeSpider.id, version_id: row.id }).then(async(response) => {
+            if (!response.data || response.data.code !== 200) {
+              this.$message.error(response.data.message)
+              return
+            }
+            this.$message({
+              type: 'success',
+              message: this.$t('Deleted successfully')
+            })
+            await this.getSpiderVersionList(this.activeSpider.id)
+            this.$st.sendEv('爬虫版本列表', '删除爬虫版本')
+          })
+        })
       },
       onView(row, ev) {
         ev.stopPropagation()
@@ -759,6 +684,20 @@
         this.$message.success(this.$t('Uploaded spider files successfully'))
         this.addDialogVisible = false
       },
+      onUploadVersionSuccess(res) {
+        // clear fileList
+        this.fileList = []
+
+        // fetch spider list
+        setTimeout(() => {
+          this.getSpiderVersionList(this.activeSpider.id)
+        }, 500)
+
+        this.$message.success(this.$t('Uploaded spider files successfully'))
+      },
+      onUploadError() {
+        this.$message.error(this.$t('Failed to upload spider files'))
+      },
       beforeUpload(file) {
         return new Promise((resolve, reject) => {
           this.$refs['addSpiderForm'].validate(res => {
@@ -783,45 +722,22 @@
           page_size: this.pagination.pageSize
         }
         await this.$store.dispatch('spider/getSpiderList', params)
-
-        // 更新当前爬虫（任务列表）
-        this.updateActiveSpider()
       },
-      getTasksByStatus(row, status) {
-        if (!row.latest_tasks) return []
-        return row.latest_tasks.filter(d => d.status === status)
+      async getSpiderVersionList(spiderId) {
+        await this.$store.dispatch('spider/getSpiderVersionList', { spider_id: spiderId })
       },
-      getTaskCountByStatus(row, status) {
-        return this.getTasksByStatus(row, status).length
+      async onViewSpiderVersions(row, ev) {
+        ev.stopPropagation()
+        this.activeSpider = row
+        this.versionListDialogVisible = true
+        await this.getSpiderVersionList(row.id)
       },
-      updateActiveSpider() {
-        if (this.activeSpider) {
-          for (let i = 0; i < this.spiderList.length; i++) {
-            const spider = this.spiderList[i]
-            if (this.activeSpider.id === spider.id) {
-              this.activeSpider = spider
-            }
-          }
-        }
-      },
-      onViewRunningTasks(row, ev) {
+      async onViewRunningTasks(row, ev) {
         ev.stopPropagation()
         this.activeSpider = row
         this.isRunningTasksDialogVisible = true
-      },
-      getTasks(row) {
-        if (!this.activeSpider.latest_tasks) {
-          return []
-        }
-        return this.activeSpider.latest_tasks
-          .filter(d => d.status === this.activeSpiderTaskStatus)
-          .map(d => {
-            d = JSON.parse(JSON.stringify(d))
-            d.create_ts = d.create_ts.match('^0001') ? 'NA' : dayjs(d.create_ts).format('YYYY-MM-DD HH:mm:ss')
-            d.start_ts = d.start_ts.match('^0001') ? 'NA' : dayjs(d.start_ts).format('YYYY-MM-DD HH:mm:ss')
-            d.finish_ts = d.finish_ts.match('^0001') ? 'NA' : dayjs(d.finish_ts).format('YYYY-MM-DD HH:mm:ss')
-            return d
-          })
+        this.$set(this.filter, 'spider_id', row.id)
+        await this.$store.dispatch('task/getTaskList')
       },
       onViewTask(row) {
         this.$router.push(`/tasks/${row.id}`)
@@ -832,28 +748,11 @@
         const res = await this.$store.dispatch('task/cancelTask', row.id)
         if (res.data && res.data.code === 200) {
           this.$message.success(`Task "${row.id}" has been sent signal to stop`)
-          this.getList()
+          await this.getList()
         }
-      },
-      getVersions(row) {
-        if (!this.activeSpider.latest_tasks) {
-          return []
-        }
-        return this.activeSpider.latest_tasks
-          .filter(d => d.status === this.activeSpiderTaskStatus)
-          .map(d => {
-            d = JSON.parse(JSON.stringify(d))
-            d.create_ts = d.create_ts.match('^0001') ? 'NA' : dayjs(d.create_ts).format('YYYY-MM-DD HH:mm:ss')
-            d.start_ts = d.start_ts.match('^0001') ? 'NA' : dayjs(d.start_ts).format('YYYY-MM-DD HH:mm:ss')
-            d.finish_ts = d.finish_ts.match('^0001') ? 'NA' : dayjs(d.finish_ts).format('YYYY-MM-DD HH:mm:ss')
-            return d
-          })
       },
       onCrawlConfirmDialogClose() {
         this.crawlConfirmDialogVisible = false
-      },
-      isDisabled(row) {
-        return row.is_public && row.username !== this.userInfo.username
       }
     }
   }
