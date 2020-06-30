@@ -51,7 +51,7 @@ func (t *Tx) SelectTask(id uuid.UUID) (task *models.Task, err error) {
 		return nil, nil
 	}
 	value := b.Get([]byte(id.String()))
-	if value == nil {
+	if len(value) == 0 {
 		return nil, nil
 	}
 	if err = json.Unmarshal(value, &task); err != nil {

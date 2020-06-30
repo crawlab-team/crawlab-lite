@@ -17,17 +17,22 @@ import (
 )
 
 func QuerySpiderPage(page forms.PageForm) (total int, resultList []*results.Spider, err error) {
-	start, end := page.Range()
-
 	if err := dao.ReadTx(func(tx dao.Tx) error {
 		allSpiders, err := tx.SelectAllSpiders()
 		if err != nil {
 			return err
 		}
-		total = len(allSpiders)
-		spiders := From(allSpiders).OrderByDescendingT(func(spider *models.Spider) int64 {
+
+		query := From(allSpiders).OrderByDescendingT(func(spider *models.Spider) int64 {
 			return spider.CreateTs.UnixNano()
-		}).Skip(start).Take(end - start).Results()
+		}).Query
+		if page.PageNum > 0 && page.PageSize > 0 {
+			start, end := page.Range()
+			query = query.Skip(start).Take(end - start)
+		}
+		spiders := query.Results()
+		total = query.Count()
+
 		cache := map[uuid.UUID]*models.Task{}
 		for _, spider := range spiders {
 			spider := spider.(*models.Spider)
@@ -159,12 +164,23 @@ func RemoveSpider(id uuid.UUID) (res interface{}, err error) {
 	return nil, nil
 }
 
-func QuerySpiderVersionList(spiderId uuid.UUID) (resultList []*results.SpiderVersion, err error) {
+func QuerySpiderVersionPage(page forms.SpiderVersionPageForm) (total int, resultList []*results.SpiderVersion, err error) {
 	if err := dao.ReadTx(func(tx dao.Tx) error {
-		versions, err := tx.SelectAllSpiderVersions(spiderId)
+		allVersions, err := tx.SelectAllSpiderVersions(uuid.FromStringOrNil(page.SpiderId))
 		if err != nil {
 			return err
 		}
+
+		query := From(allVersions).OrderByDescendingT(func(version *models.SpiderVersion) int64 {
+			return version.CreateTs.UnixNano()
+		}).Query
+		if page.PageNum > 0 && page.PageSize > 0 {
+			start, end := page.Range()
+			query = query.Skip(start).Take(end - start)
+		}
+		versions := query.Results()
+		total = query.Count()
+
 		for _, version := range versions {
 			var result results.SpiderVersion
 			if err := copier.Copy(&result, version); err != nil {
@@ -174,10 +190,10 @@ func QuerySpiderVersionList(spiderId uuid.UUID) (resultList []*results.SpiderVer
 		}
 		return nil
 	}); err != nil {
-		return nil, err
+		return 0, nil, err
 	}
 
-	return resultList, nil
+	return total, resultList, nil
 }
 
 func QuerySpiderVersion(spiderId uuid.UUID, versionId uuid.UUID) (result *results.SpiderVersion, err error) {
@@ -244,13 +260,13 @@ func AddSpiderVersion(spiderId uuid.UUID, form forms.SpiderUploadForm) (result *
 
 		version := &models.SpiderVersion{
 			Id:       uid,
-			FileHash: utils.GetFileMD5(zipFile),
+			MD5:      utils.GetFileMD5(zipFile),
 			SpiderId: spiderId,
 			Path:     filepath.Join(spiderId.String(), uid.String()),
 		}
 
 		// 通过文件 MD5 判断是否为重复的版本
-		if _version, err := tx.SelectSpiderVersionWhereFileHash(spiderId, version.FileHash); err != nil {
+		if _version, err := tx.SelectSpiderVersionWhereMD5(spiderId, version.MD5); err != nil {
 			return err
 		} else if _version != nil {
 			return errors.New("spider version already exists")
@@ -268,6 +284,7 @@ func AddSpiderVersion(spiderId uuid.UUID, form forms.SpiderUploadForm) (result *
 			return err
 		}
 
+		// 判断解压后外面是否还有一层目录
 		fileList, err := ioutil.ReadDir(unzipPath)
 		if err == nil && len(fileList) == 1 && fileList[0].IsDir() {
 			version.Path = filepath.Join(version.Path, fileList[0].Name())
@@ -312,17 +329,9 @@ func RemoveSpiderVersion(spiderId uuid.UUID, versionId uuid.UUID) (res interface
 			return err
 		}
 
-		// 查询版本信息
-		version2, err := tx.SelectSpiderVersion(spiderId, versionId)
-		if err != nil {
-			return err
-		} else if version2 == nil {
-			return errors.New("spider version not found")
-		}
-
 		// 删除版本文件
 		dirPath := viper.GetString("spider.path")
-		if err := os.RemoveAll(filepath.Join(dirPath, version.Path)); err != nil {
+		if err := os.RemoveAll(filepath.Join(dirPath, version.SpiderId.String(), version.Id.String())); err != nil {
 			return err
 		}
 

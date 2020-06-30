@@ -15,17 +15,22 @@ import (
 )
 
 func QuerySchedulePage(page forms.PageForm) (total int, resultList []*results.Schedule, err error) {
-	start, end := page.Range()
-
 	if err := dao.ReadTx(func(tx dao.Tx) error {
 		allSchedules, err := tx.SelectAllSchedules()
 		if err != nil {
 			return err
 		}
-		total = len(allSchedules)
-		schedules := From(allSchedules).OrderByDescendingT(func(spider *models.Schedule) int64 {
+
+		query := From(allSchedules).OrderByDescendingT(func(spider *models.Schedule) int64 {
 			return spider.CreateTs.UnixNano()
-		}).Skip(start).Take(end - start).Results()
+		}).Query
+		if page.PageNum > 0 && page.PageSize > 0 {
+			start, end := page.Range()
+			query = query.Skip(start).Take(end - start)
+		}
+		schedules := query.Results()
+		total = query.Count()
+
 		cache := map[uuid.UUID]*models.Spider{}
 		for _, schedule := range schedules {
 			schedule := schedule.(*models.Schedule)

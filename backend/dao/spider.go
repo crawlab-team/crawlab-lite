@@ -34,7 +34,7 @@ func (t *Tx) SelectSpider(id uuid.UUID) (spider *models.Spider, err error) {
 		return nil, nil
 	}
 	value := b.Get([]byte(id.String()))
-	if value == nil {
+	if len(value) == 0 {
 		return nil, nil
 	}
 	if err = json.Unmarshal(value, &spider); err != nil {
@@ -138,7 +138,7 @@ func (t *Tx) SelectSpiderVersion(spiderId uuid.UUID, versionId uuid.UUID) (versi
 		return nil, nil
 	}
 	value := b.Get([]byte(joinVersionKey(spiderId, versionId)))
-	if value == nil {
+	if len(value) == 0 {
 		return nil, nil
 	}
 	if err = json.Unmarshal(value, &version); err != nil {
@@ -148,7 +148,7 @@ func (t *Tx) SelectSpiderVersion(spiderId uuid.UUID, versionId uuid.UUID) (versi
 }
 
 // 根据 MD5 查询爬虫版本
-func (t *Tx) SelectSpiderVersionWhereFileHash(spiderId uuid.UUID, fileHash string) (version *models.SpiderVersion, err error) {
+func (t *Tx) SelectSpiderVersionWhereMD5(spiderId uuid.UUID, md5 string) (version *models.SpiderVersion, err error) {
 	b := t.tx.Bucket([]byte(constants.SpiderVersionBucket))
 	if b == nil {
 		return nil, nil
@@ -159,7 +159,7 @@ func (t *Tx) SelectSpiderVersionWhereFileHash(spiderId uuid.UUID, fileHash strin
 		if err = json.Unmarshal(v, &version); err != nil {
 			return nil, err
 		}
-		if version.FileHash == fileHash {
+		if version.MD5 == md5 {
 			return version, nil
 		}
 	}

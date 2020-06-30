@@ -1,6 +1,8 @@
 package forms
 
-import "mime/multipart"
+import (
+	"mime/multipart"
+)
 
 type SpiderForm struct {
 	SpiderUploadForm
@@ -13,4 +15,10 @@ type SpiderUploadForm struct {
 	BaseForm
 
 	File *multipart.FileHeader `form:"file" json:"-" binding:"required"`
+}
+
+type SpiderVersionPageForm struct {
+	PageForm
+
+	SpiderId string `uri:"id" json:"spider_id" binding:"required"`
 }

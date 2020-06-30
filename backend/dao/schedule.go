@@ -32,7 +32,7 @@ func (t *Tx) SelectSchedule(id uuid.UUID) (schedule *models.Schedule, err error)
 		return nil, nil
 	}
 	value := b.Get([]byte(id.String()))
-	if value == nil {
+	if len(value) == 0 {
 		return nil, nil
 	}
 	if err = json.Unmarshal(value, &schedule); err != nil {

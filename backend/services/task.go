@@ -13,15 +13,15 @@ import (
 )
 
 func QueryTaskPage(page forms.TaskPageForm) (total int, resultList []*results.Task, err error) {
-	spiderId := uuid.FromStringOrNil(page.SpiderId)
-	scheduleId := uuid.FromStringOrNil(page.ScheduleId)
-	start, end := page.Range()
-
 	if err := dao.ReadTx(func(tx dao.Tx) error {
 		allTasks, err := tx.SelectAllTasks()
 		if err != nil {
 			return err
 		}
+
+		spiderId := uuid.FromStringOrNil(page.SpiderId)
+		scheduleId := uuid.FromStringOrNil(page.ScheduleId)
+
 		query := From(allTasks)
 		if spiderId != uuid.Nil {
 			query = query.WhereT(func(task *models.Task) bool {
@@ -33,9 +33,16 @@ func QueryTaskPage(page forms.TaskPageForm) (total int, resultList []*results.Ta
 				return task.ScheduleId == scheduleId
 			})
 		}
-		tasks := query.OrderByDescendingT(func(task *models.Task) int64 {
+
+		query = query.OrderByDescendingT(func(task *models.Task) int64 {
 			return task.UpdateTs.UnixNano()
-		}).Skip(start).Take(end - start).Results()
+		}).Query
+		if page.PageNum > 0 && page.PageSize > 0 {
+			start, end := page.Range()
+			query = query.Skip(start).Take(end - start)
+		}
+		tasks := query.Results()
+		total = query.Count()
 
 		cache := map[uuid.UUID]*models.Spider{}
 		for _, task := range tasks {

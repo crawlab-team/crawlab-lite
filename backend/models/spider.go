@@ -15,7 +15,7 @@ type Spider struct {
 
 type SpiderVersion struct {
 	Id       uuid.UUID `json:"id"`
-	FileHash string    `json:"file_hash"`
+	MD5      string    `json:"md5"`
 	SpiderId uuid.UUID `json:"spider_id"`
 	Path     string    `json:"path"`
 	CreateTs time.Time `json:"create_ts"`

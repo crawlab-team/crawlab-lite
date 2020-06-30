@@ -94,17 +94,23 @@ func DeleteSpider(c *gin.Context) {
 }
 
 func GetSpiderVersionList(c *gin.Context) {
-	id, err := uuid.FromString(c.Param("id"))
-	if err != nil {
-		HandleError(http.StatusBadRequest, c, errors.New("invalid id"))
+	var page forms.SpiderVersionPageForm
+
+	if err := c.ShouldBindUri(&page); err != nil {
+		HandleError(http.StatusBadRequest, c, err)
 		return
 	}
 
-	if res, err := services.QuerySpiderVersionList(id); err != nil {
+	if _, err := uuid.FromString(page.SpiderId); err != nil {
+		HandleError(http.StatusBadRequest, c, errors.New("invalid spider id"))
+		return
+	}
+
+	if total, versions, err := services.QuerySpiderVersionPage(page); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
 		return
 	} else {
-		HandleSuccess(c, res)
+		HandleSuccessList(c, total, versions)
 	}
 }
 
