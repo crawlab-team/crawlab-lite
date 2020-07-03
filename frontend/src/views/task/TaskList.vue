@@ -26,17 +26,17 @@
                 <el-option v-for="spider in spiderList" :key="spider.id" :value="spider.id" :label="spider.name" />
               </el-select>
             </el-form-item>
-            <!--            <el-form-item prop="status" :label="$t('Status')">-->
-            <!--              <el-select v-model="filter.status" size="small" :placeholder="$t('Status')" @change="onFilterChange">-->
-            <!--                <el-option value="" :label="$t('All')"></el-option>-->
-            <!--                <el-option value="pending" :label="$t('Pending')"></el-option>-->
-            <!--                <el-option value="running" :label="$t('Running')"></el-option>-->
-            <!--                <el-option value="finished" :label="$t('Finished')"></el-option>-->
-            <!--                <el-option value="error" :label="$t('Error')"></el-option>-->
-            <!--                <el-option value="cancelled" :label="$t('Cancelled')"></el-option>-->
-            <!--                <el-option value="abnormal" :label="$t('Abnormal')"></el-option>-->
-            <!--              </el-select>-->
-            <!--            </el-form-item>-->
+            <el-form-item prop="status" :label="$t('Status')">
+              <el-select v-model="filter.status" size="small" :placeholder="$t('Status')" @change="onFilterChange">
+                <el-option value="" :label="$t('All')" />
+                <el-option value="PADDING" :label="$t('Pending')" />
+                <el-option value="RUNNING" :label="$t('Running')" />
+                <el-option value="FINISHED" :label="$t('Finished')" />
+                <el-option value="ERROR" :label="$t('Error')" />
+                <el-option value="CANCELLED" :label="$t('Cancelled')" />
+                <el-option value="ABNORMAL" :label="$t('Abnormal')" />
+              </el-select>
+            </el-form-item>
           </el-form>
         </div>
         <div class="right">

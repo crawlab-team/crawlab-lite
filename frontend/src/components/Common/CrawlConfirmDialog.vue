@@ -1,5 +1,6 @@
 <template>
   <div class="crawl-confirm-dialog-wrapper">
+    <disclaimer-dialog v-model="disclaimerVisible" />
     <el-dialog
       :title="$t('Notification')"
       :visible="visible"
@@ -47,9 +48,13 @@
 
 <script>
   import { mapState } from 'vuex'
+  import DisclaimerDialog from '@/components/Disclaimer'
 
   export default {
     name: 'CrawlConfirmDialog',
+    components: {
+      DisclaimerDialog
+    },
     props: {
       spiderId: {
         type: String,
@@ -79,7 +84,8 @@
         isAllowDisclaimer: true,
         isRetry: false,
         isRedirect: false,
-        isLoading: false
+        isLoading: false,
+        disclaimerVisible: false
       }
     },
     computed: {
@@ -157,7 +163,7 @@
         })
       },
       onClickDisclaimer() {
-        this.$router.push('/disclaimer')
+        this.disclaimerVisible = true
       }
     }
   }

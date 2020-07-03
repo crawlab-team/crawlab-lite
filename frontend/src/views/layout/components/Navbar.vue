@@ -1,97 +1,99 @@
 <template>
-  <div class="navbar">
+  <div>
     <disclaimer-dialog v-model="disclaimerVisible" />
-    <el-dialog
-      :visible.sync="isLatestReleaseNoteVisible"
-      :title="$t('Release') + ` ${this.latestRelease.name}`"
-    >
-      <el-tabs v-model="activeTabName">
-        <el-tab-pane :label="$t('Release Note')" name="release-note">
-          <div class="content markdown-body" v-html="latestReleaseNoteHtml" />
-          <template slot="footer">
-            <el-button type="primary" size="small" @click="isLatestReleaseNoteVisible = false">{{ $t('Ok') }}</el-button>
-          </template>
-        </el-tab-pane>
-        <el-tab-pane :label="$t('How to Upgrade')" name="how-to-upgrade">
-          <div class="content markdown-body" v-html="howToUpgradeHtml" />
-        </el-tab-pane>
-      </el-tabs>
-      <template slot="footer">
-        <el-button type="primary" size="small" @click="isLatestReleaseNoteVisible = false">{{ $t('Ok') }}</el-button>
-      </template>
-    </el-dialog>
-
-    <hamburger :toggle-click="toggleSideBar" :is-active="sidebar.opened" class="hamburger-container" />
-    <breadcrumb class="breadcrumb" />
-    <el-dropdown class="avatar-container right" trigger="click">
-      <span class="el-dropdown-link">
-        {{ username }}
-        <i class="el-icon-arrow-down el-icon--right" />
-      </span>
-      <el-dropdown-menu slot="dropdown" class="user-dropdown">
-        <el-dropdown-item>
-          <span style="display:block;" @click="logout">{{ $t('Logout') }}</span>
-        </el-dropdown-item>
-      </el-dropdown-menu>
-    </el-dropdown>
-    <el-dropdown class="lang-list right" trigger="click">
-      <span class="el-dropdown-link">
-        {{ $t($store.getters['lang/lang']) }}
-        <i class="el-icon-arrow-down el-icon--right" />
-      </span>
-      <el-dropdown-menu slot="dropdown">
-        <el-dropdown-item @click.native="setLang('zh')">
-          <span>中文</span>
-        </el-dropdown-item>
-        <el-dropdown-item @click.native="setLang('en')">
-          <span>English</span>
-        </el-dropdown-item>
-      </el-dropdown-menu>
-    </el-dropdown>
-    <!--    <div class="documentation right">-->
-    <!--      <a href="http://docs.crawlab.cn" target="_blank">-->
-    <!--        <font-awesome-icon :icon="['far', 'question-circle']" />-->
-    <!--        <span style="margin-left: 5px;">{{ $t('Documentation') }}</span>-->
-    <!--      </a>-->
-    <!--    </div>-->
-    <div class="disclaimer right">
-      <div @click="disclaimerVisible=true">
-        <font-awesome-icon :icon="['fa', 'exclamation-circle']" />
-        <span style="margin-left: 5px;">{{ $t('Disclaimer') }}</span>
-      </div>
-    </div>
-    <div v-if="isUpgradable" class="upgrade right" @click="onClickUpgrade">
-      <font-awesome-icon :icon="['fas', 'arrow-up']" />
-      <el-badge is-dot>
-        <span style="margin-left: 5px;">{{ $t('Upgrade') }}</span>
-      </el-badge>
-    </div>
-    <el-popover
-      class="wechat right"
-      trigger="click"
-    >
-      <div style="margin-bottom: 5px">
-        <label>{{ $t('Add Wechat to join discussion group') }}</label>
-      </div>
-      <div>
-        <img class="wechat-img" src="http://static-docs.crawlab.cn/wechat.jpg">
-      </div>
-      <div slot="reference">
-        <i class="fa fa-wechat" />
-      </div>
-    </el-popover>
-    <div class="github right">
-      <!-- Place this tag where you want the button to render. -->
-      <github-button
-        href="https://github.com/crawlab-team/crawlab-lite"
-        data-color-scheme="no-preference: light; light: light; dark: dark;"
-        data-size="large"
-        data-show-count="true"
-        :aria-label="$t('Star crawlab-team/crawlab on GitHub')"
-        style="color: white"
+    <div class="navbar">
+      <el-dialog
+        :visible.sync="isLatestReleaseNoteVisible"
+        :title="$t('Release') + ` ${this.latestRelease.name}`"
       >
-        Star
-      </github-button>
+        <el-tabs v-model="activeTabName">
+          <el-tab-pane :label="$t('Release Note')" name="release-note">
+            <div class="content markdown-body" v-html="latestReleaseNoteHtml" />
+            <template slot="footer">
+              <el-button type="primary" size="small" @click="isLatestReleaseNoteVisible = false">{{ $t('Ok') }}</el-button>
+            </template>
+          </el-tab-pane>
+          <el-tab-pane :label="$t('How to Upgrade')" name="how-to-upgrade">
+            <div class="content markdown-body" v-html="howToUpgradeHtml" />
+          </el-tab-pane>
+        </el-tabs>
+        <template slot="footer">
+          <el-button type="primary" size="small" @click="isLatestReleaseNoteVisible = false">{{ $t('Ok') }}</el-button>
+        </template>
+      </el-dialog>
+
+      <hamburger :toggle-click="toggleSideBar" :is-active="sidebar.opened" class="hamburger-container" />
+      <breadcrumb class="breadcrumb" />
+      <el-dropdown class="avatar-container right" trigger="click">
+        <span class="el-dropdown-link">
+          {{ username }}
+          <i class="el-icon-arrow-down el-icon--right" />
+        </span>
+        <el-dropdown-menu slot="dropdown" class="user-dropdown">
+          <el-dropdown-item>
+            <span style="display:block;" @click="logout">{{ $t('Logout') }}</span>
+          </el-dropdown-item>
+        </el-dropdown-menu>
+      </el-dropdown>
+      <el-dropdown class="lang-list right" trigger="click">
+        <span class="el-dropdown-link">
+          {{ $t($store.getters['lang/lang']) }}
+          <i class="el-icon-arrow-down el-icon--right" />
+        </span>
+        <el-dropdown-menu slot="dropdown">
+          <el-dropdown-item @click.native="setLang('zh')">
+            <span>中文</span>
+          </el-dropdown-item>
+          <el-dropdown-item @click.native="setLang('en')">
+            <span>English</span>
+          </el-dropdown-item>
+        </el-dropdown-menu>
+      </el-dropdown>
+      <!--    <div class="documentation right">-->
+      <!--      <a href="http://docs.crawlab.cn" target="_blank">-->
+      <!--        <font-awesome-icon :icon="['far', 'question-circle']" />-->
+      <!--        <span style="margin-left: 5px;">{{ $t('Documentation') }}</span>-->
+      <!--      </a>-->
+      <!--    </div>-->
+      <div class="disclaimer right">
+        <div @click="disclaimerVisible=true">
+          <font-awesome-icon :icon="['fa', 'exclamation-circle']" />
+          <span style="margin-left: 5px;">{{ $t('Disclaimer') }}</span>
+        </div>
+      </div>
+      <div v-if="isUpgradable" class="upgrade right" @click="onClickUpgrade">
+        <font-awesome-icon :icon="['fas', 'arrow-up']" />
+        <el-badge is-dot>
+          <span style="margin-left: 5px;">{{ $t('Upgrade') }}</span>
+        </el-badge>
+      </div>
+      <el-popover
+        class="wechat right"
+        trigger="click"
+      >
+        <div style="margin-bottom: 5px">
+          <label>{{ $t('Add Wechat to join discussion group') }}</label>
+        </div>
+        <div>
+          <img class="wechat-img" src="http://static-docs.crawlab.cn/wechat.jpg">
+        </div>
+        <div slot="reference">
+          <i class="fa fa-wechat" />
+        </div>
+      </el-popover>
+      <div class="github right">
+        <!-- Place this tag where you want the button to render. -->
+        <github-button
+          href="https://github.com/crawlab-team/crawlab-lite"
+          data-color-scheme="no-preference: light; light: light; dark: dark;"
+          data-size="large"
+          data-show-count="true"
+          :aria-label="$t('Star crawlab-team/crawlab on GitHub')"
+          style="color: white"
+        >
+          Star
+        </github-button>
+      </div>
     </div>
   </div>
 </template>

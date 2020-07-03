@@ -33,6 +33,11 @@ func QueryTaskPage(page forms.TaskPageForm) (total int, resultList []*results.Ta
 				return task.ScheduleId == scheduleId
 			})
 		}
+		if page.Status != "" {
+			query = query.WhereT(func(task *models.Task) bool {
+				return task.Status == page.Status
+			})
+		}
 
 		query = query.OrderByDescendingT(func(task *models.Task) int64 {
 			return task.UpdateTs.UnixNano()

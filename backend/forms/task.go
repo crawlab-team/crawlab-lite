@@ -1,12 +1,16 @@
 package forms
 
-import uuid "github.com/satori/go.uuid"
+import (
+	"crawlab-lite/constants"
+	uuid "github.com/satori/go.uuid"
+)
 
 type TaskPageForm struct {
 	PageForm
 
-	SpiderId   string `form:"spider_id" json:"spider_id"`
-	ScheduleId string `form:"spider_version_id" json:"spider_version_id"`
+	SpiderId   string               `form:"spider_id" json:"spider_id"`
+	ScheduleId string               `form:"schedule_id" json:"schedule_id"`
+	Status     constants.TaskStatus `form:"status" json:"status"`
 }
 
 type TaskForm struct {
