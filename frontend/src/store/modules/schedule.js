@@ -26,14 +26,14 @@ const actions = {
         commit('SET_SCHEDULE_LIST', response.data.data.list || [])
       })
   },
-  addSchedule({ state }) {
-    request.post('/schedules', state.scheduleForm)
+  addSchedule({ state }, payload) {
+    return request.post('/schedules', payload || state.scheduleForm)
   },
-  editSchedule({ state }, id) {
-    request.put(`/schedules/${id}`, state.scheduleForm)
+  editSchedule({ state }, payload) {
+    return request.put(`/schedules/${payload.id}`, payload || state.scheduleForm)
   },
   removeSchedule({ state }, id) {
-    request.delete(`/schedules/${id}`)
+    return request.delete(`/schedules/${id}`)
   },
   enableSchedule({ state, dispatch }, id) {
     return request.put(`/schedules/${id}`, { enabled: 1 })

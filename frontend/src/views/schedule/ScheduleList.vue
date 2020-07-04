@@ -47,6 +47,21 @@
             />
           </el-select>
         </el-form-item>
+        <el-form-item v-if="scheduleForm.spider_id" :label="$t('Version')" inline-message prop="spiderVersionId">
+          <el-select
+            v-model="scheduleForm.spider_version_id"
+            :loading="loadingVersions"
+            :placeholder="$t('Latest Version')"
+            @focus="onSelectSpiderVersion"
+          >
+            <el-option
+              v-for="(version, index) in spiderVersionList"
+              :key="version.id"
+              :value="version.id"
+              :label="getTime(version.create_ts).format('YYYY-MM-DD HH:mm:ss') + (index === 0 ? ` (${$t('Latest Version')})` : '')"
+            />
+          </el-select>
+        </el-form-item>
         <el-form-item :label="$t('Cron')" prop="cron" required>
           <el-input
             id="cron"
@@ -228,6 +243,7 @@
   import { mapState } from 'vuex'
   import ScheduleTaskList from '../../components/Schedule/ScheduleTaskList'
   import CrawlConfirmDialog from '../../components/Common/CrawlConfirmDialog'
+  import dayjs from 'dayjs'
 
   export default {
     name: 'ScheduleList',
@@ -254,6 +270,7 @@
         isShowCron: false,
         submitting: false,
         loadingSpiders: false,
+        loadingVersions: false,
         isViewTasksDialogVisible: false,
         crawlConfirmDialogVisible: false,
 
@@ -344,6 +361,7 @@
       ]),
       ...mapState('spider', [
         'spiderList',
+        'spiderVersionList',
         'spiderForm'
       ]),
       lang() {
@@ -394,11 +412,11 @@
       onAddSubmit() {
         this.$refs.scheduleForm.validate(res => {
           if (res) {
-            const form = JSON.parse(JSON.stringify(this.scheduleForm))
+            const form = Object.assign({}, this.scheduleForm)
             if (form.cron.search(/^\S+?\s\S+?\s\S+?\s\S+?\s\S+?$/) !== -1) {
-              form.cron = '0 ' + this.scheduleForm.cron
+              this.$set(form, 'cron', '0 ' + form.cron)
             }
-            form.enabled = form.enabled ? 1 : 0
+            this.$set(form, 'enabled', form.enabled ? 1 : 0)
             if (this.isEdit) {
               this.$store.dispatch('schedule/editSchedule', form).then(response => {
                 if (response.data.code !== 200) {
@@ -456,6 +474,11 @@
         await this.$store.dispatch('spider/getSpiderList')
         this.loadingSpiders = false
       },
+      async onSelectSpiderVersion() {
+        this.loadingVersions = true
+        await this.$store.dispatch('spider/getSpiderVersionList', { spider_id: this.scheduleForm.spider_id })
+        this.loadingVersions = false
+      },
       async onEnabledChange(row) {
         let res
         if (row.enabled) {
@@ -499,6 +522,9 @@
         this.crawlConfirmDialogVisible = true
         this.$store.commit('schedule/SET_SCHEDULE_FORM', row)
         this.$st.sendEv('定时任务', '点击运行任务')
+      },
+      getTime(str) {
+        return dayjs(str)
       }
     }
   }

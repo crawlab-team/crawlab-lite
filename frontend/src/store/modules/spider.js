@@ -116,9 +116,10 @@ const actions = {
       })
   },
   crawlSpider({ state, dispatch }, payload) {
-    const { spiderId, cmd } = payload
+    const { spiderId, spiderVersionId, cmd } = payload
     return request.post(`/tasks`, {
       spider_id: spiderId,
+      spider_version_id: spiderVersionId,
       cmd: cmd
     })
   },

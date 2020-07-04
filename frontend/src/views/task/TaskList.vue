@@ -18,7 +18,7 @@
               <el-select
                 v-model="filter.spider_id"
                 size="small"
-                :placeholder="$t('Spider')"
+                :placeholder="$t('All')"
                 :disabled="isFilterSpiderDisabled"
                 @change="onFilterChange"
               >

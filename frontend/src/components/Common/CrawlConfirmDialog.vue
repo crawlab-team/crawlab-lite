@@ -15,6 +15,21 @@
             <el-input v-model="form.cmd" :placeholder="$t('Execute Command')" />
           </template>
         </el-form-item>
+        <el-form-item :label="$t('Version')" inline-message prop="spiderVersionId">
+          <el-select
+            v-model="form.spiderVersionId"
+            :loading="loadingVersions"
+            :placeholder="$t('Latest Version')"
+            @focus="onSelectSpiderVersion"
+          >
+            <el-option
+              v-for="(version, index) in spiderVersionList"
+              :key="version.id"
+              :value="version.id"
+              :label="getTime(version.create_ts).format('YYYY-MM-DD HH:mm:ss') + (index === 0 ? ` (${$t('Latest Version')})` : '')"
+            />
+          </el-select>
+        </el-form-item>
       </el-form>
       <div>
         <el-checkbox v-model="isAllowDisclaimer" />
@@ -48,6 +63,7 @@
 
 <script>
   import { mapState } from 'vuex'
+  import dayjs from 'dayjs'
   import DisclaimerDialog from '@/components/Disclaimer'
 
   export default {
@@ -56,23 +72,13 @@
       DisclaimerDialog
     },
     props: {
-      spiderId: {
-        type: String,
-        default: ''
-      },
-      spiders: {
-        type: Array,
-        default() {
-          return []
-        }
-      },
       visible: {
         type: Boolean,
         default: false
       },
-      multiple: {
-        type: Boolean,
-        default: false
+      spiderId: {
+        type: String,
+        default: ''
       }
     },
     data() {
@@ -84,63 +90,41 @@
         isAllowDisclaimer: true,
         isRetry: false,
         isRedirect: false,
-        isLoading: false,
+        loadingVersions: false,
+        versionList: [],
         disclaimerVisible: false
       }
     },
     computed: {
       ...mapState('spider', [
-        'spiderForm'
-      ]),
-      ...mapState('setting', [
-        'setting'
+        'spiderForm',
+        'spiderVersionList'
       ]),
       ...mapState('lang', [
         'lang'
       ]),
       isConfirmDisabled() {
-        if (this.isLoading) return true
         return !this.isAllowDisclaimer
       }
     },
     methods: {
+      async onSelectSpiderVersion() {
+        this.loadingVersions = true
+        await this.$store.dispatch('spider/getSpiderVersionList', { spider_id: this.spiderId })
+        this.loadingVersions = false
+      },
       beforeClose() {
         this.$emit('close')
       },
-      onConfirm() {
+      async onConfirm() {
         this.$refs['form'].validate(async valid => {
           if (!valid) return
 
-          // 请求响应
-          let res
-
-          if (!this.multiple) {
-            // 运行单个爬虫
-
-            // 参数
-            const cmd = this.form.cmd
-
-            // 发起请求
-            res = await this.$store.dispatch('spider/crawlSpider', {
-              spiderId: this.spiderId,
-              cmd
-            })
-          } else {
-            // 运行多个爬虫
-
-            // 发起请求
-            res = await this.$store.dispatch('spider/crawlSelectedSpiders', {
-              taskParams: this.spiders.map(d => {
-                // 参数
-                const cmd = this.form.cmd
-
-                return {
-                  spider_id: d.id,
-                  cmd
-                }
-              })
-            })
-          }
+          const res = await this.$store.dispatch('spider/crawlSpider', {
+            spiderId: this.spiderId,
+            spiderVersionId: this.form.spiderVersionId,
+            cmd: this.form.cmd
+          })
 
           // 消息提示
           this.$message.success(this.$t('A task has been scheduled successfully'))
@@ -148,14 +132,10 @@
           this.$emit('close')
 
           // 是否重定向
-          if (
-            this.isRedirect &&
-            !this.spiderForm.is_long_task &&
-            !this.multiple
-          ) {
+          if (this.isRedirect) {
             // 返回任务id
             const id = res.data.data[0]
-            this.$router.push('/tasks/' + id)
+            await this.$router.push('/tasks/' + id)
             this.$st.sendEv('爬虫确认', '跳转到任务详情')
           }
 
@@ -164,6 +144,9 @@
       },
       onClickDisclaimer() {
         this.disclaimerVisible = true
+      },
+      getTime(str) {
+        return dayjs(str)
       }
     }
   }
