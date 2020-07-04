@@ -144,9 +144,9 @@ const router = new Router({
 
 router.beforeEach((to, from, next) => {
   if (to.meta && to.meta.title) {
-    window.document.title = `Crawlab - ${to.meta.title}`
+    window.document.title = `Crawlab Lite - ${to.meta.title}`
   } else {
-    window.document.title = 'Crawlab'
+    window.document.title = 'Crawlab Lite'
   }
 
   if (['/login', '/signup'].includes(to.path)) {
