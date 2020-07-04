@@ -42,12 +42,13 @@ func QueryTaskPage(page forms.TaskPageForm) (total int, resultList []*results.Ta
 		query = query.OrderByDescendingT(func(task *models.Task) int64 {
 			return task.UpdateTs.UnixNano()
 		}).Query
+		total = query.Count()
+
 		if page.PageNum > 0 && page.PageSize > 0 {
 			start, end := page.Range()
 			query = query.Skip(start).Take(end - start)
 		}
 		tasks := query.Results()
-		total = query.Count()
 
 		cache := map[uuid.UUID]*models.Spider{}
 		for _, task := range tasks {

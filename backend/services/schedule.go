@@ -24,12 +24,13 @@ func QuerySchedulePage(page forms.PageForm) (total int, resultList []*results.Sc
 		query := From(allSchedules).OrderByDescendingT(func(spider *models.Schedule) int64 {
 			return spider.CreateTs.UnixNano()
 		}).Query
+		total = query.Count()
+
 		if page.PageNum > 0 && page.PageSize > 0 {
 			start, end := page.Range()
 			query = query.Skip(start).Take(end - start)
 		}
 		schedules := query.Results()
-		total = query.Count()
 
 		cache := map[uuid.UUID]*models.Spider{}
 		for _, schedule := range schedules {

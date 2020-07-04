@@ -26,12 +26,13 @@ func QuerySpiderPage(page forms.PageForm) (total int, resultList []*results.Spid
 		query := From(allSpiders).OrderByDescendingT(func(spider *models.Spider) int64 {
 			return spider.CreateTs.UnixNano()
 		}).Query
+		total = query.Count()
+
 		if page.PageNum > 0 && page.PageSize > 0 {
 			start, end := page.Range()
 			query = query.Skip(start).Take(end - start)
 		}
 		spiders := query.Results()
-		total = query.Count()
 
 		cache := map[uuid.UUID]*models.Task{}
 		for _, spider := range spiders {
@@ -174,12 +175,13 @@ func QuerySpiderVersionPage(page forms.SpiderVersionPageForm) (total int, result
 		query := From(allVersions).OrderByDescendingT(func(version *models.SpiderVersion) int64 {
 			return version.CreateTs.UnixNano()
 		}).Query
+		total = query.Count()
+
 		if page.PageNum > 0 && page.PageSize > 0 {
 			start, end := page.Range()
 			query = query.Skip(start).Take(end - start)
 		}
 		versions := query.Results()
-		total = query.Count()
 
 		for _, version := range versions {
 			var result results.SpiderVersion
