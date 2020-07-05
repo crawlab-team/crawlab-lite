@@ -396,13 +396,13 @@
       </el-table>
       <div class="pagination">
         <el-pagination
-          :current-page.sync="pagination.pageNum"
+          :current-page.sync="pagination.page_num"
           :page-sizes="[10, 20, 50, 100]"
-          :page-size.sync="pagination.pageSize"
+          :page-size.sync="pagination.page_size"
           layout="sizes, prev, pager, next"
           :total="spiderTotal"
-          @current-change="onPageNumChange"
-          @size-change="onPageSizeChange"
+          @current-change="getSpiderList"
+          @size-change="getSpiderList"
         />
       </div>
       <!--./table list-->
@@ -425,8 +425,8 @@
     data() {
       return {
         pagination: {
-          pageNum: 1,
-          pageSize: 10
+          page_num: 1,
+          page_size: 10
         },
         importLoading: false,
         addConfigurableLoading: false,
@@ -500,7 +500,7 @@
             this.$utils.tour.nextStep('spider-list-add', currentStep)
           }
         },
-        handle: undefined,
+        refreshHandle: undefined,
         activeSpiderTaskStatus: 'RUNNING',
         isStopLoading: false,
         isRemoveLoading: false
@@ -548,11 +548,11 @@
     },
     async created() {
       // fetch spider list
-      await this.getList()
+      await this.getSpiderList()
 
       // periodically fetch spider list
-      this.handle = setInterval(() => {
-        this.getList()
+      this.refreshHandle = setInterval(() => {
+        this.getSpiderList()
       }, 15000)
     },
     mounted() {
@@ -565,18 +565,10 @@
         this.$utils.tour.startTour(this, 'spider-list')
       }
     },
+    destroyed() {
+      clearInterval(this.refreshHandle)
+    },
     methods: {
-      onPageSizeChange(val) {
-        this.pagination.pageSize = val
-        this.getList()
-      },
-      onPageNumChange(val) {
-        this.pagination.pageNum = val
-        this.getList()
-      },
-      onSearch() {
-        this.getList()
-      },
       onAdd() {
         this.$store.commit('spider/SET_SPIDER_FORM', {})
         this.addDialogVisible = true
@@ -588,7 +580,7 @@
         }, 300)
       },
       onRefresh() {
-        this.getList()
+        this.getSpiderList()
         this.$st.sendEv('爬虫列表', '刷新')
       },
       onCancel() {
@@ -623,7 +615,7 @@
               type: 'success',
               message: this.$t('Deleted successfully')
             })
-            await this.getList()
+            await this.getSpiderList()
             this.$st.sendEv('爬虫列表', '删除爬虫')
           })
         })
@@ -636,7 +628,7 @@
       },
       onCrawlConfirm() {
         setTimeout(() => {
-          this.getList()
+          this.getSpiderList()
         }, 1000)
       },
       onRemoveVersion(row, ev) {
@@ -678,7 +670,7 @@
 
         // fetch spider list
         setTimeout(() => {
-          this.getList()
+          this.getSpiderList()
         }, 500)
 
         this.$message.success(this.$t('Uploaded spider files successfully'))
@@ -716,12 +708,8 @@
       onRowClick(row, column, event) {
         this.onView(row, event)
       },
-      async getList() {
-        const params = {
-          page_num: this.pagination.pageNum,
-          page_size: this.pagination.pageSize
-        }
-        await this.$store.dispatch('spider/getSpiderList', params)
+      async getSpiderList() {
+        await this.$store.dispatch('spider/getSpiderList', this.pagination)
       },
       async getSpiderVersionList(spiderId) {
         await this.$store.dispatch('spider/getSpiderVersionList', { spider_id: spiderId })
@@ -748,7 +736,7 @@
         const res = await this.$store.dispatch('task/cancelTask', row.id)
         if (res.data && res.data.code === 200) {
           this.$message.success(`Task "${row.id}" has been sent signal to stop`)
-          await this.getList()
+          await this.getSpiderList()
         }
       },
       onCrawlConfirmDialogClose() {

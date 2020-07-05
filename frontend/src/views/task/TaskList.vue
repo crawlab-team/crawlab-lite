@@ -13,13 +13,14 @@
       <!--filter-->
       <div class="filter">
         <div class="left">
-          <el-form class="filter-form" :model="filter" label-position="right" inline>
+          <el-form :model="filter" label-position="right" inline>
             <el-form-item prop="spider_id" :label="$t('Spider')">
               <el-select
                 v-model="filter.spider_id"
                 size="small"
                 :placeholder="$t('All')"
                 :disabled="isFilterSpiderDisabled"
+                @focus="onSelectFilterSpider"
                 @change="onFilterChange"
               >
                 <el-option value="" :label="$t('All')" />
@@ -171,13 +172,13 @@
       </el-table>
       <div class="pagination">
         <el-pagination
-          :current-page.sync="pageNum"
+          :current-page.sync="pagination.page_num"
           :page-sizes="[10, 20, 50, 100]"
-          :page-size.sync="pageSize"
+          :page-size.sync="pagination.page_size"
           layout="sizes, prev, pager, next"
-          :total="taskListTotalCount"
-          @current-change="onPageChange"
-          @size-change="onPageChange"
+          :total="taskTotal"
+          @current-change="getTaskList"
+          @size-change="getTaskList"
         />
       </div>
       <!--./table list-->
@@ -197,30 +198,28 @@
     },
     data() {
       return {
-        // setInterval handle
-        handle: undefined,
-
-        // determine if is edit mode
+        filter: {},
+        pagination: {
+          page_num: 1,
+          page_size: 10
+        },
+        refreshHandle: undefined,
         isEditMode: false,
-
-        // dialog visibility
         dialogVisible: false,
-
+        loadingSpiders: false,
+        multipleSelection: [],
         // table columns
         columns: [
           { name: 'spider_name', label: 'Spider', width: '120' },
           { name: 'status', label: 'Status', width: '120' },
-          { name: 'cmd', label: 'Cmd', width: '120' },
-          { name: 'start_ts', label: 'Start Time', width: '100' },
-          { name: 'finish_ts', label: 'Finish Time', width: '100' },
+          { name: 'cmd', label: 'Cmd', width: '240' },
+          { name: 'start_ts', label: 'Start Time', width: '140' },
+          { name: 'finish_ts', label: 'Finish Time', width: '140' },
           { name: 'wait_duration', label: 'Wait Duration (sec)', align: 'right' },
           { name: 'runtime_duration', label: 'Runtime Duration (sec)', align: 'right' },
-          { name: 'total_duration', label: 'Total Duration (sec)', width: '80', align: 'right' }
-        // { name: 'result_count', label: 'Results Count', width: '80', align: 'right' }
+          { name: 'total_duration', label: 'Total Duration (sec)', align: 'right' }
+        // { name: 'result_count', label: 'Results Count', align: 'right' }
         ],
-
-        multipleSelection: [],
-
         // tutorial
         tourSteps: [
           {
@@ -243,7 +242,6 @@
             }
           }
         ],
-
         tourCallbacks: {
           onStop: () => {
             this.$utils.tour.finishTour('task-list')
@@ -255,36 +253,18 @@
             this.$utils.tour.nextStep('task-list', currentStep)
           }
         },
-
         isFilterSpiderDisabled: false
       }
     },
     computed: {
       ...mapState('task', [
-        'filter',
         'taskList',
-        'taskListTotalCount',
+        'taskTotal',
         'taskForm'
       ]),
       ...mapState('spider', [
         'spiderList'
       ]),
-      pageNum: {
-        get() {
-          return this.$store.state.task.pageNum
-        },
-        set(value) {
-          this.$store.commit('task/SET_PAGE_NUM', value)
-        }
-      },
-      pageSize: {
-        get() {
-          return this.$store.state.task.pageSize
-        },
-        set(value) {
-          this.$store.commit('task/SET_PAGE_SIZE', value)
-        }
-      },
       filteredTableData() {
         return this.taskList
           .map(d => d)
@@ -303,13 +283,11 @@
       }
     },
     created() {
-      this.$store.dispatch('task/resetFilter')
-      this.$store.dispatch('task/getTaskList')
-      this.$store.dispatch('spider/getSpiderList')
+      this.getTaskList()
     },
     mounted() {
-      this.handle = setInterval(() => {
-        this.$store.dispatch('task/getTaskList')
+      this.refreshHandle = setInterval(() => {
+        this.getTaskList()
       }, 5000)
 
       if (!this.$utils.tour.isFinishedTour('task-list')) {
@@ -317,13 +295,9 @@
       }
     },
     destroyed() {
-      clearInterval(this.handle)
+      clearInterval(this.refreshHandle)
     },
     methods: {
-      onRefresh() {
-        this.$store.dispatch('task/getTaskList')
-        this.$st.sendEv('任务列表', '搜索')
-      },
       onRemoveMultipleTask() {
         if (this.multipleSelection.length === 0) {
           this.$message({
@@ -344,7 +318,7 @@
                 type: 'success',
                 message: '删除任务成功'
               })
-              this.$store.dispatch('task/getTaskList')
+              this.getTaskList()
               this.$refs['table'].clearSelection()
               return
             }
@@ -398,11 +372,6 @@
         this.$router.push(`/spiders/${row.spider_id}`)
         this.$st.sendEv('任务列表', '点击爬虫详情')
       },
-      onPageChange() {
-        setTimeout(() => {
-          this.$store.dispatch('task/getTaskList')
-        }, 0)
-      },
       getTime(str) {
         if (str.match('^0001')) return 'NA'
         return dayjs(str).format('YYYY-MM-DD HH:mm:ss')
@@ -427,8 +396,17 @@
       onSelectionChange(val) {
         this.multipleSelection = val
       },
-      onFilterChange() {
-        this.$store.dispatch('task/getTaskList')
+      async getTaskList() {
+        const params = Object.assign({}, this.pagination, this.filter)
+        await this.$store.dispatch('task/getTaskList', params)
+      },
+      async onSelectFilterSpider() {
+        this.loadingSpiders = true
+        await this.$store.dispatch('spider/getSpiderList')
+        this.loadingSpiders = false
+      },
+      async onFilterChange() {
+        await this.getTaskList()
         this.$st.sendEv('任务列表', '筛选任务')
       }
     }

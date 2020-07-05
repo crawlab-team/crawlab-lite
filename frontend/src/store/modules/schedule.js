@@ -2,6 +2,7 @@ import request from '../../api/request'
 
 const state = {
   scheduleList: [],
+  scheduleTotal: 0,
   scheduleForm: {}
 }
 
@@ -11,19 +12,23 @@ const mutations = {
   SET_SCHEDULE_LIST(state, value) {
     state.scheduleList = value
   },
+  SET_SCHEDULE_TOTAL(state, value) {
+    state.scheduleTotal = value
+  },
   SET_SCHEDULE_FORM(state, value) {
     state.scheduleForm = value
   }
 }
 
 const actions = {
-  getScheduleList({ state, commit }) {
-    request.get('/schedules')
+  getScheduleList({ state, commit }, params = {}) {
+    request.get('/schedules', params)
       .then(response => {
         if (!response || !response.data || !response.data.data) {
           return
         }
         commit('SET_SCHEDULE_LIST', response.data.data.list || [])
+        commit('SET_SCHEDULE_TOTAL', response.data.data.total || 0)
       })
   },
   addSchedule({ state }, payload) {

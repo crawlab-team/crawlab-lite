@@ -3,20 +3,11 @@ import request from '../../api/request'
 const state = {
   // TaskList
   taskList: [],
-  taskListTotalCount: 0,
+  taskTotal: 0,
   taskForm: {},
   taskResultsData: [],
   taskResultsColumns: [],
-  taskResultsTotalCount: 0,
-  // filter
-  filter: {
-    spider_id: '',
-    status: '',
-    schedule_id: ''
-  },
-  // pagination
-  pageNum: 1,
-  pageSize: 10,
+  taskResultsTotal: 0,
   // log
   currentLogIndex: 0,
   logKeyword: '',
@@ -100,23 +91,11 @@ const mutations = {
   SET_TASK_RESULTS_COLUMNS(state, value) {
     state.taskResultsColumns = value
   },
-  SET_PAGE_NUM(state, value) {
-    state.pageNum = value
+  SET_TASK_TOTAL(state, value) {
+    state.taskTotal = value
   },
-  SET_PAGE_SIZE(state, value) {
-    state.pageSize = value
-  },
-  SET_TASK_LIST_TOTAL_COUNT(state, value) {
-    state.taskListTotalCount = value
-  },
-  SET_RESULTS_PAGE_NUM(state, value) {
-    state.resultsPageNum = value
-  },
-  SET_RESULTS_PAGE_SIZE(state, value) {
-    state.resultsPageSize = value
-  },
-  SET_TASK_RESULTS_TOTAL_COUNT(state, value) {
-    state.taskResultsTotalCount = value
+  SET_TASK_RESULTS_TOTAL(state, value) {
+    state.taskResultsTotal = value
   },
   SET_LOG_KEYWORD(state, value) {
     state.logKeyword = value
@@ -141,9 +120,6 @@ const mutations = {
   },
   SET_ACTIVE_ERROR_LOG_ITEM(state, value) {
     state.activeErrorLogItem = value
-  },
-  SET_FILTER(state, value) {
-    state.filter = value
   }
 }
 
@@ -156,20 +132,14 @@ const actions = {
         dispatch('spider/getSpiderData', data.spider_id, { root: true })
       })
   },
-  getTaskList({ state, commit }) {
-    return request.get('/tasks', {
-      page_num: state.pageNum,
-      page_size: state.pageSize,
-      spider_id: state.filter.spider_id || undefined,
-      status: state.filter.status || undefined,
-      schedule_id: state.filter.schedule_id || undefined
-    })
+  getTaskList({ state, commit }, params = {}) {
+    return request.get('/tasks', params)
       .then(response => {
         if (!response || !response.data || !response.data.data) {
           return
         }
         commit('SET_TASK_LIST', response.data.data.list || [])
-        commit('SET_TASK_LIST_TOTAL_COUNT', response.data.data.total || 0)
+        commit('SET_TASK_TOTAL', response.data.data.total || 0)
       })
   },
   deleteTask({ state, dispatch }, id) {
@@ -227,7 +197,7 @@ const actions = {
           return
         }
         commit('SET_TASK_RESULTS_DATA', response.data.data.list || [])
-        commit('SET_TASK_RESULTS_TOTAL_COUNT', response.data.data.total || 0)
+        commit('SET_TASK_RESULTS_TOTAL', response.data.data.total || 0)
       })
   },
   cancelTask({ state, dispatch }, id) {
@@ -238,9 +208,6 @@ const actions = {
           resolve(res)
         })
     })
-  },
-  resetFilter({ state, commit }) {
-    commit('SET_FILTER', {})
   }
 }
 

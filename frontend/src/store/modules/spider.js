@@ -123,14 +123,6 @@ const actions = {
       cmd: cmd
     })
   },
-  crawlSelectedSpiders({ state, dispatch }, payload) {
-    const { taskParams, runType, nodeIds } = payload
-    return request.post(`/spiders-run`, {
-      task_params: taskParams,
-      run_type: runType,
-      node_ids: nodeIds
-    })
-  },
   getDir({ state, commit }, path) {
     const id = state.spiderForm.id
     return request.get(`/spiders/${id}/dir`)
@@ -170,8 +162,8 @@ const actions = {
   addSpider({ state }) {
     return request.post(`/spiders`, state.spiderForm)
   },
-  getSpiderVersionList({ state, commit }, payload) {
-    const { spider_id } = payload
+  getSpiderVersionList({ state, commit }, params = {}) {
+    const { spider_id } = params
     return request.get(`/spiders/${spider_id}/versions`)
       .then(response => {
         if (!response || !response.data || !response.data.data) {

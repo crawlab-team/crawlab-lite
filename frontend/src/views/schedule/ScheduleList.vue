@@ -108,9 +108,9 @@
     <!--view tasks dialog-->
     <el-dialog
       :title="$t('Tasks')"
-      :visible.sync="isViewTasksDialogVisible"
+      :visible.sync="tasksDialogVisible"
       width="calc(100% - 240px)"
-      :before-close="() => this.isViewTasksDialogVisible = false"
+      :before-close="onCloseTasksDialog"
     >
       <schedule-task-list ref="schedule-task-list" />
     </el-dialog>
@@ -156,7 +156,6 @@
       <el-table
         :data="filteredTableData"
         class="table"
-        height="500"
         :header-cell-style="{background:'rgb(48, 65, 86)',color:'white'}"
         border
       >
@@ -233,6 +232,17 @@
           </template>
         </el-table-column>
       </el-table>
+      <div class="pagination">
+        <el-pagination
+          :current-page.sync="pagination.page_num"
+          :page-sizes="[10, 20, 50, 100]"
+          :page-size.sync="pagination.page_size"
+          layout="sizes, prev, pager, next"
+          :total="scheduleTotal"
+          @current-change="getScheduleList"
+          @size-change="getScheduleList"
+        />
+      </div>
       <!--./table list-->
     </el-card>
   </div>
@@ -262,6 +272,10 @@
           { name: 'description', label: 'Description' }
         // { name: 'status', label: 'Status', width: '100px' }
         ],
+        pagination: {
+          page_num: 1,
+          page_size: 10
+        },
         isEdit: false,
         dialogTitle: '',
         dialogVisible: false,
@@ -271,7 +285,7 @@
         submitting: false,
         loadingSpiders: false,
         loadingVersions: false,
-        isViewTasksDialogVisible: false,
+        tasksDialogVisible: false,
         crawlConfirmDialogVisible: false,
 
         // tutorial
@@ -357,6 +371,7 @@
     computed: {
       ...mapState('schedule', [
         'scheduleList',
+        'scheduleTotal',
         'scheduleForm'
       ]),
       ...mapState('spider', [
@@ -383,7 +398,7 @@
       }
     },
     created() {
-      this.$store.dispatch('schedule/getScheduleList')
+      this.getScheduleList()
     },
     mounted() {
       if (!this.$utils.tour.isFinishedTour('schedule-list')) {
@@ -424,7 +439,7 @@
                   return
                 }
                 this.dialogVisible = false
-                this.$store.dispatch('schedule/getScheduleList')
+                this.getScheduleList()
                 this.$message.success(this.$t('The schedule has been saved'))
               })
             } else {
@@ -434,7 +449,7 @@
                   return
                 }
                 this.dialogVisible = false
-                this.$store.dispatch('schedule/getScheduleList')
+                this.getScheduleList()
                 this.$message.success(this.$t('The schedule has been added'))
               })
             }
@@ -461,13 +476,16 @@
           this.$store.dispatch('schedule/removeSchedule', row.id)
             .then(() => {
               setTimeout(() => {
-                this.$store.dispatch('schedule/getScheduleList')
+                this.getScheduleList()
                 this.$message.success(this.$t('The schedule has been removed'))
               }, 100)
             })
         }).catch(() => {
         })
         this.$st.sendEv('定时任务', '删除定时任务')
+      },
+      async getScheduleList() {
+        await this.$store.dispatch('schedule/getScheduleList', this.pagination)
       },
       async onSelectSpider() {
         this.loadingSpiders = true
@@ -510,11 +528,15 @@
         this.cronDialogVisible = true
         this.$st.sendEv('定时任务', '点击编辑Cron')
       },
+      onCloseTasksDialog() {
+        this.$refs['schedule-task-list'].close()
+        this.tasksDialogVisible = false
+      },
       async onViewTasks(row) {
-        this.isViewTasksDialogVisible = true
         this.$store.commit('schedule/SET_SCHEDULE_FORM', row)
+        this.tasksDialogVisible = true
         setTimeout(() => {
-          this.$refs['schedule-task-list'].update()
+          this.$refs['schedule-task-list'].open()
         }, 100)
         this.$st.sendEv('定时任务', '查看任务列表')
       },
@@ -536,8 +558,8 @@
   }
 
   .table {
-    min-height: 360px;
-    margin-top: 10px;
+    margin-top: 8px;
+    border-radius: 5px;
   }
 
   .table .el-button {
