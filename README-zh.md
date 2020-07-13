@@ -1,6 +1,9 @@
 # Crawlab Lite
 
 <p>
+  <a href="https://hub.docker.com/r/zkqiang/crawlab-lite" target="_blank">
+    <img src="https://img.shields.io/docker/pulls/zkqiang/crawlab-lite?label=pulls&logo=docker">
+  </a>
   <a href="https://github.com/crawlab-team/crawlab-lite/commits/master" target="_blank">
     <img src="https://img.shields.io/github/last-commit/crawlab-team/crawlab-lite.svg">
   </a>
@@ -21,15 +24,11 @@
 
 相比较 [Crawlab](https://github.com/crawlab-team/crawlab)，该版本专注于单机上的爬虫管理。
 
-:warning: 目前该版本仍在开发中，代码仅用于体验。
-
-## 运行环境
-- Go 1.12+
-- Node 8.12+
+:warning: 目前该版本仍在前期开发中，部分功能可能不稳定。
 
 ## 快速开始
 
-- Docker Compose
+#### Docker Compose
 
 1. 在任意目录下创建 `docker-compose.yml`，内容如下：
 
@@ -49,7 +48,7 @@ services:
 docker-compose up -d
 ```
 
-- 源代码
+#### 源代码
 
 1. 克隆仓库
 

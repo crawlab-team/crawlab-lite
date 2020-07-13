@@ -1,6 +1,9 @@
 # Crawlab Lite
 
 <p>
+  <a href="https://hub.docker.com/r/zkqiang/crawlab-lite" target="_blank">
+    <img src="https://img.shields.io/docker/pulls/zkqiang/crawlab-lite?label=pulls&logo=docker">
+  </a>
   <a href="https://github.com/crawlab-team/crawlab-lite/commits/master" target="_blank">
     <img src="https://img.shields.io/github/last-commit/crawlab-team/crawlab-lite.svg">
   </a>
@@ -21,15 +24,11 @@ Lite version of [Crawlab](https://github.com/crawlab-team/crawlab), golang-based
 
 Compared with [Crawlab](https://github.com/crawlab-team/crawlab), this lite version focuses on crawler management on a single machine.
 
-:warning: This version is still under development, and the code is for experiential purposes only.
-
-## Pre-requisite
-- Go 1.12+
-- Node 8.12+
+:warning: This version is still in early development and some features may be unstable.
 
 ## Quick Start
 
-- Docker Compose
+#### Docker Compose
 
 1. Create `docker-compose.yml` in any directory as follows:
 
@@ -49,7 +48,7 @@ services:
 docker-compose up -d
 ```
 
-- Source Code
+#### Source Code
 
 1. Clone repository
 
@@ -68,8 +67,7 @@ go run main.go
 3. Run frontend
 
 ```bash
-cd ..
-cd frontend
+cd ../frontend
 npm i && npm run serve
 ```
 
