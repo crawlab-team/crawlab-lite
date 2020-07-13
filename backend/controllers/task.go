@@ -29,7 +29,7 @@ func GetTaskList(c *gin.Context) {
 func GetTask(c *gin.Context) {
 	id, err := uuid.FromString(c.Param("id"))
 	if err != nil {
-		HandleError(http.StatusBadRequest, c, errors.New("invalid id"))
+		HandleError(http.StatusBadRequest, c, errors.New("invalid task id"))
 		return
 	}
 
@@ -64,7 +64,7 @@ func CreateTask(c *gin.Context) {
 func DeleteTask(c *gin.Context) {
 	id, err := uuid.FromString(c.Param("id"))
 	if err != nil {
-		HandleError(http.StatusBadRequest, c, errors.New("invalid id"))
+		HandleError(http.StatusBadRequest, c, errors.New("invalid task id"))
 		return
 	}
 
@@ -79,7 +79,7 @@ func DeleteTask(c *gin.Context) {
 func UpdateTaskCancel(c *gin.Context) {
 	id, err := uuid.FromString(c.Param("id"))
 	if err != nil {
-		HandleError(http.StatusBadRequest, c, errors.New("invalid id"))
+		HandleError(http.StatusBadRequest, c, errors.New("invalid task id"))
 		return
 	}
 
@@ -94,7 +94,7 @@ func UpdateTaskCancel(c *gin.Context) {
 func PostTaskRestart(c *gin.Context) {
 	id, err := uuid.FromString(c.Param("id"))
 	if err != nil {
-		HandleError(http.StatusBadRequest, c, errors.New("invalid id"))
+		HandleError(http.StatusBadRequest, c, errors.New("invalid task id"))
 		return
 	}
 
@@ -103,5 +103,31 @@ func PostTaskRestart(c *gin.Context) {
 		return
 	} else {
 		HandleSuccess(c, res)
+	}
+}
+
+func GetTaskLogList(c *gin.Context) {
+	var page forms.TaskLogPageForm
+
+	if err := c.ShouldBindUri(&page); err != nil {
+		HandleError(http.StatusBadRequest, c, err)
+		return
+	}
+
+	if err := c.ShouldBindQuery(&page); err != nil {
+		HandleError(http.StatusBadRequest, c, err)
+		return
+	}
+
+	if _, err := uuid.FromString(page.TaskId); err != nil {
+		HandleError(http.StatusBadRequest, c, errors.New("invalid task id"))
+		return
+	}
+
+	if total, results, err := services.QueryTaskLog(page); err != nil {
+		HandleError(http.StatusBadRequest, c, err)
+		return
+	} else {
+		HandleSuccessList(c, total, results)
 	}
 }

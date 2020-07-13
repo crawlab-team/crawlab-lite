@@ -13,6 +13,7 @@ type Task struct {
 	ScheduleId      uuid.UUID            `json:"schedule_id"`
 	Status          constants.TaskStatus `json:"status"`
 	Cmd             string               `json:"cmd"`
+	LogPath         string               `json:"log_path"`
 	Error           string               `json:"error"`
 	CreateTs        time.Time            `json:"create_ts"`
 	UpdateTs        time.Time            `json:"update_ts"`

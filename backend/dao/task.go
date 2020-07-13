@@ -61,7 +61,7 @@ func (t *Tx) SelectTask(id uuid.UUID) (task *models.Task, err error) {
 }
 
 // 根据状态查询任务
-func (t *Tx) SelectTaskWhereStatus(status constants.TaskStatus) (task *models.Task, err error) {
+func (t *Tx) SelectFirstTaskWhereStatus(status constants.TaskStatus) (task *models.Task, err error) {
 	b := t.tx.Bucket([]byte(constants.TaskBucket))
 	if b == nil {
 		return nil, nil

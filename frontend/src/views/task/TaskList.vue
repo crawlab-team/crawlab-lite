@@ -40,11 +40,11 @@
             </el-form-item>
           </el-form>
         </div>
-        <div class="right">
-          <el-button v-if="this.multipleSelection.length" class="btn-delete" size="small" type="danger" @click="onRemoveMultipleTask">
-            删除任务
-          </el-button>
-        </div>
+        <!--        <div class="right">-->
+        <!--          <el-button v-if="this.multipleSelection.length" class="btn-delete" size="small" type="danger" @click="onRemoveMultipleTask">-->
+        <!--            删除任务-->
+        <!--          </el-button>-->
+        <!--        </div>-->
       </div>
       <!--./filter-->
 
@@ -56,9 +56,10 @@
         :header-cell-style="{background:'rgb(48, 65, 86)',color:'white'}"
         border
         row-key="id"
+        @row-click="onRowClick"
         @selection-change="onSelectionChange"
       >
-        <el-table-column type="selection" width="45" align="center" reserve-selection />
+        <!--        <el-table-column type="selection" width="45" align="center" reserve-selection />-->
         <template v-for="col in columns">
           <el-table-column
             v-if="col.name === 'spider_name'"
@@ -149,8 +150,11 @@
             :width="col.width"
           />
         </template>
-        <el-table-column :label="$t('Action')" align="left" fixed="right" width="90px">
+        <el-table-column :label="$t('Action')" align="left" fixed="right" width="130px">
           <template slot-scope="scope">
+            <el-tooltip :content="$t('View')" placement="top">
+              <el-button type="primary" icon="el-icon-search" size="mini" @click="onView(scope.row)" />
+            </el-tooltip>
             <el-tooltip :content="$t('Restart')" placement="top">
               <el-button
                 type="warning"
@@ -164,7 +168,7 @@
                 type="danger"
                 icon="el-icon-delete"
                 size="mini"
-                @click="onRemove(scope.row, $event)"
+                @click="onCancel(scope.row, $event)"
               />
             </el-tooltip>
           </template>
@@ -230,10 +234,10 @@
             target: '.table',
             content: this.$t('This is a list of spider tasks executed sorted in a time descending order.')
           },
-          // {
-          //   target: '.table .el-table__body-wrapper tr:nth-child(1)',
-          //   content: this.$t('Click the row to or the view button to view the task detail.')
-          // },
+          {
+            target: '.table .el-table__body-wrapper tr:nth-child(1)',
+            content: this.$t('Click the row to or the view button to view the task detail.')
+          },
           {
             target: '.table tr td:nth-child(1)',
             content: this.$t('Tick and select the tasks you would like to delete in batches.'),
@@ -330,21 +334,22 @@
         }).catch(() => {
         })
       },
-      onRemove(row, ev) {
+      onCancel(row, ev) {
         ev.stopPropagation()
-        this.$confirm(this.$t('Are you sure to delete this task?'), this.$t('Notification'), {
+        this.$confirm(this.$t('Are you sure to cancel this task?'), this.$t('Notification'), {
           confirmButtonText: this.$t('Confirm'),
           cancelButtonText: this.$t('Cancel'),
           type: 'warning'
         }).then(() => {
-          this.$store.dispatch('task/deleteTask', row.id)
+          this.$store.dispatch('task/cancelTask', row.id)
             .then(() => {
               this.$message({
                 type: 'success',
-                message: this.$t('Deleted successfully')
+                message: this.$t('Canceled successfully')
               })
+              this.getTaskList()
             })
-          this.$st.sendEv('任务列表', '删除任务')
+          this.$st.sendEv('任务列表', '取消任务')
         })
       },
       onRestart(row, ev) {
@@ -360,6 +365,7 @@
                 type: 'success',
                 message: this.$t('Restarted successfully')
               })
+              this.getTaskList()
             })
           this.$st.sendEv('任务列表', '重新开始任务')
         })

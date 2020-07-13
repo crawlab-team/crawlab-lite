@@ -146,7 +146,7 @@ func (ex *Executor) ExecuteTask(id int) {
 	}
 
 	// 执行Shell命令
-	if err := executeShellCmd(cwd, *task); err != nil {
+	if err := executeShellCmd(cwd, task); err != nil {
 		log.Errorf(getWorkerPrefix(id) + err.Error())
 
 		// 如果发生错误，则发送通知
@@ -165,7 +165,7 @@ func (ex *Executor) ExecuteTask(id int) {
 		return
 	}
 
-	go finishUpTask(*task)
+	go finishUpTask(task)
 
 	// 结束计时
 	toc := time.Now()
@@ -181,7 +181,7 @@ func getWorkerPrefix(id int) string {
 }
 
 // 执行shell命令
-func executeShellCmd(cwd string, task models.Task) (err error) {
+func executeShellCmd(cwd string, task *models.Task) (err error) {
 	cmdStr := task.Cmd
 
 	log.Infof("cwd: %s", cwd)
@@ -201,6 +201,10 @@ func executeShellCmd(cwd string, task models.Task) (err error) {
 	// 起一个 goroutine 来监控进程
 	ch := utils.TaskExecChanMap.ChanBlocked(task.Id.String())
 
+	// 记录任务生成的日志
+	recordTaskLog(cmd, task)
+
+	// 完成或取消任务后的工作
 	go finishOrCancelTask(ch, cmd, task)
 
 	// kill 的时候，可以 kill 所有的子进程
@@ -209,12 +213,12 @@ func executeShellCmd(cwd string, task models.Task) (err error) {
 	}
 
 	// 启动进程
-	if err := startTaskProcess(cmd, task); err != nil {
+	if err := startTask(cmd, task); err != nil {
 		return err
 	}
 
 	// 同步等待进程完成
-	if err := waitTaskProcess(cmd, task); err != nil {
+	if err := waitTask(cmd, task); err != nil {
 		log.Errorf("task process error: %s", err.Error())
 		return err
 	}

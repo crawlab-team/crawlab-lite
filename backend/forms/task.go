@@ -21,3 +21,10 @@ type TaskForm struct {
 	ScheduleId      uuid.UUID `form:"schedule_id" json:"schedule_id"`
 	Cmd             string    `form:"cmd" json:"cmd" binding:"required,min=1"`
 }
+
+type TaskLogPageForm struct {
+	PageForm
+
+	TaskId  string `uri:"id" json:"task_id" binding:"required"`
+	Keyword string `form:"keyword" json:"keyword"`
+}

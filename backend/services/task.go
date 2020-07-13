@@ -1,6 +1,7 @@
 package services
 
 import (
+	"bufio"
 	"crawlab-lite/constants"
 	"crawlab-lite/dao"
 	"crawlab-lite/forms"
@@ -10,6 +11,7 @@ import (
 	. "github.com/ahmetb/go-linq"
 	"github.com/jinzhu/copier"
 	uuid "github.com/satori/go.uuid"
+	"os"
 )
 
 func QueryTaskPage(page forms.TaskPageForm) (total int, resultList []*results.Task, err error) {
@@ -232,4 +234,50 @@ func RestartTask(id uuid.UUID) (result *results.Task, err error) {
 	}
 
 	return result, nil
+}
+
+func QueryTaskLog(form forms.TaskLogPageForm) (total int, resultList []*results.TaskLogLine, err error) {
+	taskId, err := uuid.FromString(form.TaskId)
+	if err != nil {
+		return 0, nil, err
+	}
+
+	if form.PageSize <= 0 || form.PageNum <= 0 {
+		return 0, nil, nil
+	}
+
+	var task *models.Task
+	if err := dao.ReadTx(func(tx dao.Tx) error {
+		if task, err = tx.SelectTask(taskId); err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		return 0, nil, err
+	}
+	if task == nil {
+		return 0, nil, errors.New("task not found")
+	}
+
+	start, end := form.Range()
+	file, err := os.OpenFile(task.LogPath, os.O_RDONLY, os.ModePerm)
+	if err != nil {
+		return 0, nil, nil
+	}
+	scanner := bufio.NewScanner(file)
+	count := 0
+	for scanner.Scan() {
+		if start <= count && count < end {
+			line := scanner.Text()
+			if line != "" {
+				resultList = append(resultList, &results.TaskLogLine{
+					LineNum:  count + 1,
+					LineText: line,
+				})
+			}
+		}
+		count++
+	}
+	total = count
+	return total, resultList, nil
 }

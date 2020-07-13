@@ -25,3 +25,8 @@ type Task struct {
 	RuntimeDuration float64              `json:"runtime_duration"`
 	TotalDuration   float64              `json:"total_duration"`
 }
+
+type TaskLogLine struct {
+	LineNum  int    `json:"line_num"`
+	LineText string `json:"line_text"`
+}

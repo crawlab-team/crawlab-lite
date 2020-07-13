@@ -90,6 +90,16 @@ export const constantRouterMap = [
           title: 'Tasks',
           icon: 'fa fa-list'
         }
+      },
+      {
+        path: ':id',
+        name: 'TaskDetail',
+        component: () => import('../views/task/TaskDetail'),
+        meta: {
+          title: 'Task Detail',
+          icon: 'fa fa-circle-o'
+        },
+        hidden: true
       }
     ]
   },

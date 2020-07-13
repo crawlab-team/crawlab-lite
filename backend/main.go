@@ -15,7 +15,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"runtime/debug"
 	"syscall"
 	"time"
 )
@@ -45,10 +44,15 @@ func main() {
 	}
 	log.Info("Initialized log config successfully")
 
+	// 取消还处于运行状态的任务
+	if err := managers.CancelRunningTasks(); err != nil {
+		log.Error("cancel running tasks error:" + err.Error())
+		panic(err)
+	}
+
 	// 初始化定时调度器
 	if err := managers.InitScheduler(); err != nil {
 		log.Error("init scheduler error:" + err.Error())
-		debug.PrintStack()
 		panic(err)
 	}
 	log.Info("Initialized schedule successfully")

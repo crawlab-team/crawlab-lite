@@ -15,7 +15,7 @@ const state = {
   isLogAutoScroll: false,
   isLogAutoFetch: false,
   isLogFetchLoading: false,
-  taskLog: [],
+  taskLogList: [],
   taskLogTotal: 0,
   taskLogPage: 1,
   taskLogPageSize: 5000,
@@ -38,12 +38,10 @@ const getters = {
     return keys
   },
   logData(state) {
-    const data = state.taskLog
+    const data = state.taskLogList
       .map((d, i) => {
         return {
-          index: i + 1,
           active: state.currentLogIndex === i + 1,
-          data: d.msg,
           ...d
         }
       })
@@ -76,8 +74,8 @@ const mutations = {
   SET_TASK_LIST(state, value) {
     state.taskList = value
   },
-  SET_TASK_LOG(state, value) {
-    state.taskLog = value
+  SET_TASK_LOG_LIST(state, value) {
+    state.taskLogList = value
   },
   SET_TASK_LOG_TOTAL(state, value) {
     state.taskLogTotal = value
@@ -129,7 +127,7 @@ const actions = {
       .then(response => {
         const data = response.data.data
         commit('SET_TASK_FORM', data)
-        dispatch('spider/getSpiderData', data.spider_id, { root: true })
+        // dispatch('spider/getSpiderData', data.spider_id, { root: true })
       })
   },
   getTaskList({ state, commit }, params = {}) {
@@ -144,9 +142,6 @@ const actions = {
   },
   deleteTask({ state, dispatch }, id) {
     return request.delete(`/tasks/${id}`)
-      .then(() => {
-        dispatch('getTaskList')
-      })
   },
   deleteTaskMultiple({ state }, ids) {
     return request.delete(`/tasks`, {
@@ -155,12 +150,9 @@ const actions = {
   },
   restartTask({ state, dispatch }, id) {
     return request.post(`/tasks/${id}/restart`)
-      .then(() => {
-        dispatch('getTaskList')
-      })
   },
-  getTaskLog({ state, commit }, { id, keyword }) {
-    return request.get(`/tasks/${id}/log`, {
+  getTaskLogs({ state, commit }, { id, keyword }) {
+    return request.get(`/tasks/${id}/logs`, {
       keyword,
       page_num: state.taskLogPage,
       page_size: state.taskLogPageSize
@@ -169,7 +161,7 @@ const actions = {
         if (!response || !response.data || !response.data.data) {
           return
         }
-        commit('SET_TASK_LOG', response.data.data.list || [])
+        commit('SET_TASK_LOG_LIST', response.data.data.list || [])
         commit('SET_TASK_LOG_TOTAL', response.data.data.total || 0)
 
         // auto switch to next page if not reaching the end
