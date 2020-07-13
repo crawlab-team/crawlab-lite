@@ -29,6 +29,28 @@ Compared with [Crawlab](https://github.com/crawlab-team/crawlab), this lite vers
 
 ## Quick Start
 
+- Docker Compose
+
+1. Create `docker-compose.yml` in any directory as follows:
+
+```yaml
+version: '3'
+services:
+  master:
+    image: zkqiang/crawlab-lite:latest
+    container_name: master
+    ports:
+      - "8080:8080"
+```
+
+2. Run the command in this directory:
+
+```bash
+docker-compose up -d
+```
+
+- Source Code
+
 1. Clone repository
 
 ```bash

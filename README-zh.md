@@ -29,6 +29,28 @@
 
 ## 快速开始
 
+- Docker Compose
+
+1. 在任意目录下创建 `docker-compose.yml`，内容如下：
+
+```yaml
+version: '3'
+services:
+  master:
+    image: zkqiang/crawlab-lite:latest
+    container_name: master
+    ports:
+      - "8080:8080"
+```
+
+2. 在目录下运行命令：
+
+```bash
+docker-compose up -d
+```
+
+- 源代码
+
 1. 克隆仓库
 
 ```bash
@@ -46,8 +68,7 @@ go run main.go
 3. 运行前端
 
 ```bash
-cd ..
-cd frontend
+cd ../frontend
 npm i && npm run serve
 ```
 
