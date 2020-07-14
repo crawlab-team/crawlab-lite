@@ -1,6 +1,9 @@
 .idea
+.DS_Store
 logs
 *.log
-dist/
+*.lock
+data/
+**/dist/
 **/node_modules/
 **/tmp/
