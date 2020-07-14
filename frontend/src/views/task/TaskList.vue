@@ -227,7 +227,7 @@
         // tutorial
         tourSteps: [
           {
-            target: '.filter-form',
+            target: '.filter',
             content: this.$t('You can filter tasks from this area.')
           },
           {
@@ -237,14 +237,14 @@
           {
             target: '.table .el-table__body-wrapper tr:nth-child(1)',
             content: this.$t('Click the row to or the view button to view the task detail.')
-          },
-          {
-            target: '.table tr td:nth-child(1)',
-            content: this.$t('Tick and select the tasks you would like to delete in batches.'),
-            params: {
-              placement: 'right'
-            }
           }
+          // {
+          //   target: '.table tr td:nth-child(1)',
+          //   content: this.$t('Tick and select the tasks you would like to delete in batches.'),
+          //   params: {
+          //     placement: 'right'
+          //   }
+          // }
         ],
         tourCallbacks: {
           onStop: () => {

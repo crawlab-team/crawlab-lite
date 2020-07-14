@@ -53,12 +53,6 @@ const user = {
     // 获取用户信息
     getInfo({ commit, state }) {
       return request.get('/me')
-        .then(response => {
-          // ensure compatibility
-          if (response.data.data.setting && !response.data.data.setting.max_error_log) {
-            response.data.data.setting.max_error_log = 1000
-          }
-        })
     },
 
     // 登出
