@@ -22,7 +22,7 @@
 
 Lite version of [Crawlab](https://github.com/crawlab-team/crawlab), golang-based web crawler management platform, supporting crawlers in any language.
 
-Compared with [Crawlab](https://github.com/crawlab-team/crawlab), this lite version focuses on crawler management on a single machine.
+Compared with [Crawlab](https://github.com/crawlab-team/crawlab), this lite version focuses on crawler management on a single machine, it runs independent of any external database and removes a lot of non-essential features.
 
 :warning: This version is still in early development and some features may be unstable.
 

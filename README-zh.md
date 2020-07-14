@@ -22,7 +22,7 @@
 
 [Crawlab](https://github.com/crawlab-team/crawlab) 轻量版本, 基于 Golang 的爬虫管理平台，支持任意语言编写的爬虫。
 
-相比较 [Crawlab](https://github.com/crawlab-team/crawlab)，该版本专注于单机上的爬虫管理。
+相比较 [Crawlab](https://github.com/crawlab-team/crawlab)，该版本专注于单机上的爬虫管理，平台运行不依赖任何的外部数据库，去除了大量非必要功能。
 
 :warning: 目前该版本仍在前期开发中，部分功能可能不稳定。
 
@@ -48,6 +48,8 @@ services:
 docker-compose up -d
 ```
 
+3. 访问 `http://localhost:8080`
+
 #### 源代码
 
 1. 克隆仓库
@@ -70,6 +72,8 @@ go run main.go
 cd ../frontend
 npm i && npm run serve
 ```
+
+4. 访问 `http://localhost:8080`
 
 ## 截图
 
