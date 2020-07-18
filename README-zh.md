@@ -40,6 +40,8 @@ services:
     container_name: master
     ports:
       - "8080:8080"
+    volumes:
+      - "./data:/app/data"  # 数据持久化的挂载
 ```
 
 2. 在目录下运行命令：

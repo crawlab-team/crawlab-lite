@@ -40,6 +40,8 @@ services:
     container_name: master
     ports:
       - "8080:8080"
+    volumes:
+      - "./data:/app/data"  # persistent volume
 ```
 
 2. Run the command in this directory:
@@ -47,6 +49,8 @@ services:
 ```bash
 docker-compose up -d
 ```
+
+3. Visit `http://localhost:8080`
 
 #### Source Code
 
@@ -70,6 +74,8 @@ go run main.go
 cd ../frontend
 npm i && npm run serve
 ```
+
+4. Visit `http://localhost:8080`
 
 ## Screenshot
 
