@@ -33,7 +33,6 @@ export default {
 
   // 任务状态
   Pending: '待定',
-  Processing: '处理中',
   Running: '进行中',
   Finished: '已完成',
   Error: '错误',
@@ -262,9 +261,6 @@ export default {
   'Description': '描述',
   'Cmd': '运行命令',
   'Add Schedule': '添加定时任务',
-  'stop': '暂停',
-  'running': '运行',
-  'error': '错误',
   'Not Found Spider': '爬虫配置错误',
   '[minute] [hour] [day] [month] [day of week]': '[分] [时] [天] [月] [星期几]',
   'Enable/Disable': '启用/禁用',

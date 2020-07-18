@@ -176,6 +176,22 @@ func (ex *Executor) ExecuteTask(id int) {
 	log.Infof(getWorkerPrefix(id) + "task (id:" + task.Id.String() + ")" + " finished. elapsed:" + durationStr + " sec")
 }
 
+func StopTask(task *models.Task) {
+	if task.Status != constants.TaskStatusRunning &&
+		task.Status != constants.TaskStatusProcessing &&
+		task.Status != constants.TaskStatusPending {
+		return
+	}
+	ch := utils.TaskExecChanMap.ChanBlocked(task.Id.String())
+	if ch != nil {
+		ch <- constants.TaskCancel
+	}
+	task.Status = constants.TaskStatusCancelled                      // 任务状态: 已取消
+	task.FinishTs = time.Now()                                       // 结束时间
+	task.RuntimeDuration = task.FinishTs.Sub(task.StartTs).Seconds() // 运行时长
+	task.TotalDuration = task.FinishTs.Sub(task.CreateTs).Seconds()  // 总时长
+}
+
 func getWorkerPrefix(id int) string {
 	return "[Worker " + strconv.Itoa(id) + "] "
 }

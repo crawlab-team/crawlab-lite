@@ -32,7 +32,7 @@ const getters = {
     }
     const keys = []
     const item = state.taskResultsData[0]
-    for (const key in item) {
+    for (const key of item) {
       keys.push(key)
     }
     return keys
@@ -45,14 +45,10 @@ const getters = {
           ...d
         }
       })
-    if (state.taskForm && state.taskForm.status === 'running') {
+    if (state.taskForm && state.taskForm.status === 'RUNNING') {
       data.push({
-        index: data.length + 1,
-        data: '###LOG_END###'
-      })
-      data.push({
-        index: data.length + 1,
-        data: ''
+        line_num: data.length + 1,
+        line_text: '###LOG_END###'
       })
     }
     return data

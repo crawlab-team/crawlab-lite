@@ -124,7 +124,7 @@ func GetTaskLogList(c *gin.Context) {
 		return
 	}
 
-	if total, results, err := services.QueryTaskLog(page); err != nil {
+	if total, results, err := services.QueryTaskLogPage(page); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
 		return
 	} else {

@@ -1,5 +1,5 @@
 <template>
-  <div class="log-item" :style="style" :class="`log-item-${source.index} ${source.active ? 'active' : ''}`">
+  <div class="log-item" :style="style" :class="`log-item-${source.index}`">
     <div class="line-no">{{ source.index }}</div>
     <div class="line-content">
       <span v-if="isLogEnd" style="color: #E6A23C">
@@ -79,12 +79,6 @@
     background: #313335;
     padding-right: 10px;
     text-align: right;
-  }
-
-  .log-item.active .line-no {
-    background: #E6A23C;
-    color: white;
-    font-weight: bolder;
   }
 
   .log-item .line-content {

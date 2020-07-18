@@ -5,6 +5,7 @@ import (
 	"crawlab-lite/constants"
 	"crawlab-lite/dao"
 	"crawlab-lite/forms"
+	"crawlab-lite/managers"
 	"crawlab-lite/models"
 	"crawlab-lite/results"
 	"errors"
@@ -42,7 +43,7 @@ func QueryTaskPage(page forms.TaskPageForm) (total int, resultList []*results.Ta
 		}
 
 		query = query.OrderByDescendingT(func(task *models.Task) int64 {
-			return task.UpdateTs.UnixNano()
+			return task.StartTs.UnixNano()
 		}).Query
 		total = query.Count()
 
@@ -161,6 +162,8 @@ func RemoveTask(id uuid.UUID) (res interface{}, err error) {
 		} else if task == nil {
 			return errors.New("task not found")
 		} else {
+			managers.StopTask(task)
+
 			// 删除任务
 			if err = tx.DeleteTask(id); err != nil {
 				return err
@@ -182,9 +185,15 @@ func CancelTask(id uuid.UUID, status constants.TaskStatus) (task *models.Task, e
 		if task == nil {
 			return errors.New("task not found")
 		}
-		if task.Status == constants.TaskStatusFinished {
-			return errors.New("task has been finished")
+
+		if task.Status == constants.TaskStatusRunning ||
+			task.Status == constants.TaskStatusProcessing ||
+			task.Status == constants.TaskStatusPending {
+			managers.StopTask(task)
+		} else {
+			return nil
 		}
+
 		task.Status = status
 		if err = tx.UpdateTask(task); err != nil {
 			return err
@@ -206,6 +215,8 @@ func RestartTask(id uuid.UUID) (result *results.Task, err error) {
 		if task == nil {
 			return errors.New("task not found")
 		}
+
+		managers.StopTask(task)
 
 		newTask := &models.Task{
 			SpiderId:        task.SpiderId,
@@ -236,7 +247,7 @@ func RestartTask(id uuid.UUID) (result *results.Task, err error) {
 	return result, nil
 }
 
-func QueryTaskLog(form forms.TaskLogPageForm) (total int, resultList []*results.TaskLogLine, err error) {
+func QueryTaskLogPage(form forms.TaskLogPageForm) (total int, resultList []*results.TaskLogLine, err error) {
 	taskId, err := uuid.FromString(form.TaskId)
 	if err != nil {
 		return 0, nil, err

@@ -163,12 +163,20 @@
                 @click="onRestart(scope.row, $event)"
               />
             </el-tooltip>
-            <el-tooltip :content="$t('Remove')" placement="top">
+            <el-tooltip v-if="['PENDING', 'RUNNING'].includes(scope.row.status)" :content="$t('Cancel')" placement="top">
+              <el-button
+                type="danger"
+                icon="el-icon-video-pause"
+                size="mini"
+                @click="onCancel(scope.row, $event)"
+              />
+            </el-tooltip>
+            <el-tooltip v-else :content="$t('Remove')" placement="top">
               <el-button
                 type="danger"
                 icon="el-icon-delete"
                 size="mini"
-                @click="onCancel(scope.row, $event)"
+                @click="onRemove(scope.row, $event)"
               />
             </el-tooltip>
           </template>
@@ -350,6 +358,23 @@
               this.getTaskList()
             })
           this.$st.sendEv('任务列表', '取消任务')
+        })
+      },
+      onRemove(row, ev) {
+        ev.stopPropagation()
+        this.$confirm(this.$t('Are you sure to delete this task?'), this.$t('Notification'), {
+          confirmButtonText: this.$t('Confirm'),
+          cancelButtonText: this.$t('Cancel'),
+          type: 'warning'
+        }).then(() => {
+          this.$store.dispatch('task/deleteTask', row.id)
+            .then(() => {
+              this.$message({
+                type: 'success',
+                message: this.$t('Deleted successfully')
+              })
+            })
+          this.$st.sendEv('任务列表', '删除任务')
         })
       },
       onRestart(row, ev) {

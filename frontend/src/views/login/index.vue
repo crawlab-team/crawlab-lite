@@ -10,7 +10,8 @@
       label-position="left"
     >
       <h3 class="title">
-        <span><img style="width:48px;margin-bottom:-5px;margin-right:2px" src="../../assets/logo.svg" alt="logo"></span>RAWLAB LITE
+        <span><img style="width:48px;margin-bottom:-5px;margin-right:2px" src="../../assets/logo.svg"></span>RAWLAB
+        <span class="text-lite">Lite</span>
       </h3>
       <el-form-item prop="username" style="margin-bottom: 28px;">
         <el-input
@@ -393,6 +394,13 @@
       margin: 0px auto 20px auto;
       text-align: center;
       cursor: default;
+
+      .text-lite {
+        color: #97a8be;
+        margin-top: 30px;
+        margin-right: 36px;
+        font-size: 16px;
+      }
     }
 
     .show-pwd {

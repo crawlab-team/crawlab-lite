@@ -30,6 +30,11 @@ func CancelRunningTasks() (err error) {
 				if err = tx.UpdateTask(task); err != nil {
 					return err
 				}
+			} else if task.Status == constants.TaskStatusProcessing {
+				task.Status = constants.TaskStatusPending
+				if err = tx.UpdateTask(task); err != nil {
+					return err
+				}
 			}
 		}
 		return nil
@@ -175,9 +180,6 @@ func recordTaskLog(cmd *exec.Cmd, task *models.Task) {
 		return
 	}
 
-	task.LogPath = logPath
-	_ = updateTask(task)
-
 	// get stdout reader
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -193,6 +195,13 @@ func recordTaskLog(cmd *exec.Cmd, task *models.Task) {
 		return
 	}
 	stderrScanner := bufio.NewScanner(stderr)
+
+	// 存储日志路径
+	task.LogPath = logPath
+	if err = updateTask(task); err != nil {
+		log.Errorf("save log path error: %s", err.Error())
+		return
+	}
 
 	// scan stdout and record
 	go func() {

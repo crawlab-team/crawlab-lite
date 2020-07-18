@@ -18,7 +18,6 @@
       return {
         statusDict: {
           PENDING: { label: 'Pending', type: 'primary' },
-          PROCESSING: { label: 'Processing', type: 'primary' },
           RUNNING: { label: 'Running', type: 'warning' },
           FINISHED: { label: 'Finished', type: 'success' },
           ERROR: { label: 'Error', type: 'danger' },

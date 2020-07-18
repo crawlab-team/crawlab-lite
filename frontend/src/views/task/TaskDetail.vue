@@ -230,9 +230,9 @@
       }, 5000)
     },
     mounted() {
-      if (!this.$utils.tour.isFinishedTour('task-detail')) {
-        this.$utils.tour.startTour(this, 'task-detail')
-      }
+      // if (!this.$utils.tour.isFinishedTour('task-detail')) {
+      //   this.$utils.tour.startTour(this, 'task-detail')
+      // }
     },
     destroyed() {
       clearInterval(this.handle)
