@@ -9,11 +9,8 @@ import (
 )
 
 func CheckUser(username string, password string) (bool, error) {
-	user, err := dao.GetUserByName(username)
-	if err != nil {
-		return false, err
-	}
-	return user != nil && password == user.Password, nil
+	user := dao.GetUser()
+	return user != nil && username == user.Username && password == user.Password, nil
 }
 
 func MakeToken(username string) (tokenStr string, err error) {

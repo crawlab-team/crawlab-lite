@@ -1,8 +1,9 @@
 api:
   address: "localhost:8000"
 
-users:
-  - { username: "admin", password: "admin" }
+user:
+  username: "admin"
+  password: "admin"
 
 log:
   level: info
@@ -12,12 +13,7 @@ log:
 server:
   host: 0.0.0.0
   port: 8000
-  master: "Y"
   secret: "crawlab-lite"
-  register:
-    # mac地址/ip地址/hostname, 如果是ip，则需要手动指定IP
-    type: "mac"
-    ip: ""
   lang: # 安装语言环境, Y 为安装，N 为不安装
     python: "Y"
     node: "N"
@@ -29,7 +25,7 @@ spider:
   path: "../data/spiders"
 
 task:
-  workers: 4
+  workers: 16
 
 kvdb:
   path: "../data/db"
@@ -41,16 +37,3 @@ version: 0.0.1
 
 setting:
   enableTutorial: "N"
-  runOnMaster: "Y"
-  demoSpiders: "N"
-  checkScrapy: "Y"
-
-notification:
-  mail:
-    server: ''
-    port: ''
-    senderEmail: ''
-    senderIdentity: ''
-    smtp:
-      user: ''
-      password: ''
