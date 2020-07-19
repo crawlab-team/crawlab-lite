@@ -1,20 +1,5 @@
 <template>
   <div class="app-container schedule-list">
-    <!--tour-->
-    <v-tour
-      name="schedule-list"
-      :steps="tourSteps"
-      :callbacks="tourCallbacks"
-      :options="$utils.tour.getOptions(true)"
-    />
-    <v-tour
-      name="schedule-list-add"
-      :steps="tourAddSteps"
-      :callbacks="tourAddCallbacks"
-      :options="$utils.tour.getOptions(true)"
-    />
-    <!--./tour-->
-
     <!--add schedule dialog-->
     <el-dialog
       :title="$t(dialogTitle)"
@@ -130,8 +115,8 @@
     <crawl-confirm-dialog
       :visible="crawlConfirmDialogVisible"
       :spider-id="scheduleForm.spider_id"
-      @close="() => crawlConfirmDialogVisible = false"
-      @confirm="() => crawlConfirmDialogVisible = false"
+      @close="() => this.crawlConfirmDialogVisible = false"
+      @confirm="() => this.crawlConfirmDialogVisible = false"
     />
     <!--./crawl confirm dialog-->
 
@@ -286,86 +271,7 @@
         loadingSpiders: false,
         loadingVersions: false,
         tasksDialogVisible: false,
-        crawlConfirmDialogVisible: false,
-
-        // tutorial
-        tourSteps: [
-        // {
-        //   target: '.table',
-        //   content: this.$t('This is a list of schedules (cron jobs) to periodically run spider tasks. You can add/modify/edit your schedules here.<br><br>For more information, please refer to the <a href="https://docs.crawlab.cn/Usage/Schedule/" target="_blank" style="color: #409EFF">Documentation (Chinese)</a> for detail.')
-        // },
-        // {
-        //   target: '.btn-add',
-        //   content: this.$t('You can add a new schedule by clicking this button.')
-        // }
-        ],
-        tourCallbacks: {
-          onStop: () => {
-            this.$utils.tour.finishTour('schedule-list')
-          },
-          onPreviousStep: (currentStep) => {
-            if (currentStep === 2) {
-              this.dialogVisible = false
-            }
-            this.$utils.tour.prevStep('schedule-list', currentStep)
-          },
-          onNextStep: (currentStep) => {
-            if (currentStep === 1) {
-              this.isEdit = false
-              this.dialogVisible = true
-              this.$store.commit('schedule/SET_SCHEDULE_FORM', {})
-            }
-            this.$utils.tour.nextStep('schedule-list', currentStep)
-          }
-        },
-        tourAddSteps: [
-          {
-            target: '#spider-id',
-            content: this.$t('The spider to run'),
-            params: {
-              placement: 'right'
-            }
-          },
-          {
-            target: '#cron',
-            content: this.$t('<strong>Cron</strong> expression for the schedule.<br><br>If you are not sure what a cron expression is, please refer to this <a href="https://baike.baidu.com/item/crontab/8819388" target="_blank" style="color: #409EFF">Article</a>.'),
-            params: {
-              placement: 'right'
-            }
-          },
-          {
-            target: '#cmd',
-            content: this.$t('The command which will be used to run the spider program.'),
-            params: {
-              placement: 'right'
-            }
-          },
-          {
-            target: '#schedule-description',
-            content: this.$t('The description for the schedule'),
-            params: {
-              placement: 'right'
-            }
-          },
-          {
-            target: '#btn-submit',
-            content: this.$t('Once you have filled all fields, click this button to submit.'),
-            params: {
-              placement: 'right'
-            }
-          }
-        ],
-        tourAddCallbacks: {
-          onStop: () => {
-            this.$utils.tour.finishTour('schedule-list-add')
-          },
-          onPreviousStep: (currentStep) => {
-            this.$utils.tour.prevStep('schedule-list-add', currentStep)
-          },
-          onNextStep: (currentStep) => {
-            this.$utils.tour.nextStep('schedule-list-add', currentStep)
-          }
-        }
+        crawlConfirmDialogVisible: false
       }
     },
     computed: {
@@ -401,9 +307,6 @@
       this.getScheduleList()
     },
     mounted() {
-      if (!this.$utils.tour.isFinishedTour('schedule-list')) {
-        this.$utils.tour.startTour(this, 'schedule-list')
-      }
     },
     methods: {
       onDialogClose() {
@@ -417,12 +320,6 @@
         this.dialogVisible = true
         this.$store.commit('schedule/SET_SCHEDULE_FORM', {})
         this.$st.sendEv('定时任务', '添加定时任务')
-
-        if (!this.$utils.tour.isFinishedTour('schedule-list-add')) {
-          setTimeout(() => {
-            this.$utils.tour.startTour(this, 'schedule-list-add')
-          }, 500)
-        }
       },
       onAddSubmit() {
         this.$refs.scheduleForm.validate(res => {

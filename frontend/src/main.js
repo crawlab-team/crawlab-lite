@@ -26,9 +26,6 @@ import '@/permission' // permission control
 import request from './api/request'
 import i18n from './i18n'
 import utils from './utils'
-// vue-tour
-import VueTour from 'vue-tour'
-import 'vue-tour/dist/vue-tour.css'
 
 // code mirror
 Vue.use(codemirror)
@@ -43,9 +40,6 @@ library.add(fas)
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 Vue.component('font-awesome-layers', FontAwesomeLayers)
 Vue.component('font-awesome-layers-text', FontAwesomeLayersText)
-
-// vue-tour
-Vue.use(VueTour)
 
 Vue.config.productionTip = false
 

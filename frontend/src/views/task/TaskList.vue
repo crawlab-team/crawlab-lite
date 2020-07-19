@@ -1,14 +1,5 @@
 <template>
   <div class="app-container">
-    <!--tour-->
-    <v-tour
-      name="task-list"
-      :steps="tourSteps"
-      :callbacks="tourCallbacks"
-      :options="$utils.tour.getOptions(true)"
-    />
-    <!--./tour-->
-
     <el-card style="border-radius: 0">
       <!--filter-->
       <div class="filter">
@@ -35,7 +26,6 @@
                 <el-option value="FINISHED" :label="$t('Finished')" />
                 <el-option value="ERROR" :label="$t('Error')" />
                 <el-option value="CANCELLED" :label="$t('Cancelled')" />
-                <el-option value="ABNORMAL" :label="$t('Abnormal')" />
               </el-select>
             </el-form-item>
           </el-form>
@@ -232,39 +222,6 @@
           { name: 'total_duration', label: 'Total Duration (sec)', align: 'right' }
         // { name: 'result_count', label: 'Results Count', align: 'right' }
         ],
-        // tutorial
-        tourSteps: [
-          {
-            target: '.filter',
-            content: this.$t('You can filter tasks from this area.')
-          },
-          {
-            target: '.table',
-            content: this.$t('This is a list of spider tasks executed sorted in a time descending order.')
-          },
-          {
-            target: '.table .el-table__body-wrapper tr:nth-child(1)',
-            content: this.$t('Click the row to or the view button to view the task detail.')
-          }
-          // {
-          //   target: '.table tr td:nth-child(1)',
-          //   content: this.$t('Tick and select the tasks you would like to delete in batches.'),
-          //   params: {
-          //     placement: 'right'
-          //   }
-          // }
-        ],
-        tourCallbacks: {
-          onStop: () => {
-            this.$utils.tour.finishTour('task-list')
-          },
-          onPreviousStep: (currentStep) => {
-            this.$utils.tour.prevStep('task-list', currentStep)
-          },
-          onNextStep: (currentStep) => {
-            this.$utils.tour.nextStep('task-list', currentStep)
-          }
-        },
         isFilterSpiderDisabled: false
       }
     },
@@ -301,10 +258,6 @@
       this.refreshHandle = setInterval(() => {
         this.getTaskList()
       }, 5000)
-
-      if (!this.$utils.tour.isFinishedTour('task-list')) {
-        this.$utils.tour.startTour(this, 'task-list')
-      }
     },
     destroyed() {
       clearInterval(this.refreshHandle)

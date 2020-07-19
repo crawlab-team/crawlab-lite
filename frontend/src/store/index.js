@@ -11,7 +11,6 @@ import schedule from './modules/schedule'
 import lang from './modules/lang'
 import stats from './modules/stats'
 import version from './modules/version'
-import tour from './modules/tour'
 import doc from './modules/doc'
 import getters from './getters'
 
@@ -29,7 +28,6 @@ const store = new Vuex.Store({
     schedule,
     lang,
     version,
-    tour,
     doc,
     stats
   },

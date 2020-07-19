@@ -37,10 +37,7 @@ const state = {
   previewCrawlData: [],
 
   // spider file tree
-  fileTree: {},
-
-  // config list ts
-  configListTs: undefined
+  fileTree: {}
 }
 
 const getters = {}
@@ -85,9 +82,6 @@ const mutations = {
   },
   SET_FILE_TREE(state, value) {
     state.fileTree = value
-  },
-  SET_CONFIG_LIST_TS(state, value) {
-    state.configListTs = value
   }
 }
 

@@ -29,11 +29,10 @@ func InitTestApp() *gin.Engine {
 }
 
 func Login(app *gin.Engine) (string, error) {
-	users, err := dao.GetUserList()
-	if err != nil {
-		return "", err
+	user := dao.GetUser()
+	if user == nil {
+		return "", errors.New("user does not exist")
 	}
-	user := users[0]
 	w := httptest.NewRecorder()
 	values := map[string]string{"username": user.Username, "password": user.Password}
 	req, err := PostJson("/api/login", values)

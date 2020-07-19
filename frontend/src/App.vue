@@ -5,8 +5,6 @@
 </template>
 
 <script>
-  import { mapState } from 'vuex'
-
   export default {
     name: 'App',
     data() {
@@ -15,7 +13,6 @@
       }
     },
     computed: {
-      ...mapState('setting', ['setting']),
       useStats() {
         return localStorage.getItem('useStats')
       },
@@ -114,24 +111,5 @@
     background: #f56c6c;
     border-color: #f56c6c;
     color: #fff;
-  }
-
-  .v-tour__target--highlighted {
-    box-shadow: none !important;
-    /*box-shadow: 0 0 0 4px #f56c6c !important;*/
-    border: 3px solid #f56c6c !important;
-  }
-
-  .v-step__button {
-    background: #67c23a !important;
-    border: none !important;
-    color: white !important;
-  }
-
-  .v-step__button:hover {
-    background: #67c23a !important;
-    border: none !important;
-    color: white !important;
-    opacity: 0.9 !important;
   }
 </style>

@@ -11,9 +11,8 @@ import (
 func TestUserAPI(t *testing.T) {
 	Convey("Test User API", t, func() {
 		app := InitTestApp()
-		users, err := dao.GetUserList()
-		So(err, ShouldBeNil)
-		user := users[0]
+		user := dao.GetUser()
+		So(user, ShouldNotBeNil)
 
 		Convey("Test right user", func() {
 			w := httptest.NewRecorder()

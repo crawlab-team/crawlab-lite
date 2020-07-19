@@ -56,12 +56,12 @@
       },
       getGoToPath(item) {
         if (item.path) {
-          var path = item.path
-          var startPos = path.indexOf(':')
+          let path = item.path
+          const startPos = path.indexOf(':')
 
           if (startPos !== -1) {
-            var endPos = path.indexOf('/', startPos)
-            var key = path.substring(startPos + 1, endPos)
+            const endPos = path.indexOf('/', startPos)
+            const key = path.substring(startPos + 1, endPos)
             path = path.replace(':' + key, this.$route.params[key])
             return path
           }

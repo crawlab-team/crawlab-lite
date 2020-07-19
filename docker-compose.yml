@@ -18,4 +18,3 @@ services:
       # CRAWLAB_SERVER_LANG_JAVA: "Y"  # whether to pre-install Java 预安装 Java 语言环境
       # CRAWLAB_SERVER_LANG_DOTNET: "Y"  # whether to pre-install .Net core 预安装 .Net Core 语言环境
       # CRAWLAB_SERVER_LANG_PHP: "Y"  # whether to pre-install PHP 预安装 PHP 语言环境
-      # CRAWLAB_SETTING_ENABLETUTORIAL: "N"  # whether to enable tutorial 是否启用教程

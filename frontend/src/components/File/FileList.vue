@@ -136,7 +136,6 @@
             size="small"
             type="primary"
             icon="el-icon-plus"
-            :disabled="isDisabled"
             @click="onEmptyClick"
           >
             {{ $t('Add') }}
@@ -203,7 +202,7 @@
 </template>
 
 <script>
-  import { mapGetters, mapState } from 'vuex'
+  import { mapState } from 'vuex'
   import FileDetail from './FileDetail'
 
   export default {
@@ -240,9 +239,6 @@
       ...mapState('file', [
         'fileList'
       ]),
-      ...mapGetters('user', [
-        'userInfo'
-      ]),
       currentPath: {
         set(value) {
           this.$store.commit('file/SET_CURRENT_PATH', value)
@@ -267,9 +263,6 @@
           })
           .filter(d => d.expanded)
           .map(d => d.path)
-      },
-      isDisabled() {
-        return this.spiderForm.is_public && this.spiderForm.username !== this.userInfo.username && this.userInfo.role !== 'admin'
       }
     },
     async created() {

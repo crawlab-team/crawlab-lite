@@ -1,20 +1,5 @@
 <template>
   <div class="app-container">
-    <!--tour-->
-    <v-tour
-      name="spider-list"
-      :steps="tourSteps"
-      :callbacks="tourCallbacks"
-      :options="$utils.tour.getOptions(true)"
-    />
-    <v-tour
-      name="spider-list-add"
-      :steps="tourAddSteps"
-      :callbacks="tourAddCallbacks"
-      :options="$utils.tour.getOptions(true)"
-    />
-    <!--./tour-->
-
     <!--add dialog-->
     <el-dialog
       :title="$t('Add Spider')"
@@ -125,95 +110,6 @@
       </template>
     </el-dialog>
     <!--./version list dialog-->
-
-    <!--running tasks dialog-->
-    <el-dialog
-      :visible.sync="isRunningTasksDialogVisible"
-      :title="`${$t('Latest Tasks')} (${$t('Spider')}: ${activeSpider ? activeSpider.name : ''})`"
-      width="920px"
-    >
-      <el-tabs v-model="activeSpiderTaskStatus">
-        <el-tab-pane name="PENDING" :label="$t('Pending')" />
-        <el-tab-pane name="RUNNING" :label="$t('Running')" />
-        <el-tab-pane name="FINISHED" :label="$t('Finished')" />
-        <el-tab-pane name="ERROR" :label="$t('Error')" />
-        <el-tab-pane name="CANCELLED" :label="$t('Cancelled')" />
-        <el-tab-pane name="ABNORMAL" :label="$t('Abnormal')" />
-      </el-tabs>
-      <el-table
-        :data="spiderTaskList"
-        border
-        class="table"
-        max-height="240px"
-        style="margin: 5px 10px"
-      >
-        <el-table-column
-          :label="$t('Create Time')"
-          prop="create_ts"
-        >
-          <template slot-scope="scope">
-            {{ getTime(scope.row.create_ts) }}
-          </template>
-        </el-table-column>
-        <el-table-column
-          :label="$t('Start Time')"
-          prop="start_ts"
-        >
-          <template slot-scope="scope">
-            {{ getTime(scope.row.start_ts) }}
-          </template>
-        </el-table-column>
-        <el-table-column
-          :label="$t('Finish Time')"
-          prop="finish_ts"
-        >
-          <template slot-scope="scope">
-            {{ getTime(scope.row.finish_ts) }}
-          </template>
-        </el-table-column>
-        <el-table-column
-          :label="$t('Cmd')"
-          prop="param"
-        />
-        <el-table-column
-          :label="$t('Status')"
-        >
-          <template slot-scope="scope">
-            <template
-              v-if="scope.row.status === 'ERROR'"
-            >
-              <el-tooltip :content="scope.row.error" placement="top">
-                <status-tag :status="scope.row.status" />
-              </el-tooltip>
-            </template>
-            <status-tag v-else :status="scope.row.status" />
-          </template>
-        </el-table-column>
-        <!--        <el-table-column-->
-        <!--          :label="$t('Results Count')"-->
-        <!--          prop="result_count"-->
-        <!--          width="80px"-->
-        <!--        />-->
-        <el-table-column
-          :label="$t('Action')"
-        >
-          <template slot-scope="scope">
-            <el-button
-              v-if="['PENDING', 'RUNNING'].includes(scope.row.status)"
-              icon="el-icon-video-pause"
-              size="mini"
-              type="danger"
-              @click="onStop(scope.row, $event)"
-            />
-          </template>
-        </el-table-column>
-      </el-table>
-
-      <template slot="footer">
-        <el-button size="small" type="primary" @click="isRunningTasksDialogVisible = false">{{ $t('Ok') }}</el-button>
-      </template>
-    </el-dialog>
-    <!--./running tasks dialog-->
 
     <!--crawl confirm dialog-->
     <crawl-confirm-dialog
@@ -349,7 +245,7 @@
             :width="col.width"
           />
         </template>
-        <el-table-column :label="$t('Action')" align="left" fixed="right" width="170">
+        <el-table-column :label="$t('Action')" align="left" fixed="right" width="130">
           <template slot-scope="scope">
             <!--            <el-tooltip :content="$t('View')" placement="top">-->
             <!--              <el-button-->
@@ -361,18 +257,10 @@
             <!--            </el-tooltip>-->
             <el-tooltip :content="$t('Spider Version List')" placement="top">
               <el-button
-                type="info"
+                type="warning"
                 icon="fa fa-archive"
                 size="mini"
                 @click="onViewSpiderVersions(scope.row, $event)"
-              />
-            </el-tooltip>
-            <el-tooltip :content="$t('Latest Tasks')" placement="top">
-              <el-button
-                type="warning"
-                icon="fa fa-tasks"
-                size="mini"
-                @click="onViewRunningTasks(scope.row, $event)"
               />
             </el-tooltip>
             <el-tooltip :content="$t('Run')" placement="top">
@@ -429,77 +317,17 @@
           page_size: 10
         },
         importLoading: false,
-        addConfigurableLoading: false,
         isEditMode: false,
         dialogVisible: false,
         addDialogVisible: false,
         crawlConfirmDialogVisible: false,
         versionListDialogVisible: false,
-        isRunningTasksDialogVisible: false,
         activeSpider: {},
         types: [],
         spiderFormRules: {
           name: [{ required: true, message: 'Required Field', trigger: 'change' }]
         },
         fileList: [],
-        activeTabName: 'customized',
-        tourSteps: [
-          // {
-          //   target: '.table',
-          //   content: this.$t('You can view your created spiders here.<br>Click a table row to view <strong>spider details</strong>.'),
-          //   params: {
-          //     placement: 'top'
-          //   }
-          // },
-          {
-            target: '.btn.add',
-            content: this.$t('Click to add a new spider.')
-          }
-        ],
-        tourCallbacks: {
-          onStop: () => {
-            this.$utils.tour.finishTour('spider-list')
-          },
-          onPreviousStep: (currentStep) => {
-            this.$utils.tour.prevStep('spider-list', currentStep)
-          },
-          onNextStep: (currentStep) => {
-            this.$utils.tour.nextStep('spider-list', currentStep)
-          }
-        },
-        tourAddSteps: [
-          {
-            target: '#spider-name',
-            content: this.$t('Unique identifier for the spider'),
-            params: {
-              placement: 'right'
-            }
-          },
-          {
-            target: '#upload',
-            content: this.$t('Upload a zip file containing all spider files to create the spider.'),
-            params: {
-              placement: 'right'
-            }
-          }
-        ],
-        tourAddCallbacks: {
-          onStop: () => {
-            this.$utils.tour.finishTour('spider-list-add')
-          },
-          onPreviousStep: (currentStep) => {
-            if (currentStep === 7) {
-              this.activeTabName = 'customized'
-            }
-            this.$utils.tour.prevStep('spider-list-add', currentStep)
-          },
-          onNextStep: (currentStep) => {
-            if (currentStep === 6) {
-              this.activeTabName = 'configurable'
-            }
-            this.$utils.tour.nextStep('spider-list-add', currentStep)
-          }
-        },
         refreshHandle: undefined,
         activeSpiderTaskStatus: 'RUNNING',
         isStopLoading: false,
@@ -516,7 +344,6 @@
         'spiderVersionTotal'
       ]),
       ...mapState('task', [
-        'filter',
         'taskList'
       ]),
       ...mapGetters('user', [
@@ -560,10 +387,6 @@
       this.$nextTick(() => {
         vm.$store.commit('spider/SET_SPIDER_FORM', this.spiderForm)
       })
-
-      if (!this.$utils.tour.isFinishedTour('spider-list')) {
-        this.$utils.tour.startTour(this, 'spider-list')
-      }
     },
     destroyed() {
       clearInterval(this.refreshHandle)
@@ -572,12 +395,6 @@
       onAdd() {
         this.$store.commit('spider/SET_SPIDER_FORM', {})
         this.addDialogVisible = true
-
-        setTimeout(() => {
-          if (!this.$utils.tour.isFinishedTour('spider-list-add')) {
-            this.$utils.tour.startTour(this, 'spider-list-add')
-          }
-        }, 300)
       },
       onRefresh() {
         this.getSpiderList()
@@ -657,13 +474,6 @@
         this.$router.push('/spiders/' + row.id)
         this.$st.sendEv('爬虫列表', '查看爬虫')
       },
-      isShowRun(row) {
-        if (!this.isCustomized(row)) return true
-        return !!row.cmd
-      },
-      isCustomized(row) {
-        return row.type === 'customized'
-      },
       onUploadSuccess(res) {
         // clear fileList
         this.fileList = []
@@ -719,17 +529,6 @@
         this.activeSpider = row
         this.versionListDialogVisible = true
         await this.getSpiderVersionList(row.id)
-      },
-      async onViewRunningTasks(row, ev) {
-        ev.stopPropagation()
-        this.activeSpider = row
-        this.isRunningTasksDialogVisible = true
-        this.$set(this.filter, 'spider_id', row.id)
-        await this.$store.dispatch('task/getTaskList')
-      },
-      onViewTask(row) {
-        this.$router.push(`/tasks/${row.id}`)
-        this.$st.sendEv('爬虫列表', '任务列表', '查看任务')
       },
       async onStop(row, ev) {
         ev.stopPropagation()

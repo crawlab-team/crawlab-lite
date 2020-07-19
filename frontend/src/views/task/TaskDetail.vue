@@ -1,14 +1,5 @@
 <template>
   <div class="app-container">
-    <!--tour-->
-    <!--    <v-tour-->
-    <!--      name="task-detail"-->
-    <!--      :steps="tourSteps"-->
-    <!--      :callbacks="tourCallbacks"-->
-    <!--      :options="$utils.tour.getOptions(true)"-->
-    <!--    />-->
-    <!--./tour-->
-
     <!--tabs-->
     <el-tabs v-model="activeTabName" type="border-card" @tab-click="onTabClick">
       <!--      <el-tab-pane :label="$t('Overview')" name="overview">-->
@@ -41,96 +32,17 @@
     mapState,
     mapGetters
   } from 'vuex'
-  // import TaskOverview from '../../components/Overview/TaskOverview'
-  // import GeneralTableView from '../../components/TableView/GeneralTableView'
   import LogView from '../../components/ScrollView/LogView'
 
   export default {
     name: 'TaskDetail',
     components: {
       LogView
-      // GeneralTableView,
-      // TaskOverview
     },
     data() {
       return {
         activeTabName: 'log',
-        handle: undefined,
-
-        // tutorial
-        tourSteps: [
-          // overview
-          {
-            target: '.task-info-overview-wrapper',
-            content: this.$t('This is the info of the task detail.'),
-            params: {
-              placement: 'right'
-            }
-          },
-          {
-            target: '.task-info-spider-wrapper',
-            content: this.$t('This is the spider info of the task.'),
-            params: {
-              placement: 'left'
-            }
-          },
-          {
-            target: '.spider-title',
-            content: this.$t('You can click to view the spider detail for the task.'),
-            params: {
-              placement: 'left'
-            }
-          },
-          {
-            target: '.task-info-node-wrapper',
-            content: this.$t('This is the node info of the task.'),
-            params: {
-              placement: 'left'
-            }
-          },
-          {
-            target: '.node-title',
-            content: this.$t('You can click to view the node detail for the task.'),
-            params: {
-              placement: 'left'
-            }
-          },
-          // log
-          {
-            target: '#tab-log',
-            content: this.$t('Here you can view the log<br> details for the task. The<br> log is automatically updated.')
-          },
-          // results
-          {
-            target: '#tab-results',
-            content: this.$t('Here you can view the results scraped by the spider.<br><br><strong>Note:</strong> If you find your results here are empty, please refer to the <a href="https://docs.crawlab.cn/Integration/" target="_blank" style="color: #409EFF">Documentation (Chinese)</a> about how to integrate your spider into Crawlab.')
-          },
-          {
-            target: '.btn-download',
-            content: this.$t('You can download your results as a CSV file by clicking this button.')
-          }
-        ],
-        tourCallbacks: {
-          onStop: () => {
-            this.$utils.tour.finishTour('task-detail')
-          },
-          onPreviousStep: (currentStep) => {
-            if (currentStep === 5) {
-              this.activeTabName = 'overview'
-            } else if (currentStep === 6) {
-              this.activeTabName = 'log'
-            }
-            this.$utils.tour.prevStep('task-detail', currentStep)
-          },
-          onNextStep: (currentStep) => {
-            if (currentStep === 4) {
-              this.activeTabName = 'log'
-            } else if (currentStep === 5) {
-              this.activeTabName = 'results'
-            }
-            this.$utils.tour.nextStep('task-detail', currentStep)
-          }
-        }
+        handle: undefined
       }
     },
     computed: {
@@ -230,9 +142,6 @@
       }, 5000)
     },
     mounted() {
-      // if (!this.$utils.tour.isFinishedTour('task-detail')) {
-      //   this.$utils.tour.startTour(this, 'task-detail')
-      // }
     },
     destroyed() {
       clearInterval(this.handle)

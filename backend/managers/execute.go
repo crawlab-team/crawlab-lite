@@ -10,10 +10,13 @@ import (
 	"github.com/robfig/cron/v3"
 	uuid "github.com/satori/go.uuid"
 	"github.com/spf13/viper"
+	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"runtime"
 	"strconv"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -220,6 +223,9 @@ func executeShellCmd(cwd string, task *models.Task) (err error) {
 	// 记录任务生成的日志
 	recordTaskLog(cmd, task)
 
+	// 设置环境变量
+	setEnv(cmd, task)
+
 	// 完成或取消任务后的工作
 	go finishOrCancelTask(ch, cmd, task)
 
@@ -273,4 +279,34 @@ func queryLatestSpiderVersion(spiderId uuid.UUID) (version *models.SpiderVersion
 	}
 
 	return version, nil
+}
+
+// 设置环境变量
+func setEnv(cmd *exec.Cmd, task *models.Task) {
+	// 默认把 Node.js 的全局 node_modules 加入环境变量
+	envPath := os.Getenv("PATH")
+	homePath := os.Getenv("HOME")
+	nodeVersion := "v10.19.0"
+	nodePath := path.Join(homePath, ".nvm/versions/node", nodeVersion, "lib/node_modules")
+	if !strings.Contains(envPath, nodePath) {
+		_ = os.Setenv("PATH", nodePath+":"+envPath)
+	}
+	_ = os.Setenv("NODE_PATH", nodePath)
+
+	// 默认环境变量
+	cmd.Env = append(os.Environ(), "CRAWLABLITE_TASK_ID="+task.Id.String())
+	cmd.Env = append(cmd.Env, "PYTHONUNBUFFERED=0")
+	cmd.Env = append(cmd.Env, "PYTHONIOENCODING=utf-8")
+	cmd.Env = append(cmd.Env, "TZ=Asia/Shanghai")
+
+	//任务环境变量
+	//for _, env := range envs {
+	//	cmd.Env = append(cmd.Env, env.Name+"="+env.Value)
+	//}
+
+	// 全局环境变量
+	//variables := models.GetVariableList()
+	//for _, variable := range variables {
+	//	cmd.Env = append(cmd.Env, variable.Key+"="+variable.Value)
+	//}
 }

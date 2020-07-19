@@ -21,8 +21,7 @@
           RUNNING: { label: 'Running', type: 'warning' },
           FINISHED: { label: 'Finished', type: 'success' },
           ERROR: { label: 'Error', type: 'danger' },
-          CANCELLED: { label: 'Cancelled', type: 'info' },
-          ABNORMAL: { label: 'Abnormal', type: 'danger' }
+          CANCELLED: { label: 'Cancelled', type: 'info' }
         }
       }
     },
@@ -52,8 +51,6 @@
           return 'el-icon-error'
         } else if (this.status === 'CANCELLED') {
           return 'el-icon-video-pause'
-        } else if (this.status === 'ABNORMAL') {
-          return 'el-icon-warning'
         } else {
           return 'el-icon-question'
         }

@@ -9,7 +9,7 @@
 </template>
 
 <script>
-  import { mapGetters, mapState } from 'vuex'
+  import { mapState } from 'vuex'
   import { codemirror } from 'vue-codemirror-lite'
 
   import 'codemirror/lib/codemirror.js'
@@ -34,9 +34,6 @@
       ...mapState('spider', [
         'spiderForm'
       ]),
-      ...mapGetters('user', [
-        'userInfo'
-      ]),
       fileContent: {
         get() {
           return this.$store.state.file.fileContent
@@ -55,7 +52,7 @@
           lineNumbers: true,
           line: true,
           matchBrackets: true,
-          readOnly: this.isDisabled ? 'nocursor' : false
+          readOnly: false
         }
       },
       language() {
@@ -78,9 +75,6 @@
         } else {
           return 'text'
         }
-      },
-      isDisabled() {
-        return this.spiderForm.is_public && this.spiderForm.username !== this.userInfo.username && this.userInfo.role !== 'admin'
       }
     },
     created() {

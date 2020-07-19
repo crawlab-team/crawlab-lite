@@ -206,6 +206,7 @@
 
   export default {
     name: 'VueCronLinux',
+    // eslint-disable-next-line vue/require-prop-types
     props: ['data', 'i18n'],
     data() {
       return {
