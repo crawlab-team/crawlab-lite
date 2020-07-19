@@ -164,11 +164,6 @@ func recordTaskLog(cmd *exec.Cmd, task *models.Task) {
 	days := viper.GetInt("log.expireDays")
 
 	logPattern := filepath.Join(fileDir, task.Id.String()) + "_%Y%m%d.log"
-	logPath, err := strftime.Format(logPattern, time.Now())
-	if err != nil {
-		log.Errorf("new strftime error: %s", err.Error())
-		return
-	}
 
 	logf, err := rotatelogs.New(
 		logPattern,
@@ -197,7 +192,12 @@ func recordTaskLog(cmd *exec.Cmd, task *models.Task) {
 	stderrScanner := bufio.NewScanner(stderr)
 
 	// 存储日志路径
-	task.LogPath = logPath
+	savedPattern := filepath.Join(task.SpiderId.String(), task.Id.String()) + "_%Y%m%d.log"
+	task.LogPath, err = strftime.Format(savedPattern, time.Now())
+	if err != nil {
+		log.Errorf("new strftime error: %s", err.Error())
+		return
+	}
 	if err = updateTask(task); err != nil {
 		log.Errorf("save log path error: %s", err.Error())
 		return

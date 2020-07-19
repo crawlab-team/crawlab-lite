@@ -448,6 +448,9 @@
         }
       },
       updateCronFromData() {
+        if (!this.data) {
+          return
+        }
         const arr = this.data.split(' ')
         const minute = arr[0]
         const hour = arr[1]

@@ -12,7 +12,9 @@ import (
 	. "github.com/ahmetb/go-linq"
 	"github.com/jinzhu/copier"
 	uuid "github.com/satori/go.uuid"
+	"github.com/spf13/viper"
 	"os"
+	"path/filepath"
 )
 
 func QueryTaskPage(page forms.TaskPageForm) (total int, resultList []*results.Task, err error) {
@@ -270,11 +272,13 @@ func QueryTaskLogPage(form forms.TaskLogPageForm) (total int, resultList []*resu
 		return 0, nil, errors.New("task not found")
 	}
 
-	start, end := form.Range()
-	file, err := os.OpenFile(task.LogPath, os.O_RDONLY, os.ModePerm)
+	logPath := filepath.Join(viper.GetString("log.path"), task.LogPath)
+	file, err := os.OpenFile(logPath, os.O_RDONLY, os.ModePerm)
 	if err != nil {
 		return 0, nil, nil
 	}
+
+	start, end := form.Range()
 	scanner := bufio.NewScanner(file)
 	count := 0
 	for scanner.Scan() {
