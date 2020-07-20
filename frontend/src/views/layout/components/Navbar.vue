@@ -125,7 +125,7 @@
 ### Docker 部署
 \`\`\`bash
 # 拉取最新镜像
-docker pull tikazyq/crawlab:latest
+docker pull zkqiang/crawlab-lite:latest
 
 # 删除容器
 docker-compose down | true
@@ -136,7 +136,7 @@ docker-compose up -d
 
 ### 直接部署
 
-1. 拉取最新 Github 代码
+1. 拉取最新 GitHub 代码
 2. 重新构建前后端应用
 3. 启动前后端应用
 `,
@@ -144,7 +144,7 @@ docker-compose up -d
 ### Docker Deployment
 \`\`\`bash
 # pull the latest image
-docker pull tikazyq/crawlab:latest
+docker pull zkqiang/crawlab-lite:latest
 
 # delete containers
 docker-compose down | true
