@@ -15,18 +15,19 @@
             <el-input v-model="form.cmd" :placeholder="$t('Execute Command')" />
           </template>
         </el-form-item>
-        <el-form-item :label="$t('Version')" inline-message prop="spiderVersionId">
+        <el-form-item :label="$t('Version')" inline-message prop="spider_version_id" required>
           <el-select
-            v-model="form.spiderVersionId"
+            v-model="form.spider_version_id"
             :loading="loadingVersions"
             :placeholder="$t('Latest Version')"
             @focus="onSelectSpiderVersion"
           >
+            <el-option value="00000000-0000-0000-0000-000000000000" :label="$t('Latest Version')" />
             <el-option
-              v-for="(version, index) in spiderVersionList"
+              v-for="(version) in spiderVersionList"
               :key="version.id"
               :value="version.id"
-              :label="getTime(version.create_ts).format('YYYY-MM-DD HH:mm:ss') + (index === 0 ? ` (${$t('Latest Version')})` : '')"
+              :label="getTime(version.create_ts).format('YYYY-MM-DD HH:mm:ss')"
             />
           </el-select>
         </el-form-item>
@@ -83,10 +84,7 @@
     },
     data() {
       return {
-        form: {
-          spider: undefined,
-          cmd: ''
-        },
+        form: this.defaultForm(),
         isAllowDisclaimer: true,
         isRetry: false,
         isRedirect: false,
@@ -107,7 +105,24 @@
         return !this.isAllowDisclaimer
       }
     },
+    watch: {
+      visible: function(current) {
+        this.$emit('input', current)
+        if (!this.visible) {
+          this.$nextTick(() => {
+            this.form = this.defaultForm()
+          })
+        }
+      }
+    },
     methods: {
+      defaultForm() {
+        return {
+          spider: undefined,
+          spider_version_id: '00000000-0000-0000-0000-000000000000',
+          cmd: undefined
+        }
+      },
       async onSelectSpiderVersion() {
         this.loadingVersions = true
         await this.$store.dispatch('spider/getSpiderVersionList', { spider_id: this.spiderId })
@@ -135,7 +150,7 @@
           if (this.isRedirect) {
             // 返回任务id
             const id = res.data.data[0]
-            await this.$router.push('/tasks/' + id)
+            await this.$router.push(`/tasks/${id}`)
             this.$st.sendEv('爬虫确认', '跳转到任务详情')
           }
 

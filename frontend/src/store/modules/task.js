@@ -123,7 +123,6 @@ const actions = {
       .then(response => {
         const data = response.data.data
         commit('SET_TASK_FORM', data)
-        // dispatch('spider/getSpiderData', data.spider_id, { root: true })
       })
   },
   getTaskList({ state, commit }, params = {}) {

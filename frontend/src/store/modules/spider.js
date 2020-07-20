@@ -1,4 +1,3 @@
-import Vue from 'vue'
 import request from '../../api/request'
 
 const state = {
@@ -15,26 +14,11 @@ const state = {
   // active spider data
   spiderForm: {},
 
-  // upload form for importing spiders
-  importForm: {
-    url: '',
-    type: 'github'
-  },
-
   // spider overview stats
   overviewStats: {},
 
-  // spider status stats
-  statusStats: [],
-
   // spider daily stats
   dailyStats: [],
-
-  // filters
-  filterSite: '',
-
-  // preview crawl data
-  previewCrawlData: [],
 
   // spider file tree
   fileTree: {}
@@ -58,27 +42,11 @@ const mutations = {
   SET_SPIDER_VERSION_TOTAL(state, value) {
     state.spiderVersionTotal = value
   },
-  SET_IMPORT_FORM(state, value) {
-    state.importForm = value
-  },
   SET_OVERVIEW_STATS(state, value) {
     state.overviewStats = value
   },
-  SET_STATUS_STATS(state, value) {
-    state.statusStats = value
-  },
   SET_DAILY_STATS(state, value) {
     state.dailyStats = value
-  },
-  SET_PREVIEW_CRAWL_DATA(state, value) {
-    state.previewCrawlData = value
-  },
-  SET_SPIDER_FORM_CONFIG_SETTINGS(state, payload) {
-    const settings = {}
-    payload.forEach(row => {
-      settings[row.name] = row.value
-    })
-    Vue.set(state.spiderForm.config, 'settings', settings)
   },
   SET_FILE_TREE(state, value) {
     state.fileTree = value
@@ -102,7 +70,7 @@ const actions = {
   deleteSpider({ state, dispatch }, id) {
     return request.delete(`/spiders/${id}`)
   },
-  getSpiderData({ state, commit }, id) {
+  getSpider({ state, commit }, id) {
     return request.get(`/spiders/${id}`)
       .then(response => {
         const data = response.data.data
@@ -124,10 +92,6 @@ const actions = {
         commit('')
       })
   },
-  importGithub({ state }) {
-    const url = state.importForm.url
-    return request.post('/spiders/import/github', { url })
-  },
   getSpiderStats({ state, commit }) {
     return request.get(`/spiders/${state.spiderForm.id}/stats`)
       .then(response => {
@@ -136,22 +100,6 @@ const actions = {
         commit('SET_DAILY_STATS', response.data.data.daily)
         // commit('SET_NODE_STATS', response.data.task_count_by_node)
       })
-  },
-  getPreviewCrawlData({ state, commit }) {
-    return request.post(`/spiders/${state.spiderForm.id}/preview_crawl`)
-      .then(response => {
-        commit('SET_PREVIEW_CRAWL_DATA', response.data.items)
-      })
-  },
-  extractFields({ state, commit }) {
-    return request.post(`/spiders/${state.spiderForm.id}/extract_fields`)
-  },
-  postConfigSpiderConfig({ state }) {
-    return request.post(`/config_spiders/${state.spiderForm.id}/config`, state.spiderForm.config)
-  },
-  saveConfigSpiderSpiderfile({ state, rootState }) {
-    const content = rootState.file.fileContent
-    return request.post(`/config_spiders/${state.spiderForm.id}/spiderfile`, { content })
   },
   addSpider({ state }) {
     return request.post(`/spiders`, state.spiderForm)

@@ -155,6 +155,25 @@ func ModifySchedule(id uuid.UUID, form forms.ScheduleUpdateForm) (result *result
 			return errors.New("schedule not found")
 		}
 
+		if form.SpiderId != uuid.Nil {
+			// 检查爬虫是否存在
+			if spider, err := tx.SelectSpider(form.SpiderId); err != nil {
+				return err
+			} else if spider == nil {
+				return errors.New("spider not found")
+			}
+			schedule.SpiderId = form.SpiderId
+		}
+		if form.SpiderVersionId != uuid.Nil {
+			// 检查爬虫版本是否存在
+			version, err := tx.SelectSpiderVersion(form.SpiderId, form.SpiderVersionId)
+			if err != nil {
+				return err
+			} else if version == nil {
+				return errors.New("spider version not found")
+			}
+			schedule.SpiderVersionId = form.SpiderVersionId
+		}
 		if form.Cmd != "" {
 			schedule.Cmd = form.Cmd
 		}

@@ -15,8 +15,10 @@ type ScheduleCreateForm struct {
 type ScheduleUpdateForm struct {
 	BaseForm
 
-	Cron        string `form:"cron" json:"cron"`
-	Cmd         string `form:"cmd" json:"cmd"`
-	Enabled     int    `form:"enabled" json:"enabled"`
-	Description string `form:"description" json:"description"`
+	SpiderId        uuid.UUID `form:"spider_id" json:"spider_id"`
+	SpiderVersionId uuid.UUID `form:"spider_version_id" json:"spider_version_id"`
+	Cron            string    `form:"cron" json:"cron"`
+	Cmd             string    `form:"cmd" json:"cmd"`
+	Enabled         int       `form:"enabled" json:"enabled"`
+	Description     string    `form:"description" json:"description"`
 }

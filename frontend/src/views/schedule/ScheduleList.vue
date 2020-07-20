@@ -32,18 +32,19 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item v-if="scheduleForm.spider_id" :label="$t('Version')" inline-message prop="spiderVersionId">
+        <el-form-item v-if="scheduleForm.spider_id" :label="$t('Version')" inline-message prop="spider_version_id" required="">
           <el-select
             v-model="scheduleForm.spider_version_id"
             :loading="loadingVersions"
             :placeholder="$t('Latest Version')"
             @focus="onSelectSpiderVersion"
           >
+            <el-option value="00000000-0000-0000-0000-000000000000" :label="$t('Latest Version')" />
             <el-option
-              v-for="(version, index) in spiderVersionList"
+              v-for="(version) in spiderVersionList"
               :key="version.id"
               :value="version.id"
-              :label="getTime(version.create_ts).format('YYYY-MM-DD HH:mm:ss') + (index === 0 ? ` (${$t('Latest Version')})` : '')"
+              :label="getTime(version.create_ts).format('YYYY-MM-DD HH:mm:ss')"
             />
           </el-select>
         </el-form-item>
@@ -361,7 +362,9 @@
         this.$st.sendEv('定时任务', '修改定时任务')
 
         this.submitting = true
-        await this.$store.dispatch('spider/getSpiderData', row.spider_id)
+        await this.$store.dispatch('schedule/getSchedule', row.id)
+        await this.getSpiderList()
+        await this.getSpiderVersionList()
         this.submitting = false
       },
       onRemove(row) {
@@ -384,15 +387,25 @@
       async getScheduleList() {
         await this.$store.dispatch('schedule/getScheduleList', this.pagination)
       },
-      async onSelectSpider() {
+      async getSpiderList() {
         this.loadingSpiders = true
         await this.$store.dispatch('spider/getSpiderList')
         this.loadingSpiders = false
       },
-      async onSelectSpiderVersion() {
+      async getSpiderVersionList() {
         this.loadingVersions = true
         await this.$store.dispatch('spider/getSpiderVersionList', { spider_id: this.scheduleForm.spider_id })
         this.loadingVersions = false
+      },
+      async onSelectSpider() {
+        if (this.spiderList.length === 0) {
+          await this.getSpiderList()
+        }
+      },
+      async onSelectSpiderVersion() {
+        if (this.spiderVersionList.length === 0) {
+          await this.getSpiderVersionList()
+        }
       },
       async onEnabledChange(row) {
         let res
@@ -401,10 +414,10 @@
         } else {
           res = await this.$store.dispatch('schedule/disableSchedule', row.id)
         }
-        if (!res || res.data.code !== 200) {
-          this.$message.error(this.$t(`${row.enabled ? 'Enabling' : 'Disabling'} the schedule unsuccessful`))
-        } else {
+        if (res.data && res.data.code === 200) {
           this.$message.success(this.$t(`${row.enabled ? 'Enabling' : 'Disabling'} the schedule successful`))
+        } else {
+          this.$message.error(this.$t(`${row.enabled ? 'Enabling' : 'Disabling'} the schedule unsuccessful`))
         }
         this.$st.sendEv('定时任务', '启用/禁用')
       },
@@ -418,8 +431,8 @@
           this.cronDialogVisible = false
         }
       },
-      async onSpiderChange(spiderId) {
-        await this.$store.dispatch('spider/getSpiderData', spiderId)
+      onSpiderChange() {
+        this.$set(this.scheduleForm, 'spider_version_id', '00000000-0000-0000-0000-000000000000')
       },
       onShowCronDialog() {
         this.cronDialogVisible = true

@@ -326,6 +326,7 @@
                 type: 'success',
                 message: this.$t('Deleted successfully')
               })
+              this.getTaskList()
             })
           this.$st.sendEv('任务列表', '删除任务')
         })
@@ -343,7 +344,7 @@
                 type: 'success',
                 message: this.$t('Restarted successfully')
               })
-              this.getTaskList()
+              setTimeout(this.getTaskList, 500)
             })
           this.$st.sendEv('任务列表', '重新开始任务')
         })

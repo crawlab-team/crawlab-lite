@@ -368,9 +368,6 @@
         columns.push({ name: 'create_ts', label: 'Create Time', width: '140' })
         columns.push({ name: 'description', label: 'Description' })
         return columns
-      },
-      spiderTaskList() {
-        return this.taskList.filter(d => d.status === this.activeSpiderTaskStatus)
       }
     },
     async created() {

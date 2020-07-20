@@ -1,15 +1,16 @@
-/**
- * Created by jiachenpan on 16/11/18.
- */
-
 export function isValidUsername(str) {
   if (!str) return false
-  if (str.length > 100) return false
-  return true
-  // const validMap = ['admin', 'editor']
-  // return validMap.indexOf(str.trim()) >= 0
+  return str.length <= 100
 }
 
 export function isExternal(path) {
   return /^(https?:|mailto:|tel:)/.test(path)
+}
+
+export function isUUID(str) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str)
+}
+
+export function isNilUUID(str) {
+  return /^00000000-0000-0000-0000-000000000000$/.test(str)
 }

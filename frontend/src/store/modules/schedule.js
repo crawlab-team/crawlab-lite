@@ -31,6 +31,12 @@ const actions = {
         commit('SET_SCHEDULE_TOTAL', response.data.data.total || 0)
       })
   },
+  getSchedule({ state, commit }, id) {
+    return request.get(`/schedules/${id}`)
+      .then(response => {
+        commit('SET_SCHEDULE_FORM', response.data.data)
+      })
+  },
   addSchedule({ state }, payload) {
     return request.post('/schedules', payload || state.scheduleForm)
   },
