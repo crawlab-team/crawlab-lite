@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"crawlab-lite/constants"
 	"crawlab-lite/dao"
+	"crawlab-lite/managers/sys_exec"
 	"crawlab-lite/models"
 	"crawlab-lite/utils"
 	"github.com/apex/log"
@@ -13,8 +14,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
-	"syscall"
 	"time"
 )
 
@@ -89,15 +88,8 @@ func finishOrCancelTask(ch chan string, cmd *exec.Cmd, task *models.Task) {
 	log.Infof("process received signal: %s", signal)
 
 	if signal == constants.TaskCancel && cmd.Process != nil {
-		var err error
-		// 兼容windows
-		if runtime.GOOS == constants.Windows {
-			err = cmd.Process.Kill()
-		} else {
-			err = syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL)
-		}
-		// 取消进程
-		if err != nil {
+		// 终止进程
+		if err := sys_exec.KillProcess(cmd); err != nil {
 			log.Errorf("process kill error: %s", err.Error())
 
 			task.Error = "kill process error: " + err.Error()

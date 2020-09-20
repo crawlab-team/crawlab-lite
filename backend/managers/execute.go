@@ -3,6 +3,7 @@ package managers
 import (
 	"crawlab-lite/constants"
 	"crawlab-lite/dao"
+	"crawlab-lite/managers/sys_exec"
 	"crawlab-lite/models"
 	"crawlab-lite/utils"
 	. "github.com/ahmetb/go-linq"
@@ -14,11 +15,9 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
-	"runtime"
 	"strconv"
 	"strings"
 	"sync"
-	"syscall"
 	"time"
 )
 
@@ -207,12 +206,7 @@ func executeShellCmd(cwd string, task *models.Task) (err error) {
 	log.Infof("cmd: %s", cmdStr)
 
 	// 生成执行命令
-	var cmd *exec.Cmd
-	if runtime.GOOS == constants.Windows {
-		cmd = exec.Command("cmd", "/C", cmdStr)
-	} else {
-		cmd = exec.Command("sh", "-c", cmdStr)
-	}
+	cmd := sys_exec.BuildCmd(cmdStr)
 
 	// 工作目录
 	cmd.Dir = cwd
@@ -230,9 +224,7 @@ func executeShellCmd(cwd string, task *models.Task) (err error) {
 	go finishOrCancelTask(ch, cmd, task)
 
 	// kill 的时候，可以 kill 所有的子进程
-	if runtime.GOOS != constants.Windows {
-		cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
-	}
+	sys_exec.Setpgid(cmd)
 
 	// 启动进程
 	if err := startTask(cmd, task); err != nil {
