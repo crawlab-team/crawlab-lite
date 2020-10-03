@@ -7,7 +7,6 @@ user:
 
 log:
   level: info
-  path: "../data/logs"
   expireDays: 7
 
 server:

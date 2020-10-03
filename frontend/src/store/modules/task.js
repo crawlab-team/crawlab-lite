@@ -42,6 +42,7 @@ const getters = {
       .map((d, i) => {
         return {
           active: state.currentLogIndex === i + 1,
+          line_num: i + 1,
           ...d
         }
       })

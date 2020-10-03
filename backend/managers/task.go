@@ -4,28 +4,23 @@ import (
 	"bufio"
 	"crawlab-lite/constants"
 	"crawlab-lite/dao"
+	"crawlab-lite/database"
 	"crawlab-lite/managers/sys_exec"
 	"crawlab-lite/models"
-	"crawlab-lite/utils"
 	"github.com/apex/log"
-	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
-	"github.com/lestrrat-go/strftime"
-	"github.com/spf13/viper"
-	"os"
 	"os/exec"
-	"path/filepath"
 	"time"
 )
 
 func CancelRunningTasks() (err error) {
-	if err := dao.WriteTx(func(tx dao.Tx) error {
+	if err := dao.WriteTx(database.MainDB, func(tx dao.Tx) error {
 		tasks, err := tx.SelectAllTasks()
 		if err != nil {
 			return err
 		}
 		for _, task := range tasks {
 			if task.Status == constants.TaskStatusRunning {
-				task.Status = constants.TaskStatusCancelled
+				setTaskCancelled(task)
 				if err = tx.UpdateTask(task); err != nil {
 					return err
 				}
@@ -115,7 +110,7 @@ func finishUpTask(task *models.Task) {
 }
 
 func updateTask(task *models.Task) (err error) {
-	if err := dao.WriteTx(func(tx dao.Tx) error {
+	if err := dao.WriteTx(database.MainDB, func(tx dao.Tx) error {
 		if err = tx.UpdateTask(task); err != nil {
 			return err
 		}
@@ -127,7 +122,7 @@ func updateTask(task *models.Task) (err error) {
 }
 
 func popPendingTask() (task *models.Task, err error) {
-	if err := dao.WriteTx(func(tx dao.Tx) error {
+	if err := dao.WriteTx(database.MainDB, func(tx dao.Tx) error {
 		if task, err = tx.SelectFirstTaskWhereStatus(constants.TaskStatusPending); err != nil {
 			return err
 		}
@@ -147,26 +142,6 @@ func popPendingTask() (task *models.Task, err error) {
 }
 
 func recordTaskLog(cmd *exec.Cmd, task *models.Task) {
-	// 创建日志目录
-	fileDir, err := makeLogDir(*task)
-	if err != nil {
-		return
-	}
-
-	days := viper.GetInt("log.expireDays")
-
-	logPattern := filepath.Join(fileDir, task.Id.String()) + "_%Y%m%d.log"
-
-	logf, err := rotatelogs.New(
-		logPattern,
-		rotatelogs.WithMaxAge(time.Duration(days*24)*time.Hour),
-		rotatelogs.WithRotationTime(24*time.Hour),
-	)
-	if err != nil {
-		log.Errorf("new rotatelogs error: %s", err.Error())
-		return
-	}
-
 	// get stdout reader
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -183,24 +158,16 @@ func recordTaskLog(cmd *exec.Cmd, task *models.Task) {
 	}
 	stderrScanner := bufio.NewScanner(stderr)
 
-	// 存储日志路径
-	savedPattern := filepath.Join(task.SpiderId.String(), task.Id.String()) + "_%Y%m%d.log"
-	task.LogPath, err = strftime.Format(savedPattern, time.Now())
-	if err != nil {
-		log.Errorf("new strftime error: %s", err.Error())
-		return
-	}
-	if err = updateTask(task); err != nil {
-		log.Errorf("save log path error: %s", err.Error())
-		return
-	}
-
 	// scan stdout and record
 	go func() {
 		for stdoutScanner.Scan() {
 			text := stdoutScanner.Text()
-			_, err = logf.Write([]byte(text + "\n"))
-			if err != nil {
+			if err := saveTaskLog(&models.TaskLog{
+				TaskId:   task.Id,
+				LineText: text,
+				LogStd:   constants.TaskLogStdOut,
+				CreateTs: time.Now(),
+			}); err != nil {
 				break
 			}
 		}
@@ -210,26 +177,40 @@ func recordTaskLog(cmd *exec.Cmd, task *models.Task) {
 	go func() {
 		for stderrScanner.Scan() {
 			text := stderrScanner.Text()
-			_, err = logf.Write([]byte(text + "\n"))
-			if err != nil {
+			if err := saveTaskLog(&models.TaskLog{
+				TaskId:   task.Id,
+				LineText: text,
+				LogStd:   constants.TaskLogStdErr,
+				CreateTs: time.Now(),
+			}); err != nil {
 				break
 			}
 		}
 	}()
 }
 
-// 生成日志目录
-func makeLogDir(task models.Task) (fileDir string, err error) {
-	// 日志目录
-	fileDir = filepath.Join(viper.GetString("log.path"), task.SpiderId.String())
-
-	// 如果日志目录不存在，生成该目录
-	if !utils.PathExist(fileDir) {
-		if err := os.MkdirAll(fileDir, os.ModePerm); err != nil {
-			log.Errorf("execute task, make log dir error: %s", err.Error())
-			return "", err
+// 保存日志
+func saveTaskLog(taskLog *models.TaskLog) (err error) {
+	if err := dao.WriteTx(database.LogDB, func(tx dao.Tx) error {
+		if err := tx.InsertTaskLog(taskLog); err != nil {
+			return err
 		}
+		return nil
+	}); err != nil {
+		return err
 	}
+	return nil
+}
 
-	return fileDir, nil
+// 将任务设置为取消状态
+func setTaskCancelled(task *models.Task) {
+	if task.Status != constants.TaskStatusRunning &&
+		task.Status != constants.TaskStatusProcessing &&
+		task.Status != constants.TaskStatusPending {
+		return
+	}
+	task.Status = constants.TaskStatusCancelled                      // 任务状态: 已取消
+	task.FinishTs = time.Now()                                       // 结束时间
+	task.RuntimeDuration = task.FinishTs.Sub(task.StartTs).Seconds() // 运行时长
+	task.TotalDuration = task.FinishTs.Sub(task.CreateTs).Seconds()  // 总时长
 }

@@ -3,6 +3,7 @@ package services
 import (
 	"crawlab-lite/constants"
 	"crawlab-lite/dao"
+	"crawlab-lite/database"
 	"crawlab-lite/forms"
 	"crawlab-lite/managers"
 	"crawlab-lite/models"
@@ -15,7 +16,7 @@ import (
 )
 
 func QuerySchedulePage(page forms.PageForm) (total int, resultList []*results.Schedule, err error) {
-	if err := dao.ReadTx(func(tx dao.Tx) error {
+	if err := dao.ReadTx(database.MainDB, func(tx dao.Tx) error {
 		allSchedules, err := tx.SelectAllSchedules()
 		if err != nil {
 			return err
@@ -64,7 +65,7 @@ func QuerySchedulePage(page forms.PageForm) (total int, resultList []*results.Sc
 }
 
 func QueryScheduleById(id uuid.UUID) (result *results.Schedule, err error) {
-	if err := dao.ReadTx(func(tx dao.Tx) error {
+	if err := dao.ReadTx(database.MainDB, func(tx dao.Tx) error {
 		schedule, err := tx.SelectSchedule(id)
 		if err != nil {
 			return err
@@ -89,7 +90,7 @@ func AddSchedule(form forms.ScheduleCreateForm) (result *results.Schedule, err e
 	if form.Cron != "" && CheckCron(form.Cron) == false {
 		return nil, errors.New("schedule cron is invalid")
 	}
-	if err := dao.WriteTx(func(tx dao.Tx) error {
+	if err := dao.WriteTx(database.MainDB, func(tx dao.Tx) error {
 		// 检查爬虫是否存在
 		if spider, err := tx.SelectSpider(form.SpiderId); err != nil {
 			return err
@@ -145,7 +146,7 @@ func ModifySchedule(id uuid.UUID, form forms.ScheduleUpdateForm) (result *result
 	if form.Cron != "" && CheckCron(form.Cron) == false {
 		return nil, errors.New("schedule cron is invalid")
 	}
-	if err := dao.WriteTx(func(tx dao.Tx) error {
+	if err := dao.WriteTx(database.MainDB, func(tx dao.Tx) error {
 		// 检查调度是否存在
 		schedule, err := tx.SelectSchedule(id)
 		if err != nil {
@@ -219,7 +220,7 @@ func ModifySchedule(id uuid.UUID, form forms.ScheduleUpdateForm) (result *result
 }
 
 func RemoveSchedule(id uuid.UUID) (res interface{}, err error) {
-	if err := dao.WriteTx(func(tx dao.Tx) error {
+	if err := dao.WriteTx(database.MainDB, func(tx dao.Tx) error {
 		// 检查调度是否存在
 		if schedule, err := tx.SelectSchedule(id); err != nil {
 			return err

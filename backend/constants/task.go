@@ -15,3 +15,10 @@ const (
 	TaskFinish string = "FINISH"
 	TaskCancel string = "CANCEL"
 )
+
+type TaskLogStd string
+
+const (
+	TaskLogStdOut TaskLogStd = "STDOUT"
+	TaskLogStdErr TaskLogStd = "STDERR"
+)

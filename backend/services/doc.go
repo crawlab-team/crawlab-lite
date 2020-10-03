@@ -3,7 +3,6 @@ package services
 import (
 	"github.com/apex/log"
 	"github.com/imroc/req"
-	"runtime/debug"
 )
 
 func GetDocs() (data string, err error) {
@@ -11,7 +10,6 @@ func GetDocs() (data string, err error) {
 	res, err := req.Get("https://docs.crawlab.cn/search_plus_index.json")
 	if err != nil {
 		log.Errorf(err.Error())
-		debug.PrintStack()
 		return data, err
 	}
 
@@ -19,7 +17,6 @@ func GetDocs() (data string, err error) {
 	data, err = res.ToString()
 	if err != nil {
 		log.Errorf(err.Error())
-		debug.PrintStack()
 		return data, err
 	}
 

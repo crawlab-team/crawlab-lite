@@ -3,6 +3,7 @@ package managers
 import (
 	"crawlab-lite/constants"
 	"crawlab-lite/dao"
+	"crawlab-lite/database"
 	"crawlab-lite/managers/sys_exec"
 	"crawlab-lite/models"
 	"crawlab-lite/utils"
@@ -48,46 +49,58 @@ var lockList sync.Map
 
 // 启动任务执行器
 func (ex *Executor) Start() error {
+	// 先清除一下日志
+	if err := clearExpiredTaskLogs(); err != nil {
+		return err
+	}
+
 	// 启动cron服务
 	ex.Cron.Start()
 
 	// 加入执行器到定时任务
 	spec := "0/1 * * * * *" // 每秒执行一次
 	for i := 0; i < viper.GetInt("task.workers"); i++ {
-		// WorkerID
-		id := i
+		workerId := i
 
 		// 初始化任务锁
-		lockList.Store(id, false)
+		lockList.Store(workerId, false)
 
 		// 加入定时任务
-		_, err := ex.Cron.AddFunc(spec, func() {
-			ex.ExecuteTask(id)
-		})
-		if err != nil {
+		if _, err := ex.Cron.AddFunc(spec, func() {
+			ex.ExecuteTask(workerId)
+		}); err != nil {
 			return err
 		}
+	}
+
+	// 加入清除日志到定时任务
+	if _, err := ex.Cron.AddFunc("0 */60 * * * *", func() {
+		go func() {
+			_ = clearExpiredTaskLogs()
+		}()
+	}); err != nil {
+		return err
 	}
 
 	return nil
 }
 
 // 执行任务
-func (ex *Executor) ExecuteTask(id int) {
-	if flag, ok := lockList.Load(id); ok {
+func (ex *Executor) ExecuteTask(workerId int) {
+	if flag, ok := lockList.Load(workerId); ok {
 		if flag.(bool) {
-			log.Debugf(getWorkerPrefix(id) + "running tasks...")
+			log.Debugf(getWorkerPrefix(workerId) + "running tasks...")
 			return
 		}
 	}
 
 	// 上锁
-	lockList.Store(id, true)
+	lockList.Store(workerId, true)
 
 	// 解锁（延迟执行）
 	defer func() {
-		lockList.Delete(id)
-		lockList.Store(id, false)
+		lockList.Delete(workerId)
+		lockList.Store(workerId, false)
 	}()
 
 	// 开始计时
@@ -136,7 +149,7 @@ func (ex *Executor) ExecuteTask(id int) {
 	//}
 
 	// 开始执行任务
-	log.Infof(getWorkerPrefix(id) + "start task (id:" + task.Id.String() + ")")
+	log.Infof(getWorkerPrefix(workerId) + "start task (id:" + task.Id.String() + ")")
 
 	// 更新任务
 	task.StartTs = time.Now()                                     // 任务开始时间
@@ -149,7 +162,7 @@ func (ex *Executor) ExecuteTask(id int) {
 
 	// 执行Shell命令
 	if err := executeShellCmd(cwd, task); err != nil {
-		log.Errorf(getWorkerPrefix(id) + err.Error())
+		log.Errorf(getWorkerPrefix(workerId) + err.Error())
 
 		// 如果发生错误，则发送通知
 		//SendNotifications(task, spider)
@@ -175,10 +188,10 @@ func (ex *Executor) ExecuteTask(id int) {
 	// 统计时长
 	duration := toc.Sub(tic).Seconds()
 	durationStr := strconv.FormatFloat(duration, 'f', 6, 64)
-	log.Infof(getWorkerPrefix(id) + "task (id:" + task.Id.String() + ")" + " finished. elapsed:" + durationStr + " sec")
+	log.Infof(getWorkerPrefix(workerId) + "task (id:" + task.Id.String() + ")" + " finished. elapsed:" + durationStr + " sec")
 }
 
-func StopTask(task *models.Task) {
+func SetTaskCancelled(task *models.Task) {
 	if task.Status != constants.TaskStatusRunning &&
 		task.Status != constants.TaskStatusProcessing &&
 		task.Status != constants.TaskStatusPending {
@@ -192,6 +205,32 @@ func StopTask(task *models.Task) {
 	task.FinishTs = time.Now()                                       // 结束时间
 	task.RuntimeDuration = task.FinishTs.Sub(task.StartTs).Seconds() // 运行时长
 	task.TotalDuration = task.FinishTs.Sub(task.CreateTs).Seconds()  // 总时长
+}
+
+// 清除过期日志
+func clearExpiredTaskLogs() error {
+	log.Infof("clearing older task logs...")
+	days := viper.GetInt("log.expireDays")
+	if err := dao.ReadTx(database.MainDB, func(tx dao.Tx) error {
+		tasks, err := tx.SelectAllTasks()
+		if err != nil {
+			return err
+		}
+		if err := dao.WriteTx(database.LogDB, func(tx2 dao.Tx) error {
+			for _, task := range tasks {
+				if err = tx2.DeleteOlderTaskLogs(task.Id, days); err != nil {
+					return err
+				}
+			}
+			return nil
+		}); err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+	return nil
 }
 
 func getWorkerPrefix(id int) string {
@@ -241,7 +280,7 @@ func executeShellCmd(cwd string, task *models.Task) (err error) {
 }
 
 func querySpiderVersionById(spiderId uuid.UUID, versionId uuid.UUID) (version *models.SpiderVersion, err error) {
-	if err := dao.ReadTx(func(tx dao.Tx) error {
+	if err := dao.ReadTx(database.MainDB, func(tx dao.Tx) error {
 		if version, err = tx.SelectSpiderVersion(spiderId, versionId); err != nil {
 			return err
 		}
@@ -254,7 +293,7 @@ func querySpiderVersionById(spiderId uuid.UUID, versionId uuid.UUID) (version *m
 }
 
 func queryLatestSpiderVersion(spiderId uuid.UUID) (version *models.SpiderVersion, err error) {
-	if err := dao.ReadTx(func(tx dao.Tx) error {
+	if err := dao.ReadTx(database.MainDB, func(tx dao.Tx) error {
 		versions, err := tx.SelectAllSpiderVersions(spiderId)
 		if err != nil {
 			return err

@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-var KvDB *bolt.DB
+var MainDB, LogDB *bolt.DB
 
 func InitKvDB() error {
 	path := viper.GetString("kvdb.path")
@@ -18,10 +18,18 @@ func InitKvDB() error {
 			return err
 		}
 	}
-	db, err := bolt.Open(filepath.Join(path, "kv.db"), 0666, &bolt.Options{Timeout: 1 * time.Second})
+
+	mainDB, err := bolt.Open(filepath.Join(path, "main.db"), 0666, &bolt.Options{Timeout: 3 * time.Second})
 	if err != nil {
 		return err
 	}
-	KvDB = db
+	MainDB = mainDB
+
+	logDB, err := bolt.Open(filepath.Join(path, "log.db"), 0666, &bolt.Options{Timeout: 3 * time.Second})
+	if err != nil {
+		return err
+	}
+	LogDB = logDB
+
 	return nil
 }

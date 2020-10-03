@@ -1,9 +1,9 @@
 package services
 
 import (
-	"bufio"
 	"crawlab-lite/constants"
 	"crawlab-lite/dao"
+	"crawlab-lite/database"
 	"crawlab-lite/forms"
 	"crawlab-lite/managers"
 	"crawlab-lite/models"
@@ -12,13 +12,10 @@ import (
 	. "github.com/ahmetb/go-linq"
 	"github.com/jinzhu/copier"
 	uuid "github.com/satori/go.uuid"
-	"github.com/spf13/viper"
-	"os"
-	"path/filepath"
 )
 
 func QueryTaskPage(page forms.TaskPageForm) (total int, resultList []*results.Task, err error) {
-	if err := dao.ReadTx(func(tx dao.Tx) error {
+	if err := dao.ReadTx(database.MainDB, func(tx dao.Tx) error {
 		allTasks, err := tx.SelectAllTasks()
 		if err != nil {
 			return err
@@ -87,7 +84,7 @@ func QueryTaskPage(page forms.TaskPageForm) (total int, resultList []*results.Ta
 }
 
 func QueryTaskById(id uuid.UUID) (result *results.Task, err error) {
-	if err := dao.ReadTx(func(tx dao.Tx) error {
+	if err := dao.ReadTx(database.MainDB, func(tx dao.Tx) error {
 		task, err := tx.SelectTask(id)
 		if err != nil {
 			return err
@@ -109,7 +106,7 @@ func QueryTaskById(id uuid.UUID) (result *results.Task, err error) {
 }
 
 func AddTask(form forms.TaskForm) (result *results.Task, err error) {
-	if err := dao.WriteTx(func(tx dao.Tx) error {
+	if err := dao.WriteTx(database.MainDB, func(tx dao.Tx) error {
 		// 检查爬虫是否存在
 		if spider, err := tx.SelectSpider(form.SpiderId); err != nil {
 			return err
@@ -157,17 +154,28 @@ func AddTask(form forms.TaskForm) (result *results.Task, err error) {
 }
 
 func RemoveTask(id uuid.UUID) (res interface{}, err error) {
-	if err := dao.WriteTx(func(tx dao.Tx) error {
+	if err := dao.WriteTx(database.MainDB, func(tx dao.Tx) error {
 		// 检查任务是否存在
 		if task, err := tx.SelectTask(id); err != nil {
 			return err
 		} else if task == nil {
 			return errors.New("task not found")
 		} else {
-			managers.StopTask(task)
+			// 取消任务
+			managers.SetTaskCancelled(task)
 
 			// 删除任务
 			if err = tx.DeleteTask(id); err != nil {
+				return err
+			}
+
+			if err := dao.WriteTx(database.LogDB, func(tx2 dao.Tx) error {
+				// 删除日志
+				if err = tx2.DeleteAllTaskLogs(id); err != nil {
+					return err
+				}
+				return nil
+			}); err != nil {
 				return err
 			}
 		}
@@ -180,7 +188,7 @@ func RemoveTask(id uuid.UUID) (res interface{}, err error) {
 }
 
 func CancelTask(id uuid.UUID, status constants.TaskStatus) (task *models.Task, err error) {
-	if err := dao.WriteTx(func(tx dao.Tx) error {
+	if err := dao.WriteTx(database.MainDB, func(tx dao.Tx) error {
 		if task, err = tx.SelectTask(id); err != nil {
 			return err
 		}
@@ -191,7 +199,7 @@ func CancelTask(id uuid.UUID, status constants.TaskStatus) (task *models.Task, e
 		if task.Status == constants.TaskStatusRunning ||
 			task.Status == constants.TaskStatusProcessing ||
 			task.Status == constants.TaskStatusPending {
-			managers.StopTask(task)
+			managers.SetTaskCancelled(task)
 		} else {
 			return nil
 		}
@@ -209,7 +217,7 @@ func CancelTask(id uuid.UUID, status constants.TaskStatus) (task *models.Task, e
 }
 
 func RestartTask(id uuid.UUID) (result *results.Task, err error) {
-	if err := dao.WriteTx(func(tx dao.Tx) error {
+	if err := dao.WriteTx(database.MainDB, func(tx dao.Tx) error {
 		var task *models.Task
 		if task, err = tx.SelectTask(id); err != nil {
 			return err
@@ -218,7 +226,7 @@ func RestartTask(id uuid.UUID) (result *results.Task, err error) {
 			return errors.New("task not found")
 		}
 
-		managers.StopTask(task)
+		managers.SetTaskCancelled(task)
 
 		newTask := &models.Task{
 			SpiderId:        task.SpiderId,
@@ -260,7 +268,7 @@ func QueryTaskLogPage(form forms.TaskLogPageForm) (total int, resultList []*resu
 	}
 
 	var task *models.Task
-	if err := dao.ReadTx(func(tx dao.Tx) error {
+	if err := dao.ReadTx(database.MainDB, func(tx dao.Tx) error {
 		if task, err = tx.SelectTask(taskId); err != nil {
 			return err
 		}
@@ -272,27 +280,29 @@ func QueryTaskLogPage(form forms.TaskLogPageForm) (total int, resultList []*resu
 		return 0, nil, errors.New("task not found")
 	}
 
-	logPath := filepath.Join(viper.GetString("log.path"), task.LogPath)
-	file, err := os.OpenFile(logPath, os.O_RDONLY, os.ModePerm)
-	if err != nil {
-		return 0, nil, nil
+	if err := dao.ReadTx(database.LogDB, func(tx dao.Tx) error {
+		start, end := form.Range()
+		taskLogs, err := tx.SelectTaskLogsLimit(taskId, end-start+1, start)
+		if err != nil {
+			return err
+		}
+		for _, taskLog := range taskLogs {
+			resultList = append(resultList, &results.TaskLogLine{
+				LineText: taskLog.LineText,
+				CreateTs: taskLog.CreateTs,
+			})
+		}
+
+		count, err := tx.CountTaskLogs(taskId)
+		if err != nil {
+			return err
+		}
+		total = count
+
+		return nil
+	}); err != nil {
+		return 0, nil, err
 	}
 
-	start, end := form.Range()
-	scanner := bufio.NewScanner(file)
-	count := 0
-	for scanner.Scan() {
-		if start <= count && count < end {
-			line := scanner.Text()
-			if line != "" {
-				resultList = append(resultList, &results.TaskLogLine{
-					LineNum:  count + 1,
-					LineText: line,
-				})
-			}
-		}
-		count++
-	}
-	total = count
 	return total, resultList, nil
 }

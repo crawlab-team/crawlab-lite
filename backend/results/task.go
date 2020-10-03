@@ -27,6 +27,6 @@ type Task struct {
 }
 
 type TaskLogLine struct {
-	LineNum  int    `json:"line_num"`
-	LineText string `json:"line_text"`
+	LineText string    `json:"line_text"`
+	CreateTs time.Time `json:"create_ts"`
 }

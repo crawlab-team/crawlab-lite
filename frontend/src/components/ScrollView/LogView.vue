@@ -29,7 +29,7 @@
           size="small"
           :total="taskLogTotal"
           :current-page.sync="taskLogPage"
-          :page-sizes="[1000, 2000, 5000, 10000]"
+          :page-sizes="[100, 500, 1000, 5000]"
           :page-size.sync="taskLogPageSize"
           :page-count="3"
           layout="sizes, prev, pager, next"

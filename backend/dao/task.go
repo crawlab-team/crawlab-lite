@@ -3,8 +3,10 @@ package dao
 import (
 	"crawlab-lite/constants"
 	"crawlab-lite/models"
+	"encoding/binary"
 	"encoding/json"
 	uuid "github.com/satori/go.uuid"
+	"go.etcd.io/bbolt"
 	"time"
 )
 
@@ -147,6 +149,105 @@ func (t *Tx) DeleteTasksWhereSpiderId(spiderId uuid.UUID) (err error) {
 		}
 		if task.SpiderId == spiderId {
 			if err = b.Delete([]byte(task.Id.String())); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// 根据任务 ID 范围查询日志
+func (t *Tx) SelectTaskLogsLimit(taskId uuid.UUID, limit int, offset int) (logs []*models.TaskLog, err error) {
+	b := t.tx.Bucket([]byte(constants.TaskLogBucket + taskId.String()))
+	if b == nil {
+		return nil, nil
+	}
+	c := b.Cursor()
+	count := 0
+	for k, v := c.First(); k != nil; k, v = c.Next() {
+		if limit > len(logs) && count >= offset {
+			var taskLog models.TaskLog
+			if err = json.Unmarshal(v, &taskLog); err != nil {
+				return nil, err
+			}
+			logs = append(logs, &taskLog)
+		}
+		count++
+	}
+	return logs, nil
+}
+
+// 根据任务 ID 查询日志总数
+func (t *Tx) CountTaskLogs(taskId uuid.UUID) (count int, err error) {
+	b := t.tx.Bucket([]byte(constants.TaskLogBucket + taskId.String()))
+	if b == nil {
+		return 0, nil
+	}
+	c := b.Cursor()
+	for k, _ := c.First(); k != nil; k, _ = c.Next() {
+		count++
+	}
+	return count, nil
+}
+
+// 插入新任务日志
+func (t *Tx) InsertTaskLog(taskLog *models.TaskLog) (err error) {
+	b, err := t.tx.CreateBucketIfNotExists([]byte(constants.TaskLogBucket + taskLog.TaskId.String()))
+	if err != nil {
+		return err
+	}
+	if taskLog.CreateTs.IsZero() {
+		taskLog.CreateTs = time.Now()
+	}
+	value, err := json.Marshal(&taskLog)
+	if err != nil {
+		return err
+	}
+	id, _ := b.NextSequence()
+	bytes := make([]byte, 8)
+	binary.BigEndian.PutUint64(bytes, id)
+	if err = b.Put(bytes, value); err != nil {
+		return err
+	}
+	return nil
+}
+
+// 根据任务 ID 删除所有日志
+func (t *Tx) DeleteAllTaskLogs(taskId uuid.UUID) (err error) {
+	bucket := []byte(constants.TaskLogBucket + taskId.String())
+	b := t.tx.Bucket(bucket)
+	if b == nil {
+		return nil
+	}
+	if err = b.ForEach(func(k, v []byte) error {
+		return b.Delete(k)
+	}); err != nil {
+		return err
+	}
+	if err = t.tx.DeleteBucket(bucket); err != nil {
+		if err == bbolt.ErrBucketNotFound {
+			return nil
+		}
+		return err
+	}
+	return nil
+}
+
+// 根据任务 ID 删除超过 N 天的日志
+func (t *Tx) DeleteOlderTaskLogs(taskId uuid.UUID, days int) (err error) {
+	expireDate := time.Now().AddDate(0, 0, -days)
+	b := t.tx.Bucket([]byte(constants.TaskLogBucket + taskId.String()))
+	if b == nil {
+		return nil
+	}
+	c := b.Cursor()
+	for k, v := c.First(); k != nil; k, v = c.Next() {
+		var taskLog models.TaskLog
+		if err = json.Unmarshal(v, &taskLog); err != nil {
+			return err
+		}
+		if taskLog.CreateTs.Before(expireDate) {
+			if err = b.Delete(k); err != nil {
 				return err
 			}
 		}

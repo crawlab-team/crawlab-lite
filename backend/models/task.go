@@ -13,7 +13,6 @@ type Task struct {
 	ScheduleId      uuid.UUID            `json:"schedule_id"`
 	Status          constants.TaskStatus `json:"status"`
 	Cmd             string               `json:"cmd"`
-	LogPath         string               `json:"log_path"`
 	Error           string               `json:"error"`
 	CreateTs        time.Time            `json:"create_ts"`
 	UpdateTs        time.Time            `json:"update_ts"`
@@ -24,4 +23,11 @@ type Task struct {
 	WaitDuration    float64              `json:"wait_duration"`
 	RuntimeDuration float64              `json:"runtime_duration"`
 	TotalDuration   float64              `json:"total_duration"`
+}
+
+type TaskLog struct {
+	TaskId   uuid.UUID            `json:"task_id"`
+	LineText string               `json:"line_text"`
+	LogStd   constants.TaskLogStd `json:"log_std"`
+	CreateTs time.Time            `json:"create_ts"`
 }

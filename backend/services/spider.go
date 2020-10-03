@@ -2,6 +2,7 @@ package services
 
 import (
 	"crawlab-lite/dao"
+	"crawlab-lite/database"
 	"crawlab-lite/forms"
 	"crawlab-lite/models"
 	"crawlab-lite/results"
@@ -17,7 +18,7 @@ import (
 )
 
 func QuerySpiderPage(page forms.PageForm) (total int, resultList []*results.Spider, err error) {
-	if err := dao.ReadTx(func(tx dao.Tx) error {
+	if err := dao.ReadTx(database.MainDB, func(tx dao.Tx) error {
 		allSpiders, err := tx.SelectAllSpiders()
 		if err != nil {
 			return err
@@ -72,7 +73,7 @@ func QuerySpiderPage(page forms.PageForm) (total int, resultList []*results.Spid
 }
 
 func QuerySpider(id uuid.UUID) (result *results.Spider, err error) {
-	if err := dao.ReadTx(func(tx dao.Tx) error {
+	if err := dao.ReadTx(database.MainDB, func(tx dao.Tx) error {
 		spider, err := tx.SelectSpider(id)
 		if err != nil {
 			return err
@@ -91,7 +92,7 @@ func QuerySpider(id uuid.UUID) (result *results.Spider, err error) {
 func AddSpider(form forms.SpiderForm) (result *results.Spider, err error) {
 	spiderName := form.Name
 
-	if err := dao.WriteTx(func(tx dao.Tx) error {
+	if err := dao.WriteTx(database.MainDB, func(tx dao.Tx) error {
 		// 检查爬虫是否已存在
 		spider, err := tx.SelectSpiderWhereName(spiderName)
 		if err != nil {
@@ -123,7 +124,7 @@ func AddSpider(form forms.SpiderForm) (result *results.Spider, err error) {
 }
 
 func RemoveSpider(id uuid.UUID) (res interface{}, err error) {
-	if err := dao.WriteTx(func(tx dao.Tx) error {
+	if err := dao.WriteTx(database.MainDB, func(tx dao.Tx) error {
 		// 检查爬虫是否存在
 		if spider, err := tx.SelectSpider(id); err != nil {
 			return err
@@ -162,6 +163,14 @@ func RemoveSpider(id uuid.UUID) (res interface{}, err error) {
 			}
 		}
 
+		// 删除日志
+		logDir := filepath.Join(viper.GetString("log.path"), id.String())
+		if utils.PathExist(logDir) {
+			if err := os.RemoveAll(logDir); err != nil {
+				return err
+			}
+		}
+
 		return nil
 	}); err != nil {
 		return nil, err
@@ -171,7 +180,7 @@ func RemoveSpider(id uuid.UUID) (res interface{}, err error) {
 }
 
 func QuerySpiderVersionPage(page forms.SpiderVersionPageForm) (total int, resultList []*results.SpiderVersion, err error) {
-	if err := dao.ReadTx(func(tx dao.Tx) error {
+	if err := dao.ReadTx(database.MainDB, func(tx dao.Tx) error {
 		allVersions, err := tx.SelectAllSpiderVersions(uuid.FromStringOrNil(page.SpiderId))
 		if err != nil {
 			return err
@@ -204,7 +213,7 @@ func QuerySpiderVersionPage(page forms.SpiderVersionPageForm) (total int, result
 }
 
 func QuerySpiderVersion(spiderId uuid.UUID, versionId uuid.UUID) (result *results.SpiderVersion, err error) {
-	if err := dao.ReadTx(func(tx dao.Tx) error {
+	if err := dao.ReadTx(database.MainDB, func(tx dao.Tx) error {
 		version, err := tx.SelectSpiderVersion(spiderId, versionId)
 		if err != nil {
 			return err
@@ -222,7 +231,7 @@ func QuerySpiderVersion(spiderId uuid.UUID, versionId uuid.UUID) (result *result
 }
 
 func AddSpiderVersion(spiderId uuid.UUID, form forms.SpiderUploadForm) (result *results.SpiderVersion, err error) {
-	if err := dao.WriteTx(func(tx dao.Tx) error {
+	if err := dao.WriteTx(database.MainDB, func(tx dao.Tx) error {
 		// 检查爬虫是否存在
 		if spider, err := tx.SelectSpider(spiderId); err != nil {
 			return err
@@ -315,7 +324,7 @@ func AddSpiderVersion(spiderId uuid.UUID, form forms.SpiderUploadForm) (result *
 }
 
 func RemoveSpiderVersion(spiderId uuid.UUID, versionId uuid.UUID) (res interface{}, err error) {
-	if err := dao.WriteTx(func(tx dao.Tx) error {
+	if err := dao.WriteTx(database.MainDB, func(tx dao.Tx) error {
 		// 检查爬虫是否存在
 		if spider, err := tx.SelectSpider(spiderId); err != nil {
 			return err

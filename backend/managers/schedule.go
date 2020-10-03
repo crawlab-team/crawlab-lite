@@ -2,10 +2,10 @@ package managers
 
 import (
 	"crawlab-lite/dao"
+	"crawlab-lite/database"
 	"crawlab-lite/models"
 	"github.com/apex/log"
 	"github.com/robfig/cron/v3"
-	"runtime/debug"
 )
 
 var Scheduler *scheduler
@@ -21,7 +21,6 @@ func (s *scheduler) Start() error {
 	// 刷新调度列表
 	if err := s.Flush(); err != nil {
 		log.Errorf("update scheduler error: %s", err.Error())
-		debug.PrintStack()
 		return err
 	}
 
@@ -35,7 +34,6 @@ func (s *scheduler) Add(schedule *models.Schedule) (err error) {
 	spec := schedule.Cron
 	if schedule.EntryId, err = s.cron.AddFunc(spec, scheduleTask(*schedule)); err != nil {
 		log.Errorf("add func task error: %s", err.Error())
-		debug.PrintStack()
 		return err
 	}
 
@@ -57,7 +55,7 @@ func (s *scheduler) Flush() error {
 		s.cron.Remove(entries[i].ID)
 	}
 
-	if err := dao.WriteTx(func(tx dao.Tx) error {
+	if err := dao.WriteTx(database.MainDB, func(tx dao.Tx) error {
 		if schedules, err := tx.SelectAllSchedules(); err != nil {
 			return err
 		} else {
@@ -68,7 +66,6 @@ func (s *scheduler) Flush() error {
 				// 添加到定时调度
 				if err = s.Add(schedule); err != nil {
 					log.Errorf("add scheduler error: %s, scheduler: %s, cron: %s", err.Error(), schedule.Id, schedule.Cron)
-					debug.PrintStack()
 					return err
 				} else {
 					if err = tx.UpdateSchedule(schedule); err != nil {
@@ -80,7 +77,6 @@ func (s *scheduler) Flush() error {
 		return nil
 	}); err != nil {
 		log.Errorf("flush schedulers error: %s", err.Error())
-		debug.PrintStack()
 		return err
 	}
 
@@ -94,7 +90,6 @@ func InitScheduler() error {
 	}
 	if err := Scheduler.Start(); err != nil {
 		log.Errorf("start scheduler error: %s", err.Error())
-		debug.PrintStack()
 		return err
 	}
 	return nil
@@ -108,7 +103,7 @@ func scheduleTask(schedule models.Schedule) func() {
 			ScheduleId:      schedule.Id,
 			Cmd:             schedule.Cmd,
 		}
-		if err := dao.WriteTx(func(tx dao.Tx) error {
+		if err := dao.WriteTx(database.MainDB, func(tx dao.Tx) error {
 			if err := tx.InsertTask(task); err != nil {
 				return err
 			}
