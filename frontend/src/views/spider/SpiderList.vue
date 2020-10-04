@@ -415,10 +415,13 @@
       },
       onRemove(row, ev) {
         ev.stopPropagation()
-        this.$confirm(this.$t('Are you sure to delete this spider?'), this.$t('Notification'), {
+        this.$prompt(this.$t('This action cannot be undone. This will permanently delete the spider and all associated data!') +
+          `<br>${this.lang === 'zh' ? '请输入 <b>' + row.name + '</b> 确认删除：' : 'Please type' + row.name + 'to confirm:'}`, this.$t('Notification'), {
+          dangerouslyUseHTMLString: true,
           confirmButtonText: this.$t('Confirm'),
           cancelButtonText: this.$t('Cancel'),
-          type: 'warning'
+          inputPattern: new RegExp(`^${row.name}$`),
+          inputErrorMessage: this.$t('Inconsistent spider name')
         }).then(() => {
           this.$store.dispatch('spider/deleteSpider', row.id).then(async(response) => {
             if (!response.data || response.data.code !== 200) {
