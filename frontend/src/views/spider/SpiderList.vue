@@ -301,7 +301,7 @@
 <script>
   import { mapGetters, mapState } from 'vuex'
   import dayjs from 'dayjs'
-  import CrawlConfirmDialog from '../../components/Common/CrawlConfirmDialog'
+  import CrawlConfirmDialog from '../../components/Dialog/CrawlConfirmDialog'
   import StatusTag from '../../components/Status/StatusTag'
 
   export default {
@@ -452,7 +452,10 @@
           cancelButtonText: this.$t('Cancel'),
           type: 'warning'
         }).then(() => {
-          this.$store.dispatch('spider/deleteSpiderVersion', { spider_id: this.activeSpider.id, version_id: row.id }).then(async(response) => {
+          this.$store.dispatch('spider/deleteSpiderVersion', {
+            spider_id: this.activeSpider.id,
+            version_id: row.id
+          }).then(async(response) => {
             if (!response.data || response.data.code !== 200) {
               this.$message.error(response.data.message)
               return

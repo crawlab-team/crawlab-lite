@@ -238,7 +238,7 @@
   import VueCronLinux from '../../components/Cron'
   import { mapState } from 'vuex'
   import ScheduleTaskList from '../../components/Schedule/ScheduleTaskList'
-  import CrawlConfirmDialog from '../../components/Common/CrawlConfirmDialog'
+  import CrawlConfirmDialog from '../../components/Dialog/CrawlConfirmDialog'
   import dayjs from 'dayjs'
 
   export default {
