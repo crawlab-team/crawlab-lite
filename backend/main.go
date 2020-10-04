@@ -50,6 +50,13 @@ func main() {
 		panic(err)
 	}
 
+	// 初始化数据清扫器
+	if err := managers.InitClearer(); err != nil {
+		log.Error("Init clearer error:" + err.Error())
+		panic(err)
+	}
+	log.Info("Initialized clearer successfully")
+
 	// 初始化定时调度器
 	if err := managers.InitScheduler(); err != nil {
 		log.Error("init scheduler error:" + err.Error())

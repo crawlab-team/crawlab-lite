@@ -11,9 +11,10 @@ services:
       CRAWLAB_USER_USERNAME: admin  # login username  用户名
       CRAWLAB_USER_PASSWORD: admin  # login password  用户密码
       # CRAWLAB_API_ADDRESS: "https://<your_api_ip>:<your_api_port>"  # backend API address 后端 API 地址. 适用于 https 或者源码部署
-      # CRAWLAB_LOG_LEVEL: "info"  # log level 日志级别. 默认为 info
-      # CRAWLAB_LOG_EXPIREDAYS: 7  # The number of days the log file is retained 日志文件保留的天数，超过会被删除
+      # CRAWLAB_LOG_LEVEL: "info"  # log level 日志级别
+      # CRAWLAB_LOG_EXPIREDAYS: 7  # The number of days the task logs is retained 任务日志保留的天数，超过会被删除
       # CRAWLAB_TASK_WORKERS: 16  # number of task executors 任务执行器个数（并行执行任务数）
+      # CRAWLAB_TASK_EXPIREDAYS: 7  # The number of days the tasks is retained 任务数据保留的天数，超过会被删除
       # CRAWLAB_SERVER_LANG_NODE: "Y"  # whether to pre-install Node.js 预安装 Node.js 语言环境
       # CRAWLAB_SERVER_LANG_JAVA: "Y"  # whether to pre-install Java 预安装 Java 语言环境
       # CRAWLAB_SERVER_LANG_DOTNET: "Y"  # whether to pre-install .Net core 预安装 .Net Core 语言环境

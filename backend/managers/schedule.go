@@ -8,6 +8,7 @@ import (
 	"github.com/robfig/cron/v3"
 )
 
+// 任务调度器
 var Scheduler *scheduler
 
 type scheduler struct {
@@ -89,7 +90,6 @@ func InitScheduler() error {
 		cron: cron.New(cron.WithSeconds()),
 	}
 	if err := Scheduler.Start(); err != nil {
-		log.Errorf("start scheduler error: %s", err.Error())
 		return err
 	}
 	return nil

@@ -87,7 +87,7 @@ func QueryScheduleById(id uuid.UUID) (result *results.Schedule, err error) {
 }
 
 func AddSchedule(form forms.ScheduleCreateForm) (result *results.Schedule, err error) {
-	if form.Cron != "" && CheckCron(form.Cron) == false {
+	if form.Cron != "" && checkCron(form.Cron) == false {
 		return nil, errors.New("schedule cron is invalid")
 	}
 	if err := dao.WriteTx(database.MainDB, func(tx dao.Tx) error {
@@ -143,7 +143,7 @@ func AddSchedule(form forms.ScheduleCreateForm) (result *results.Schedule, err e
 }
 
 func ModifySchedule(id uuid.UUID, form forms.ScheduleUpdateForm) (result *results.Schedule, err error) {
-	if form.Cron != "" && CheckCron(form.Cron) == false {
+	if form.Cron != "" && checkCron(form.Cron) == false {
 		return nil, errors.New("schedule cron is invalid")
 	}
 	if err := dao.WriteTx(database.MainDB, func(tx dao.Tx) error {
@@ -245,7 +245,7 @@ func RemoveSchedule(id uuid.UUID) (res interface{}, err error) {
 }
 
 // 检查 cron 表达式是否正确
-func CheckCron(spec string) bool {
+func checkCron(spec string) bool {
 	parser := cron.NewParser(
 		cron.Second | cron.Minute | cron.Hour | cron.Dom | cron.Month | cron.Dow | cron.Descriptor,
 	)

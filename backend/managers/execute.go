@@ -23,39 +23,19 @@ import (
 )
 
 // 任务执行器
-type Executor struct {
-	Cron *cron.Cron
-}
+var Executor *executor
 
-var Exec *Executor
-
-// 初始化
-func InitTaskExecutor() error {
-	// 构造任务执行器
-	c := cron.New(cron.WithSeconds())
-	Exec = &Executor{
-		Cron: c,
-	}
-
-	// 运行定时任务
-	if err := Exec.Start(); err != nil {
-		return err
-	}
-	return nil
+type executor struct {
+	cron *cron.Cron
 }
 
 // 任务执行锁
 var lockList sync.Map
 
 // 启动任务执行器
-func (ex *Executor) Start() error {
-	// 先清除一下日志
-	if err := clearExpiredTaskLogs(); err != nil {
-		return err
-	}
-
+func (ex *executor) Start() error {
 	// 启动cron服务
-	ex.Cron.Start()
+	ex.cron.Start()
 
 	// 加入执行器到定时任务
 	spec := "0/1 * * * * *" // 每秒执行一次
@@ -66,27 +46,18 @@ func (ex *Executor) Start() error {
 		lockList.Store(workerId, false)
 
 		// 加入定时任务
-		if _, err := ex.Cron.AddFunc(spec, func() {
+		if _, err := ex.cron.AddFunc(spec, func() {
 			ex.ExecuteTask(workerId)
 		}); err != nil {
 			return err
 		}
 	}
 
-	// 加入清除日志到定时任务
-	if _, err := ex.Cron.AddFunc("0 */60 * * * *", func() {
-		go func() {
-			_ = clearExpiredTaskLogs()
-		}()
-	}); err != nil {
-		return err
-	}
-
 	return nil
 }
 
 // 执行任务
-func (ex *Executor) ExecuteTask(workerId int) {
+func (ex *executor) ExecuteTask(workerId int) {
 	if flag, ok := lockList.Load(workerId); ok {
 		if flag.(bool) {
 			log.Debugf(getWorkerPrefix(workerId) + "running tasks...")
@@ -191,43 +162,12 @@ func (ex *Executor) ExecuteTask(workerId int) {
 	log.Infof(getWorkerPrefix(workerId) + "task (id:" + task.Id.String() + ")" + " finished. elapsed:" + durationStr + " sec")
 }
 
-func SetTaskCancelled(task *models.Task) {
-	if task.Status != constants.TaskStatusRunning &&
-		task.Status != constants.TaskStatusProcessing &&
-		task.Status != constants.TaskStatusPending {
-		return
+// 初始化
+func InitTaskExecutor() error {
+	Executor = &executor{
+		cron: cron.New(cron.WithSeconds()),
 	}
-	ch := utils.TaskExecChanMap.ChanBlocked(task.Id.String())
-	if ch != nil {
-		ch <- constants.TaskCancel
-	}
-	task.Status = constants.TaskStatusCancelled                      // 任务状态: 已取消
-	task.FinishTs = time.Now()                                       // 结束时间
-	task.RuntimeDuration = task.FinishTs.Sub(task.StartTs).Seconds() // 运行时长
-	task.TotalDuration = task.FinishTs.Sub(task.CreateTs).Seconds()  // 总时长
-}
-
-// 清除过期日志
-func clearExpiredTaskLogs() error {
-	log.Infof("clearing older task logs...")
-	days := viper.GetInt("log.expireDays")
-	if err := dao.ReadTx(database.MainDB, func(tx dao.Tx) error {
-		tasks, err := tx.SelectAllTasks()
-		if err != nil {
-			return err
-		}
-		if err := dao.WriteTx(database.LogDB, func(tx2 dao.Tx) error {
-			for _, task := range tasks {
-				if err = tx2.DeleteOlderTaskLogs(task.Id, days); err != nil {
-					return err
-				}
-			}
-			return nil
-		}); err != nil {
-			return err
-		}
-		return nil
-	}); err != nil {
+	if err := Executor.Start(); err != nil {
 		return err
 	}
 	return nil

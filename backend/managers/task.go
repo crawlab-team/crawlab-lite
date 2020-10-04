@@ -7,6 +7,7 @@ import (
 	"crawlab-lite/database"
 	"crawlab-lite/managers/sys_exec"
 	"crawlab-lite/models"
+	"crawlab-lite/utils"
 	"github.com/apex/log"
 	"os/exec"
 	"time"
@@ -202,6 +203,23 @@ func saveTaskLog(taskLog *models.TaskLog) (err error) {
 	return nil
 }
 
+// 将任务设置为取消状态，并且发送取消信号
+func SetTaskCancelled(task *models.Task) {
+	if task.Status != constants.TaskStatusRunning &&
+		task.Status != constants.TaskStatusProcessing &&
+		task.Status != constants.TaskStatusPending {
+		return
+	}
+	ch := utils.TaskExecChanMap.ChanBlocked(task.Id.String())
+	if ch != nil {
+		ch <- constants.TaskCancel
+	}
+	task.Status = constants.TaskStatusCancelled                      // 任务状态: 已取消
+	task.FinishTs = time.Now()                                       // 结束时间
+	task.RuntimeDuration = task.FinishTs.Sub(task.StartTs).Seconds() // 运行时长
+	task.TotalDuration = task.FinishTs.Sub(task.CreateTs).Seconds()  // 总时长
+}
+
 // 将任务设置为取消状态
 func setTaskCancelled(task *models.Task) {
 	if task.Status != constants.TaskStatusRunning &&
@@ -213,4 +231,70 @@ func setTaskCancelled(task *models.Task) {
 	task.FinishTs = time.Now()                                       // 结束时间
 	task.RuntimeDuration = task.FinishTs.Sub(task.StartTs).Seconds() // 运行时长
 	task.TotalDuration = task.FinishTs.Sub(task.CreateTs).Seconds()  // 总时长
+}
+
+func removeTasksOlderThan(days int) (err error) {
+	if err := dao.WriteTx(database.MainDB, func(tx dao.Tx) error {
+		tasks, err := tx.SelectAllTasks()
+		if err != nil {
+			return err
+		}
+		if len(tasks) == 0 {
+			return nil
+		}
+		if err := dao.WriteTx(database.LogDB, func(tx2 dao.Tx) error {
+			expireDate := time.Now().AddDate(0, 0, -days)
+			for _, task := range tasks {
+				if task.CreateTs.Before(expireDate) {
+					// 取消任务
+					SetTaskCancelled(task)
+
+					// 删除任务
+					if err = tx.DeleteTask(task.Id); err != nil {
+						return err
+					}
+
+					// 删除日志
+					if err = tx2.DeleteAllTaskLogs(task.Id); err != nil {
+						return err
+					}
+				}
+			}
+			return nil
+		}); err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func removeTaskLogsOlderThan(days int) (err error) {
+	if err := dao.ReadTx(database.MainDB, func(tx dao.Tx) error {
+		tasks, err := tx.SelectAllTasks()
+		if err != nil {
+			return err
+		}
+		if len(tasks) == 0 {
+			return nil
+		}
+		if err := dao.WriteTx(database.LogDB, func(tx2 dao.Tx) error {
+			for _, task := range tasks {
+				if err := tx2.DeleteTaskLogsOlderThan(task.Id, days); err != nil {
+					return err
+				}
+			}
+			return nil
+		}); err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+
+	return nil
 }

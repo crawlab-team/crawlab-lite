@@ -156,6 +156,23 @@ func (t *Tx) DeleteTasksWhereSpiderId(spiderId uuid.UUID) (err error) {
 	return nil
 }
 
+// 根据任务 ID 查询所有日志
+func (t *Tx) SelectAllTaskLogs(taskId uuid.UUID) (logs []*models.TaskLog, err error) {
+	b := t.tx.Bucket([]byte(constants.TaskLogBucket + taskId.String()))
+	if b == nil {
+		return nil, nil
+	}
+	c := b.Cursor()
+	for k, v := c.First(); k != nil; k, v = c.Next() {
+		var taskLog models.TaskLog
+		if err = json.Unmarshal(v, &taskLog); err != nil {
+			return nil, err
+		}
+		logs = append(logs, &taskLog)
+	}
+	return logs, nil
+}
+
 // 根据任务 ID 范围查询日志
 func (t *Tx) SelectTaskLogsLimit(taskId uuid.UUID, limit int, offset int) (logs []*models.TaskLog, err error) {
 	b := t.tx.Bucket([]byte(constants.TaskLogBucket + taskId.String()))
@@ -234,7 +251,7 @@ func (t *Tx) DeleteAllTaskLogs(taskId uuid.UUID) (err error) {
 }
 
 // 根据任务 ID 删除超过 N 天的日志
-func (t *Tx) DeleteOlderTaskLogs(taskId uuid.UUID, days int) (err error) {
+func (t *Tx) DeleteTaskLogsOlderThan(taskId uuid.UUID, days int) (err error) {
 	expireDate := time.Now().AddDate(0, 0, -days)
 	b := t.tx.Bucket([]byte(constants.TaskLogBucket + taskId.String()))
 	if b == nil {

@@ -25,6 +25,7 @@ spider:
 
 task:
   workers: 16
+  expireDays: 7
 
 kvdb:
   path: "../data/db"

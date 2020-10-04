@@ -89,6 +89,9 @@ func QueryTaskById(id uuid.UUID) (result *results.Task, err error) {
 		if err != nil {
 			return err
 		}
+		if task == nil {
+			return errors.New("task not found")
+		}
 		spider, err := tx.SelectSpider(task.SpiderId)
 		if err != nil {
 			return err
@@ -156,28 +159,29 @@ func AddTask(form forms.TaskForm) (result *results.Task, err error) {
 func RemoveTask(id uuid.UUID) (res interface{}, err error) {
 	if err := dao.WriteTx(database.MainDB, func(tx dao.Tx) error {
 		// 检查任务是否存在
-		if task, err := tx.SelectTask(id); err != nil {
+		task, err := tx.SelectTask(id)
+		if err != nil {
 			return err
-		} else if task == nil {
+		}
+		if task == nil {
 			return errors.New("task not found")
-		} else {
-			// 取消任务
-			managers.SetTaskCancelled(task)
+		}
+		// 取消任务
+		managers.SetTaskCancelled(task)
 
-			// 删除任务
-			if err = tx.DeleteTask(id); err != nil {
+		// 删除任务
+		if err = tx.DeleteTask(id); err != nil {
+			return err
+		}
+
+		if err := dao.WriteTx(database.LogDB, func(tx2 dao.Tx) error {
+			// 删除日志
+			if err = tx2.DeleteAllTaskLogs(id); err != nil {
 				return err
 			}
-
-			if err := dao.WriteTx(database.LogDB, func(tx2 dao.Tx) error {
-				// 删除日志
-				if err = tx2.DeleteAllTaskLogs(id); err != nil {
-					return err
-				}
-				return nil
-			}); err != nil {
-				return err
-			}
+			return nil
+		}); err != nil {
+			return err
 		}
 		return nil
 	}); err != nil {
@@ -187,9 +191,10 @@ func RemoveTask(id uuid.UUID) (res interface{}, err error) {
 	return nil, nil
 }
 
-func CancelTask(id uuid.UUID, status constants.TaskStatus) (task *models.Task, err error) {
+func CancelTask(id uuid.UUID) (result *results.Task, err error) {
 	if err := dao.WriteTx(database.MainDB, func(tx dao.Tx) error {
-		if task, err = tx.SelectTask(id); err != nil {
+		task, err := tx.SelectTask(id)
+		if err != nil {
 			return err
 		}
 		if task == nil {
@@ -204,22 +209,28 @@ func CancelTask(id uuid.UUID, status constants.TaskStatus) (task *models.Task, e
 			return nil
 		}
 
-		task.Status = status
+		task.Status = constants.TaskStatusCancelled
 		if err = tx.UpdateTask(task); err != nil {
 			return err
 		}
+
+		result = &results.Task{}
+		if err := copier.Copy(&result, task); err != nil {
+			return err
+		}
+
 		return nil
 	}); err != nil {
 		return nil, err
 	}
 
-	return task, nil
+	return result, nil
 }
 
 func RestartTask(id uuid.UUID) (result *results.Task, err error) {
 	if err := dao.WriteTx(database.MainDB, func(tx dao.Tx) error {
-		var task *models.Task
-		if task, err = tx.SelectTask(id); err != nil {
+		task, err := tx.SelectTask(id)
+		if err != nil {
 			return err
 		}
 		if task == nil {

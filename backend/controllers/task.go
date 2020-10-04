@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"crawlab-lite/constants"
 	"crawlab-lite/forms"
 	"crawlab-lite/services"
 	"errors"
@@ -83,7 +82,7 @@ func UpdateTaskCancel(c *gin.Context) {
 		return
 	}
 
-	if res, err := services.CancelTask(id, constants.TaskStatusCancelled); err != nil {
+	if res, err := services.CancelTask(id); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
 		return
 	} else {
