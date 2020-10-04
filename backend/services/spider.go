@@ -146,6 +146,11 @@ func RemoveSpider(id uuid.UUID) (res interface{}, err error) {
 			return err
 		}
 
+		// 删除爬虫的所有定时调度
+		if err = tx.DeleteAllSchedulesWhereSpiderId(id); err != nil {
+			return err
+		}
+
 		// 删除版本文件
 		spiderDir := viper.GetString("spider.path")
 		dirs, _ := ioutil.ReadDir(spiderDir)

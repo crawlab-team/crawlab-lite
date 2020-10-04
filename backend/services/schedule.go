@@ -50,7 +50,7 @@ func QuerySchedulePage(page forms.PageForm) (total int, resultList []*results.Sc
 				}
 			}
 			if spider == nil {
-				return errors.New("spider not found")
+				continue
 			}
 			result.SpiderName = spider.Name
 			resultList = append(resultList, &result)
