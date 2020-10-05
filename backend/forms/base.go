@@ -1,5 +1,9 @@
 package forms
 
+import (
+	uuid "github.com/satori/go.uuid"
+)
+
 type BaseForm struct {
 }
 
@@ -16,4 +20,10 @@ func (page *PageForm) Range() (start int, end int) {
 	}
 	start = (page.PageNum - 1) * page.PageSize
 	return start, start + page.PageSize - 1
+}
+
+type BatchForm struct {
+	BaseForm
+
+	Ids []uuid.UUID `form:"ids"json:"ids"`
 }

@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"crawlab-lite/forms"
+	"crawlab-lite/results"
 	"crawlab-lite/services"
 	"errors"
 	"github.com/gin-gonic/gin"
@@ -73,6 +74,32 @@ func DeleteTask(c *gin.Context) {
 	} else {
 		HandleSuccess(c, res)
 	}
+}
+
+func BatchDeleteTasks(c *gin.Context) {
+	var form forms.BatchForm
+
+	if err := c.ShouldBindJSON(&form); err != nil {
+		HandleError(http.StatusBadRequest, c, err)
+		return
+	}
+
+	res := results.BatchCount{
+		SuccessCount: 0,
+		FailCount:    0,
+		FailReasons:  make([]map[uuid.UUID]string, 0),
+	}
+	for _, id := range form.Ids {
+		if _, err := services.RemoveTask(id); err != nil {
+			res.FailCount++
+			res.FailReasons = append(res.FailReasons, map[uuid.UUID]string{
+				id: err.Error(),
+			})
+		} else {
+			res.SuccessCount++
+		}
+	}
+	HandleSuccess(c, res)
 }
 
 func UpdateTaskCancel(c *gin.Context) {

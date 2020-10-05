@@ -10,8 +10,6 @@ require (
 	github.com/gin-gonic/gin v1.6.0
 	github.com/imroc/req v0.3.0
 	github.com/jinzhu/copier v0.0.0-20190924061706-b57f9002281a
-	github.com/lestrrat-go/file-rotatelogs v2.3.0+incompatible
-	github.com/lestrrat-go/strftime v1.0.1
 	github.com/pkg/errors v0.8.1
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/satori/go.uuid v1.2.0

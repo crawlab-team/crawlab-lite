@@ -30,11 +30,18 @@
             </el-form-item>
           </el-form>
         </div>
-        <!--        <div class="right">-->
-        <!--          <el-button v-if="this.multipleSelection.length" class="btn-delete" size="small" type="danger" @click="onRemoveMultipleTask">-->
-        <!--            删除任务-->
-        <!--          </el-button>-->
-        <!--        </div>-->
+        <div class="right">
+          <el-button
+            v-if="multipleSelection.length > 0"
+            icon="el-icon-delete"
+            class="btn-delete"
+            size="small"
+            type="danger"
+            @click="onRemoveMultipleTask"
+          >
+            {{ $t('Remove') }}
+          </el-button>
+        </div>
       </div>
       <!--./filter-->
 
@@ -49,7 +56,7 @@
         @row-click="onRowClick"
         @selection-change="onSelectionChange"
       >
-        <!--        <el-table-column type="selection" width="45" align="center" reserve-selection />-->
+        <el-table-column type="selection" width="45" align="center" reserve-selection />
         <template v-for="col in columns">
           <el-table-column
             v-if="col.name === 'spider_name'"
@@ -263,38 +270,6 @@
       clearInterval(this.refreshHandle)
     },
     methods: {
-      onRemoveMultipleTask() {
-        if (this.multipleSelection.length === 0) {
-          this.$message({
-            type: 'error',
-            message: '请选择要删除的任务'
-          })
-          return
-        }
-        this.$confirm('确定删除任务', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          const ids = this.multipleSelection.map(item => item.id)
-          this.$store.dispatch('task/deleteTaskMultiple', ids).then((resp) => {
-            if (resp.data.status === 'ok') {
-              this.$message({
-                type: 'success',
-                message: '删除任务成功'
-              })
-              this.getTaskList()
-              this.$refs['table'].clearSelection()
-              return
-            }
-            this.$message({
-              type: 'error',
-              message: resp.data.message
-            })
-          })
-        }).catch(() => {
-        })
-      },
       onCancel(row, ev) {
         ev.stopPropagation()
         this.$confirm(this.$t('Are you sure to cancel this task?'), this.$t('Notification'), {
@@ -329,6 +304,25 @@
               this.getTaskList()
             })
           this.$st.sendEv('任务列表', '删除任务')
+        })
+      },
+      onRemoveMultipleTask() {
+        this.$confirm(this.$t('Are you sure to delete these tasks?'), this.$t('Notification'), {
+          confirmButtonText: this.$t('Confirm'),
+          cancelButtonText: this.$t('Cancel'),
+          type: 'warning'
+        }).then(() => {
+          const ids = this.multipleSelection.map(item => item.id)
+          this.$store.dispatch('task/deleteTaskMultiple', ids).then(resp => {
+            this.$message({
+              type: 'success',
+              message: this.$t('Deleted successfully')
+            })
+            this.getTaskList()
+            this.$refs['table'].clearSelection()
+          })
+          this.$st.sendEv('任务列表', '批量删除任务')
+        }).catch(() => {
         })
       },
       onRestart(row, ev) {
