@@ -380,8 +380,7 @@
                 this.$message.success(this.$t('The schedule has been removed'))
               }, 100)
             })
-        }).catch(() => {
-        })
+        }).catch(() => {})
         this.$st.sendEv('定时任务', '删除定时任务')
       },
       async getScheduleList() {

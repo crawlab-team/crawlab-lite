@@ -435,7 +435,7 @@
             await this.getSpiderList()
             this.$st.sendEv('爬虫列表', '删除爬虫')
           })
-        })
+        }).catch(() => {})
       },
       onCrawl(row, ev) {
         ev.stopPropagation()
@@ -470,7 +470,7 @@
             await this.getSpiderVersionList(this.activeSpider.id)
             this.$st.sendEv('爬虫版本列表', '删除爬虫版本')
           })
-        })
+        }).catch(() => {})
       },
       onView(row, ev) {
         ev.stopPropagation()

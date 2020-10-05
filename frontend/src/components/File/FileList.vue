@@ -436,7 +436,7 @@
           type: 'warning'
         }).then(() => {
           this.onFileDeleteNav(data.path)
-        })
+        }).catch(() => {})
       },
       async onFileDeleteNav(path) {
         await this.$store.dispatch('file/deleteFile', { path })

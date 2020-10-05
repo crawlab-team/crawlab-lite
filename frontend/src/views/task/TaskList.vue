@@ -286,7 +286,7 @@
               this.getTaskList()
             })
           this.$st.sendEv('任务列表', '取消任务')
-        })
+        }).catch(() => {})
       },
       onRemove(row, ev) {
         ev.stopPropagation()
@@ -304,7 +304,7 @@
               this.getTaskList()
             })
           this.$st.sendEv('任务列表', '删除任务')
-        })
+        }).catch(() => {})
       },
       onRemoveMultipleTask() {
         this.$confirm(this.$t('Are you sure to delete these tasks?'), this.$t('Notification'), {
@@ -322,8 +322,7 @@
             this.$refs['table'].clearSelection()
           })
           this.$st.sendEv('任务列表', '批量删除任务')
-        }).catch(() => {
-        })
+        }).catch(() => {})
       },
       onRestart(row, ev) {
         ev.stopPropagation()
@@ -341,7 +340,7 @@
               setTimeout(this.getTaskList, 500)
             })
           this.$st.sendEv('任务列表', '重新开始任务')
-        })
+        }).catch(() => {})
       },
       onView(row) {
         this.$router.push(`/tasks/${row.id}`)
