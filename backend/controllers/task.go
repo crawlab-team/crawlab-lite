@@ -18,11 +18,11 @@ func GetTaskList(c *gin.Context) {
 		return
 	}
 
-	if total, tasks, err := services.QueryTaskPage(page); err != nil {
+	if total, list, err := services.QueryTaskPage(page); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
 		return
 	} else {
-		HandleSuccessList(c, total, tasks)
+		HandleSuccessList(c, total, list)
 	}
 }
 
@@ -150,10 +150,10 @@ func GetTaskLogList(c *gin.Context) {
 		return
 	}
 
-	if total, results, err := services.QueryTaskLogPage(page); err != nil {
+	if total, list, err := services.QueryTaskLogPage(page); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
 		return
 	} else {
-		HandleSuccessList(c, total, results)
+		HandleSuccessList(c, total, list)
 	}
 }

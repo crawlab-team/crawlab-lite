@@ -9,7 +9,10 @@ import (
 	"time"
 )
 
-var MainDB, LogDB *bolt.DB
+var (
+	MainDB *bolt.DB
+	LogDB  *bolt.DB
+)
 
 func InitKvDB() error {
 	path := viper.GetString("kvdb.path")

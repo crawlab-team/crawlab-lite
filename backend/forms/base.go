@@ -25,5 +25,5 @@ func (page *PageForm) Range() (start int, end int) {
 type BatchForm struct {
 	BaseForm
 
-	Ids []uuid.UUID `form:"ids"json:"ids"`
+	Ids []uuid.UUID `form:"ids" json:"ids"`
 }
