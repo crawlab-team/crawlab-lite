@@ -7,6 +7,7 @@ import (
 	"crawlab-lite/managers/sys_exec"
 	"crawlab-lite/models"
 	"crawlab-lite/utils"
+	"fmt"
 	. "github.com/ahmetb/go-linq"
 	"github.com/apex/log"
 	"github.com/robfig/cron/v3"
@@ -60,7 +61,6 @@ func (ex *executor) Start() error {
 func (ex *executor) ExecuteTask(workerId int) {
 	if flag, ok := lockList.Load(workerId); ok {
 		if flag.(bool) {
-			log.Debugf(getWorkerPrefix(workerId) + "running tasks...")
 			return
 		}
 	}
@@ -80,7 +80,7 @@ func (ex *executor) ExecuteTask(workerId int) {
 	// 获取任务
 	task, err := popPendingTask()
 	if err != nil {
-		log.Errorf("execute task, query task error: %s", err.Error())
+		log.Errorf("[WorkerId %d] execute task, query task error: %s", workerId, err.Error())
 		return
 	}
 	if task == nil {
@@ -92,18 +92,18 @@ func (ex *executor) ExecuteTask(workerId int) {
 	if task.SpiderVersionId != uuid.Nil {
 		version, err = querySpiderVersionById(task.SpiderId, task.SpiderVersionId)
 		if err != nil {
-			log.Errorf("execute task, query spider version error: %s", err.Error())
+			log.Errorf(logPrefix(workerId, task.Id)+"execute task, query spider version error: %s", err.Error())
 			return
 		}
 	} else {
 		version, err = queryLatestSpiderVersion(task.SpiderId)
 		if err != nil {
-			log.Errorf("execute task, query spider version error: %s", err.Error())
+			log.Errorf(logPrefix(workerId, task.Id)+"execute task, query spider version error: %s", err.Error())
 			return
 		}
 	}
 	if version == nil {
-		log.Errorf("execute task, query spider version error: spider have no version")
+		log.Error(logPrefix(workerId, task.Id) + "execute task, query spider version error: spider does not have any version")
 		return
 	}
 
@@ -113,27 +113,27 @@ func (ex *executor) ExecuteTask(workerId int) {
 		version.Path,
 	)
 
-	// 文件检查
-	//if err := SpiderFileCheck(t, spider); err != nil {
-	//	log.Errorf("spider file check error: %s", err.Error())
-	//	return
-	//}
+	// 检查爬虫目录是否存在
+	if exist := utils.PathExist(cwd); exist == false {
+		log.Error(logPrefix(workerId, task.Id) + "spider directory not exist")
+		return
+	}
 
 	// 开始执行任务
-	log.Infof(getWorkerPrefix(workerId) + "start task (id:" + task.Id.String() + ")")
+	log.Info(logPrefix(workerId, task.Id) + "start task")
 
 	// 更新任务
 	task.StartTs = time.Now()                                     // 任务开始时间
 	task.Status = constants.TaskStatusRunning                     // 任务状态
 	task.WaitDuration = task.StartTs.Sub(task.CreateTs).Seconds() // 等待时长
 	if err := updateTask(task); err != nil {
-		log.Errorf("execute task, save task error: %s", err.Error())
+		log.Errorf(logPrefix(workerId, task.Id)+"execute task, save task error: %s", err.Error())
 		return
 	}
 
 	// 执行Shell命令
-	if err := executeShellCmd(cwd, task); err != nil {
-		log.Errorf(getWorkerPrefix(workerId) + err.Error())
+	if err := executeShellCmd(cwd, task, workerId); err != nil {
+		log.Errorf(logPrefix(workerId, task.Id) + err.Error())
 
 		// 如果发生错误，则发送通知
 		//SendNotifications(task, spider)
@@ -147,7 +147,7 @@ func (ex *executor) ExecuteTask(workerId int) {
 	task.RuntimeDuration = task.FinishTs.Sub(task.StartTs).Seconds() // 运行时长
 	task.TotalDuration = task.FinishTs.Sub(task.CreateTs).Seconds()  // 总时长
 	if err := updateTask(task); err != nil {
-		log.Errorf("execute task, save task error: %s", err.Error())
+		log.Errorf(logPrefix(workerId, task.Id)+"execute task, save task error: %s", err.Error())
 		return
 	}
 
@@ -159,7 +159,7 @@ func (ex *executor) ExecuteTask(workerId int) {
 	// 统计时长
 	duration := toc.Sub(tic).Seconds()
 	durationStr := strconv.FormatFloat(duration, 'f', 6, 64)
-	log.Infof(getWorkerPrefix(workerId) + "task (id:" + task.Id.String() + ")" + " finished. elapsed:" + durationStr + " sec")
+	log.Infof(logPrefix(workerId, task.Id)+"finished. elapsed: %s sec", durationStr)
 }
 
 // 初始化
@@ -173,16 +173,12 @@ func InitTaskExecutor() error {
 	return nil
 }
 
-func getWorkerPrefix(id int) string {
-	return "[Worker " + strconv.Itoa(id) + "] "
-}
-
 // 执行shell命令
-func executeShellCmd(cwd string, task *models.Task) (err error) {
+func executeShellCmd(cwd string, task *models.Task, workerId int) (err error) {
 	cmdStr := task.Cmd
 
-	log.Infof("cwd: %s", cwd)
-	log.Infof("cmd: %s", cmdStr)
+	log.Debugf(logPrefix(workerId, task.Id)+"cwd: %s", cwd)
+	log.Debugf(logPrefix(workerId, task.Id)+"cmd: %s", cmdStr)
 
 	// 生成执行命令
 	cmd := sys_exec.BuildCmd(cmdStr)
@@ -194,25 +190,29 @@ func executeShellCmd(cwd string, task *models.Task) (err error) {
 	ch := utils.TaskExecChanMap.ChanBlocked(task.Id.String())
 
 	// 记录任务生成的日志
-	recordTaskLog(cmd, task)
+	if err := recordTaskLog(cmd, task); err != nil {
+		log.Error(logPrefix(workerId, task.Id) + err.Error())
+		return err
+	}
 
 	// 设置环境变量
 	setEnv(cmd, task)
 
 	// 完成或取消任务后的工作
-	go finishOrCancelTask(ch, cmd, task)
+	go finishOrCancelTask(ch, cmd, task, workerId)
 
 	// kill 的时候，可以 kill 所有的子进程
 	sys_exec.Setpgid(cmd)
 
 	// 启动进程
 	if err := startTask(cmd, task); err != nil {
+		log.Error(logPrefix(workerId, task.Id) + err.Error())
 		return err
 	}
 
 	// 同步等待进程完成
 	if err := waitTask(cmd, task); err != nil {
-		log.Errorf("task process error: %s", err.Error())
+		log.Error(logPrefix(workerId, task.Id) + err.Error())
 		return err
 	}
 	ch <- constants.TaskFinish
@@ -265,7 +265,6 @@ func setEnv(cmd *exec.Cmd, task *models.Task) {
 	_ = os.Setenv("NODE_PATH", nodePath)
 
 	// 默认环境变量
-	cmd.Env = append(os.Environ(), "CRAWLABLITE_TASK_ID="+task.Id.String())
 	cmd.Env = append(cmd.Env, "PYTHONUNBUFFERED=0")
 	cmd.Env = append(cmd.Env, "PYTHONIOENCODING=utf-8")
 	cmd.Env = append(cmd.Env, "TZ=Asia/Shanghai")
@@ -280,4 +279,8 @@ func setEnv(cmd *exec.Cmd, task *models.Task) {
 	//for _, variable := range variables {
 	//	cmd.Env = append(cmd.Env, variable.Key+"="+variable.Value)
 	//}
+}
+
+func logPrefix(workerId int, taskId uuid.UUID) string {
+	return fmt.Sprintf("[Worker(%d) Task(%s)] ", workerId, taskId)
 }

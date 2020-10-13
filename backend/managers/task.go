@@ -8,6 +8,7 @@ import (
 	"crawlab-lite/managers/sys_exec"
 	"crawlab-lite/models"
 	"crawlab-lite/utils"
+	"errors"
 	"github.com/apex/log"
 	"os/exec"
 	"time"
@@ -41,13 +42,11 @@ func CancelRunningTasks() (err error) {
 
 func startTask(cmd *exec.Cmd, task *models.Task) (err error) {
 	if err = cmd.Start(); err != nil {
-		log.Errorf("start spider error:{}", err.Error())
-
 		task.Error = "start task error: " + err.Error()
 		task.Status = constants.TaskStatusError
 		task.FinishTs = time.Now()
 		_ = updateTask(task)
-		return err
+		return errors.New(task.Error)
 	}
 	return nil
 }
@@ -78,15 +77,15 @@ func waitTask(cmd *exec.Cmd, task *models.Task) (err error) {
 	return nil
 }
 
-func finishOrCancelTask(ch chan string, cmd *exec.Cmd, task *models.Task) {
+func finishOrCancelTask(ch chan string, cmd *exec.Cmd, task *models.Task, workerId int) {
 	// 传入信号，此处阻塞
 	signal := <-ch
-	log.Infof("process received signal: %s", signal)
+	log.Debugf(logPrefix(workerId, task.Id)+"process received signal: %s", signal)
 
 	if signal == constants.TaskCancel && cmd.Process != nil {
 		// 终止进程
 		if err := sys_exec.KillProcess(cmd); err != nil {
-			log.Errorf("process kill error: %s", err.Error())
+			log.Errorf(logPrefix(workerId, task.Id)+"process kill error: %s", err.Error())
 
 			task.Error = "kill process error: " + err.Error()
 			task.Status = constants.TaskStatusError
@@ -142,20 +141,18 @@ func popPendingTask() (task *models.Task, err error) {
 	return task, nil
 }
 
-func recordTaskLog(cmd *exec.Cmd, task *models.Task) {
+func recordTaskLog(cmd *exec.Cmd, task *models.Task) error {
 	// get stdout reader
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		log.Errorf("get stdout error: %s", err.Error())
-		return
+		return errors.New("get stdout error: " + err.Error())
 	}
 	stdoutScanner := bufio.NewScanner(stdout)
 
 	// get stderr scanner
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
-		log.Errorf("get stdout error: %s", err.Error())
-		return
+		return errors.New("get stdout error: " + err.Error())
 	}
 	stderrScanner := bufio.NewScanner(stderr)
 
@@ -188,6 +185,8 @@ func recordTaskLog(cmd *exec.Cmd, task *models.Task) {
 			}
 		}
 	}()
+
+	return nil
 }
 
 // 保存日志

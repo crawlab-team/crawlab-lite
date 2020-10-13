@@ -6,7 +6,7 @@ user:
   password: "admin"
 
 log:
-  level: info
+  level: debug
   expireDays: 7
 
 server:
