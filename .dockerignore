@@ -1,9 +1,13 @@
 .idea
-.DS_Store
 logs
 *.log
-*.lock
 data/
 **/dist/
 **/node_modules/
 **/tmp/
+**/vendor/
+.github/
+.devops
+k8s
+workspace
+.git/

@@ -22,8 +22,11 @@ fi
 # start nginx
 service nginx start
 
+#grant script
+chmod +x /app/backend/scripts/*.sh
+
 # install languages
-if [ "${CRAWLAB_SERVER_LANG_NODE}" = "Y" ] || [ "${CRAWLAB_SERVER_LANG_JAVA}" = "Y" ];
+if [ "${CRAWLAB_SERVER_LANG_NODE}" = "Y" ] || [ "${CRAWLAB_SERVER_LANG_JAVA}" = "Y" ] || [ "${CRAWLAB_SERVER_LANG_DOTNET}" = "Y" ] || [ "${CRAWLAB_SERVER_LANG_PHP}" = "Y" ] || [ "${CRAWLAB_SERVER_LANG_GO}" = "Y" ];
 then
 	echo "installing languages"
 	echo "you can view log at /var/log/install.sh.log"
@@ -39,13 +42,6 @@ cat > ${HOME}/.ssh/config <<EOF
 Host *
   StrictHostKeyChecking no
 EOF
-
-# start prometheus
-if [ "${CRAWLAB_SERVER_MASTER}" = "Y" ];
-then
-	mkdir -p /app/data/prometheus
-	prometheus --config.file=/app/backend/conf/prometheus.yml --storage.tsdb.path=/app/data/prometheus --storage.tsdb.retention.time=30d >> /var/log/prometheus.log 2>&1 &
-fi
 
 # start backend
 crawlab-server
