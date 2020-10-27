@@ -32,7 +32,6 @@
         // if (!this.userInfo.setting.error_regex_pattern) {
         //   return this.$utils.log.errorRegex
         // }
-        // console.log(this.userInfo.setting.error_regex_pattern)
         // return new RegExp(this.userInfo.setting.error_regex_pattern, 'i')
         return new RegExp('error', 'i')
       },
