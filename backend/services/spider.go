@@ -128,7 +128,8 @@ func RemoveSpider(id uuid.UUID) (res interface{}, err error) {
 		// 检查爬虫是否存在
 		if spider, err := tx.SelectSpider(id); err != nil {
 			return err
-		} else if spider == nil {
+		}
+		if spider == nil {
 			return errors.New("spider not found")
 		}
 
@@ -235,7 +236,8 @@ func AddSpiderVersion(spiderId uuid.UUID, form forms.SpiderUploadForm) (result *
 		// 检查爬虫是否存在
 		if spider, err := tx.SelectSpider(spiderId); err != nil {
 			return err
-		} else if spider == nil {
+		}
+		if spider == nil {
 			return errors.New("spider not found")
 		}
 
@@ -284,7 +286,8 @@ func AddSpiderVersion(spiderId uuid.UUID, form forms.SpiderUploadForm) (result *
 		// 通过文件 MD5 判断是否为重复的版本
 		if _version, err := tx.SelectSpiderVersionWhereMD5(spiderId, version.MD5); err != nil {
 			return err
-		} else if _version != nil {
+		}
+		if _version != nil {
 			return errors.New("spider version already exists")
 		}
 
@@ -328,7 +331,8 @@ func RemoveSpiderVersion(spiderId uuid.UUID, versionId uuid.UUID) (res interface
 		// 检查爬虫是否存在
 		if spider, err := tx.SelectSpider(spiderId); err != nil {
 			return err
-		} else if spider == nil {
+		}
+		if spider == nil {
 			return errors.New("spider not found")
 		}
 
@@ -336,7 +340,8 @@ func RemoveSpiderVersion(spiderId uuid.UUID, versionId uuid.UUID) (res interface
 		version, err := tx.SelectSpiderVersion(spiderId, versionId)
 		if err != nil {
 			return err
-		} else if version == nil {
+		}
+		if version == nil {
 			return errors.New("spider version not found")
 		}
 

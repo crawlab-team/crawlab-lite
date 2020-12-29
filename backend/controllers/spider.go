@@ -22,9 +22,9 @@ func GetSpiderList(c *gin.Context) {
 	if total, spiders, err := services.QuerySpiderPage(page); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
 		return
-	} else {
-		HandleSuccessList(c, total, spiders)
 	}
+
+	HandleSuccessList(c, total, spiders)
 }
 
 func GetSpider(c *gin.Context) {
@@ -37,13 +37,14 @@ func GetSpider(c *gin.Context) {
 	if spider, err := services.QuerySpider(id); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
 		return
-	} else {
-		if spider == nil {
-			HandleError(http.StatusNotFound, c, errors.New("spider not found"))
-			return
-		}
-		HandleSuccess(c, spider)
 	}
+
+	if spider == nil {
+		HandleError(http.StatusNotFound, c, errors.New("spider not found"))
+		return
+	}
+
+	HandleSuccess(c, spider)
 }
 
 func CreateSpider(c *gin.Context) {
@@ -69,13 +70,14 @@ func CreateSpider(c *gin.Context) {
 	if res, err := services.AddSpider(form); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
 		return
-	} else {
-		if _, err2 := services.AddSpiderVersion(res.Id, form.SpiderUploadForm); err2 != nil {
-			HandleError(http.StatusBadRequest, c, err2)
-			return
-		}
-		HandleSuccess(c, res)
 	}
+
+	if _, err2 := services.AddSpiderVersion(res.Id, form.SpiderUploadForm); err2 != nil {
+		HandleError(http.StatusBadRequest, c, err2)
+		return
+	}
+
+	HandleSuccess(c, res)
 }
 
 func DeleteSpider(c *gin.Context) {
@@ -88,9 +90,9 @@ func DeleteSpider(c *gin.Context) {
 	if res, err := services.RemoveSpider(id); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
 		return
-	} else {
-		HandleSuccess(c, res)
 	}
+
+	HandleSuccess(c, res)
 }
 
 func GetSpiderVersionList(c *gin.Context) {
@@ -109,9 +111,9 @@ func GetSpiderVersionList(c *gin.Context) {
 	if total, versions, err := services.QuerySpiderVersionPage(page); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
 		return
-	} else {
-		HandleSuccessList(c, total, versions)
 	}
+
+	HandleSuccessList(c, total, versions)
 }
 
 func CreateSpiderVersion(c *gin.Context) {
@@ -137,9 +139,9 @@ func CreateSpiderVersion(c *gin.Context) {
 	if res, err := services.AddSpiderVersion(id, form); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
 		return
-	} else {
-		HandleSuccess(c, res)
 	}
+
+	HandleSuccess(c, res)
 }
 
 func DeleteSpiderVersion(c *gin.Context) {
@@ -157,7 +159,7 @@ func DeleteSpiderVersion(c *gin.Context) {
 	if res, err := services.RemoveSpiderVersion(id, versionId); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
 		return
-	} else {
-		HandleSuccess(c, res)
 	}
+
+	HandleSuccess(c, res)
 }

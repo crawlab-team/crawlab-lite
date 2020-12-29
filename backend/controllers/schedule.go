@@ -20,9 +20,9 @@ func GetScheduleList(c *gin.Context) {
 	if total, schedules, err := services.QuerySchedulePage(page); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
 		return
-	} else {
-		HandleSuccessList(c, total, schedules)
 	}
+
+	HandleSuccessList(c, total, schedules)
 }
 
 func GetSchedule(c *gin.Context) {
@@ -35,13 +35,14 @@ func GetSchedule(c *gin.Context) {
 	if schedule, err := services.QueryScheduleById(id); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
 		return
-	} else {
-		if schedule == nil {
-			HandleError(http.StatusNotFound, c, errors.New("schedule not found"))
-			return
-		}
-		HandleSuccess(c, schedule)
 	}
+
+	if schedule == nil {
+		HandleError(http.StatusNotFound, c, errors.New("schedule not found"))
+		return
+	}
+
+	HandleSuccess(c, schedule)
 }
 
 func CreateSchedule(c *gin.Context) {
@@ -55,9 +56,9 @@ func CreateSchedule(c *gin.Context) {
 	if res, err := services.AddSchedule(form); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
 		return
-	} else {
-		HandleSuccess(c, res)
 	}
+
+	HandleSuccess(c, res)
 }
 
 func UpdateSchedule(c *gin.Context) {
@@ -77,9 +78,9 @@ func UpdateSchedule(c *gin.Context) {
 	if res, err := services.ModifySchedule(id, form); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
 		return
-	} else {
-		HandleSuccess(c, res)
 	}
+
+	HandleSuccess(c, res)
 }
 
 func DeleteSchedule(c *gin.Context) {
@@ -92,7 +93,7 @@ func DeleteSchedule(c *gin.Context) {
 	if res, err := services.RemoveSchedule(id); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
 		return
-	} else {
-		HandleSuccess(c, res)
 	}
+
+	HandleSuccess(c, res)
 }

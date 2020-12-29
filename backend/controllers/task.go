@@ -21,9 +21,9 @@ func GetTaskList(c *gin.Context) {
 	if total, list, err := services.QueryTaskPage(page); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
 		return
-	} else {
-		HandleSuccessList(c, total, list)
 	}
+
+	HandleSuccessList(c, total, list)
 }
 
 func GetTask(c *gin.Context) {
@@ -36,13 +36,14 @@ func GetTask(c *gin.Context) {
 	if task, err := services.QueryTaskById(id); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
 		return
-	} else {
-		if task == nil {
-			HandleError(http.StatusNotFound, c, errors.New("task not found"))
-			return
-		}
-		HandleSuccess(c, task)
 	}
+
+	if task == nil {
+		HandleError(http.StatusNotFound, c, errors.New("task not found"))
+		return
+	}
+
+	HandleSuccess(c, task)
 }
 
 func CreateTask(c *gin.Context) {
@@ -56,9 +57,9 @@ func CreateTask(c *gin.Context) {
 	if res, err := services.AddTask(form); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
 		return
-	} else {
-		HandleSuccess(c, res)
 	}
+
+	HandleSuccess(c, res)
 }
 
 func DeleteTask(c *gin.Context) {
@@ -71,9 +72,9 @@ func DeleteTask(c *gin.Context) {
 	if res, err := services.RemoveTask(id); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
 		return
-	} else {
-		HandleSuccess(c, res)
 	}
+
+	HandleSuccess(c, res)
 }
 
 func BatchDeleteTasks(c *gin.Context) {
@@ -112,9 +113,9 @@ func UpdateTaskCancel(c *gin.Context) {
 	if res, err := services.CancelTask(id); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
 		return
-	} else {
-		HandleSuccess(c, res)
 	}
+
+	HandleSuccess(c, res)
 }
 
 func PostTaskRestart(c *gin.Context) {
@@ -127,9 +128,9 @@ func PostTaskRestart(c *gin.Context) {
 	if res, err := services.RestartTask(id); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
 		return
-	} else {
-		HandleSuccess(c, res)
 	}
+
+	HandleSuccess(c, res)
 }
 
 func GetTaskLogList(c *gin.Context) {
@@ -153,7 +154,7 @@ func GetTaskLogList(c *gin.Context) {
 	if total, list, err := services.QueryTaskLogPage(page); err != nil {
 		HandleError(http.StatusBadRequest, c, err)
 		return
-	} else {
-		HandleSuccessList(c, total, list)
 	}
+
+	HandleSuccessList(c, total, list)
 }

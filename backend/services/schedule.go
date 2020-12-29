@@ -224,17 +224,18 @@ func RemoveSchedule(id uuid.UUID) (res interface{}, err error) {
 		// 检查调度是否存在
 		if schedule, err := tx.SelectSchedule(id); err != nil {
 			return err
-		} else if schedule == nil {
+		}
+		if schedule == nil {
 			return errors.New("schedule not found")
-		} else {
-			// 删除调度
-			if err = tx.DeleteSchedule(id); err != nil {
-				return err
-			}
-			// 清除定时
-			if schedule.EntryId != 0 {
-				managers.Scheduler.Remove(schedule)
-			}
+		}
+
+		// 删除调度
+		if err = tx.DeleteSchedule(id); err != nil {
+			return err
+		}
+		// 清除定时
+		if schedule.EntryId != 0 {
+			managers.Scheduler.Remove(schedule)
 		}
 		return nil
 	}); err != nil {

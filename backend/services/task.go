@@ -113,7 +113,8 @@ func AddTask(form forms.TaskForm) (result *results.Task, err error) {
 		// 检查爬虫是否存在
 		if spider, err := tx.SelectSpider(form.SpiderId); err != nil {
 			return err
-		} else if spider == nil {
+		}
+		if spider == nil {
 			return errors.New("spider not found")
 		}
 
@@ -122,7 +123,8 @@ func AddTask(form forms.TaskForm) (result *results.Task, err error) {
 			version, err := tx.SelectSpiderVersion(form.SpiderId, form.SpiderVersionId)
 			if err != nil {
 				return err
-			} else if version == nil {
+			}
+			if version == nil {
 				return errors.New("spider version not found")
 			}
 		}
