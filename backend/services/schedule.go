@@ -13,6 +13,7 @@ import (
 	"github.com/jinzhu/copier"
 	"github.com/robfig/cron/v3"
 	uuid "github.com/satori/go.uuid"
+	"time"
 )
 
 func QuerySchedulePage(page forms.PageForm) (total int, resultList []*results.Schedule, err error) {
@@ -108,13 +109,18 @@ func AddSchedule(form forms.ScheduleCreateForm) (result *results.Schedule, err e
 			}
 		}
 
+		now := time.Now()
 		schedule := &models.Schedule{
+			Id:              uuid.NewV4(),
 			SpiderId:        form.SpiderId,
 			SpiderVersionId: form.SpiderVersionId,
 			Cron:            form.Cron,
+			EntryId:         0,
 			Cmd:             form.Cmd,
-			Description:     form.Description,
 			Enabled:         true,
+			Description:     form.Description,
+			CreateTs:        now,
+			UpdateTs:        now,
 		}
 		// 添加定时
 		if err = managers.Scheduler.Add(schedule); err != nil {
