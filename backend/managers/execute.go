@@ -8,7 +8,7 @@ import (
 	"crawlab-lite/models"
 	"crawlab-lite/utils"
 	"fmt"
-	. "github.com/ahmetb/go-linq"
+	. "github.com/ahmetb/go-linq/v3"
 	"github.com/apex/log"
 	"github.com/robfig/cron/v3"
 	uuid "github.com/satori/go.uuid"

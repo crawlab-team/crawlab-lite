@@ -8,7 +8,7 @@ import (
 	"crawlab-lite/results"
 	"crawlab-lite/utils"
 	"errors"
-	. "github.com/ahmetb/go-linq"
+	. "github.com/ahmetb/go-linq/v3"
 	"github.com/jinzhu/copier"
 	uuid "github.com/satori/go.uuid"
 	"github.com/spf13/viper"

@@ -9,7 +9,7 @@ import (
 	"crawlab-lite/models"
 	"crawlab-lite/results"
 	"errors"
-	. "github.com/ahmetb/go-linq"
+	. "github.com/ahmetb/go-linq/v3"
 	"github.com/jinzhu/copier"
 	"github.com/robfig/cron/v3"
 	uuid "github.com/satori/go.uuid"
