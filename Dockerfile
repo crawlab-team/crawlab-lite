@@ -1,4 +1,4 @@
-FROM golang:latest AS backend-build
+FROM golang:1 AS backend-build
 
 WORKDIR /go/src/app
 COPY ./backend .
@@ -6,18 +6,17 @@ COPY ./backend .
 ENV GO111MODULE on
 ENV GOPROXY https://goproxy.io
 
-RUN go install -v ./...
+RUN go mod tidy \
+  && go install -v ./...
 
-FROM node:latest AS frontend-build
+FROM node:12 AS frontend-build
 
 ADD ./frontend /app
 WORKDIR /app
 
 # install frontend
-#RUN npm config set unsafe-perm true
-#RUN npm install -g yarn && yarn install
-
-RUN yarn install && yarn run build:prod
+RUN yarn --no-lockfile --non-interactive --silent \
+	&& yarn run build:prod
 
 # images
 FROM ubuntu:latest
