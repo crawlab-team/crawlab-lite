@@ -62,6 +62,12 @@ func (s *scheduler) Flush() error {
 		} else {
 			for _, schedule := range schedules {
 				if schedule.Cron == "" || schedule.Enabled == false {
+					if schedule.EntryId != 0 {
+						schedule.EntryId = 0
+						if err = tx.UpdateSchedule(schedule); err != nil {
+							return err
+						}
+					}
 					continue
 				}
 				// 添加到定时调度

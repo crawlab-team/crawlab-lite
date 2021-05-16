@@ -55,6 +55,37 @@
     </div>
     <el-tabs type="border-card">
       <el-tab-pane>
+        <span slot="label"><i class="el-icon-date" /> {{ text.Seconds.name }}</span>
+        <div class="tabBody">
+          <el-row>
+            <el-radio v-model="second.cronEvery" label="1">{{ text.Seconds.every }}</el-radio>
+          </el-row>
+          <el-row>
+            <el-radio v-model="second.cronEvery" label="2">{{ text.Seconds.interval[0] }}
+              <el-input-number v-model="second.incrementIncrement" size="small" :min="0" :max="59" />
+              {{ text.Seconds.interval[1] }}
+              <el-input-number v-model="second.incrementStart" size="small" :min="0" :max="59" />
+              {{ text.Seconds.interval[2]||'' }}
+            </el-radio>
+          </el-row>
+          <el-row>
+            <el-radio v-model="second.cronEvery" class="long" label="3">{{ text.Seconds.specific }}
+              <el-select v-model="second.specificSpecific" size="small" multiple>
+                <el-option v-for="val in 60" :key="val" :value="(val-1).toString()" :label="val-1" />
+              </el-select>
+            </el-radio>
+          </el-row>
+          <el-row>
+            <el-radio v-model="second.cronEvery" label="4">{{ text.Seconds.cycle[0] }}
+              <el-input-number v-model="second.rangeStart" size="small" :min="0" :max="59" />
+              {{ text.Seconds.cycle[1] }}
+              <el-input-number v-model="second.rangeEnd" size="small" :min="0" :max="59" />
+              {{ text.Seconds.cycle[2] }}
+            </el-radio>
+          </el-row>
+        </div>
+      </el-tab-pane>
+      <el-tab-pane>
         <span slot="label"><i class="el-icon-date" /> {{ text.Minutes.name }}</span>
         <div class="tabBody">
           <el-row>
@@ -216,7 +247,7 @@
           incrementIncrement: '5',
           rangeStart: '',
           rangeEnd: '',
-          specificSpecific: [0]
+          specificSpecific: ['0']
         },
         minute: {
           cronEvery: '',
@@ -277,6 +308,28 @@
     computed: {
       text() {
         return Language[this.i18n || 'cn']
+      },
+      secondsText() {
+        let seconds = ''
+        const cronEvery = this.second.cronEvery
+        switch (cronEvery.toString()) {
+        case '1':
+          seconds = '*'
+          break
+        case '2':
+          seconds = this.second.incrementStart + '/' + this.second.incrementIncrement
+          break
+        case '3':
+          this.second.specificSpecific.map(val => {
+            seconds += val + ','
+          })
+          seconds = seconds.slice(0, -1)
+          break
+        case '4':
+          seconds = this.second.rangeStart + '-' + this.second.rangeEnd
+          break
+        }
+        return seconds
       },
       minutesText() {
         let minutes = ''
@@ -386,7 +439,7 @@
         return weeks
       },
       cron() {
-        return [this.minutesText, this.hoursText, this.daysText, this.monthsText, this.weeksText]
+        return [this.secondsText, this.minutesText, this.hoursText, this.daysText, this.monthsText, this.weeksText]
           .filter(v => !!v)
           .join(' ')
       }
@@ -419,12 +472,12 @@
         return true
       },
       validate() {
+        if (!this.secondsText) return false
         if (!this.minutesText) return false
         if (!this.hoursText) return false
         if (!this.daysText) return false
         if (!this.monthsText) return false
-        if (!this.weeksText) return false
-        return true
+        return this.weeksText
       },
       updateCronItem(key, value) {
         if (value === undefined) {
@@ -453,12 +506,14 @@
           return
         }
         const arr = this.data.split(' ')
-        const minute = arr[0]
-        const hour = arr[1]
-        const day = arr[2]
-        const month = arr[3]
-        const week = arr[4]
+        const second = arr[0]
+        const minute = arr[1]
+        const hour = arr[2]
+        const day = arr[3]
+        const month = arr[4]
+        const week = arr[5]
 
+        this.updateCronItem('second', second)
         this.updateCronItem('minute', minute)
         this.updateCronItem('hour', hour)
         this.updateCronItem('day', day)

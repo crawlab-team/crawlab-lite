@@ -54,7 +54,7 @@
             ref="cron"
             v-model="scheduleForm.cron"
             class="cron"
-            :placeholder="`${$t('[minute] [hour] [day] [month] [day of week]')}`"
+            :placeholder="`${$t('[second] [minute] [hour] [day] [month] [day of week]')}`"
             style="width: calc(100% - 100px)"
           />
           <el-button

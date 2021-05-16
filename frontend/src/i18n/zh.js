@@ -169,7 +169,7 @@ export default {
   'Cmd': '运行命令',
   'Add Schedule': '添加定时任务',
   'Not Found Spider': '爬虫配置错误',
-  '[minute] [hour] [day] [month] [day of week]': '[分] [时] [天] [月] [星期几]',
+  '[second] [minute] [hour] [day] [month] [day of week]': '[秒] [分] [时] [天] [月] [星期几]',
   'Enable/Disable': '启用/禁用',
   'Cron': 'Cron',
   'Cron Expression': 'Cron 表达式',
