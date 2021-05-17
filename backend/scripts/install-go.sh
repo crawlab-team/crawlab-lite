@@ -14,7 +14,7 @@ apt-get update
 apt-get install -y golang
 
 # environment variables
-export GOPROXY=https://goproxy.cn
+export GOPROXY=https://goproxy.io
 export GOPATH=/opt/go
 
 # unlock global
