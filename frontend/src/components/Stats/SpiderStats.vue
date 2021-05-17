@@ -64,6 +64,12 @@
         loading: false
       }
     },
+    computed: {
+      ...mapState('spider', [
+        'overviewStats',
+        'dailyStats'
+      ])
+    },
     methods: {
       renderTaskLine() {
         const chart = echarts.init(this.$el.querySelector('#task-line'))
@@ -149,16 +155,6 @@
         if (value === undefined) return 'NA'
         return value.toFixed(2)
       }
-    },
-    computed: {
-      ...mapState('spider', [
-        'overviewStats',
-        'statusStats',
-        'nodeStats',
-        'dailyStats'
-      ])
-    },
-    mounted() {
     }
   }
 </script>

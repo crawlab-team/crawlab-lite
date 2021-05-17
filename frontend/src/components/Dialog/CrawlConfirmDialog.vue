@@ -11,9 +11,7 @@
       <div style="margin-bottom: 20px;">{{ $t('Are you sure to run this spider?') }}</div>
       <el-form ref="form" :model="form" :label-width="lang === 'zh' ? '100px' : '150px'">
         <el-form-item :label="$t('Execute Command')" inline-message prop="cmd" required>
-          <template>
-            <el-input v-model="form.cmd" :placeholder="$t('Execute Command')" />
-          </template>
+          <el-input v-model="form.cmd" :placeholder="$t('Execute Command')" />
         </el-form-item>
         <el-form-item :label="$t('Version')" inline-message prop="spider_version_id" required>
           <el-select

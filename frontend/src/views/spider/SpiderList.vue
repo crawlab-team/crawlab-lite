@@ -336,7 +336,6 @@
     },
     computed: {
       ...mapState('spider', [
-        'importForm',
         'spiderForm',
         'spiderList',
         'spiderTotal',

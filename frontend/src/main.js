@@ -37,9 +37,9 @@ Vue.use(ElementUI, { locale })
 library.add(fab)
 library.add(far)
 library.add(fas)
-Vue.component('font-awesome-icon', FontAwesomeIcon)
-Vue.component('font-awesome-layers', FontAwesomeLayers)
-Vue.component('font-awesome-layers-text', FontAwesomeLayersText)
+Vue.component('FontAwesomeIcon', FontAwesomeIcon)
+Vue.component('FontAwesomeLayers', FontAwesomeLayers)
+Vue.component('FontAwesomeLayersText', FontAwesomeLayersText)
 
 Vue.config.productionTip = false
 

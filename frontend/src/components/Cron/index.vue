@@ -1,48 +1,3 @@
-<style lang="scss" scoped>
-  #change-crontab {
-    .language {
-      position: absolute;
-      right: 25px;
-      z-index: 1;
-    }
-
-    .cron-wrapper {
-      margin-bottom: 10px;
-    }
-
-    .el-tabs {
-      box-shadow: none;
-    }
-
-    .tabBody {
-      .el-row {
-        margin: 10px 0;
-
-        .long {
-          .el-select {
-            width: 350px;
-          }
-        }
-
-        .el-input-number {
-          width: 110px;
-        }
-      }
-    }
-
-    .bottom {
-      width: 100%;
-      text-align: center;
-      margin-top: 5px;
-      position: relative;
-
-      .value {
-        font-size: 18px;
-        vertical-align: middle;
-      }
-    }
-  }
-</style>
 <template>
   <div id="change-crontab">
     <div class="cron-wrapper">
@@ -232,6 +187,7 @@
     </el-tabs>
   </div>
 </template>
+
 <script>
   import Language from './language/index'
 
@@ -521,4 +477,51 @@
         this.updateCronItem('week', week)
       }
     }
-  }</script>
+  }
+</script>
+
+<style lang="scss" scoped>
+#change-crontab {
+  .language {
+    position: absolute;
+    right: 25px;
+    z-index: 1;
+  }
+
+  .cron-wrapper {
+    margin-bottom: 10px;
+  }
+
+  .el-tabs {
+    box-shadow: none;
+  }
+
+  .tabBody {
+    .el-row {
+      margin: 10px 0;
+
+      .long {
+        .el-select {
+          width: 350px;
+        }
+      }
+
+      .el-input-number {
+        width: 110px;
+      }
+    }
+  }
+
+  .bottom {
+    width: 100%;
+    text-align: center;
+    margin-top: 5px;
+    position: relative;
+
+    .value {
+      font-size: 18px;
+      vertical-align: middle;
+    }
+  }
+}
+</style>

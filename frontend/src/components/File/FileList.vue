@@ -47,7 +47,7 @@
         @node-expand="onDirClick"
         @node-collapse="onDirClick"
       >
-        <span slot-scope="{ node, data }" class="custom-tree-node">
+        <span slot-scope="{ data }" class="custom-tree-node">
           <el-popover
             v-model="isShowCreatePopoverDict[data.path]"
             trigger="manual"
@@ -269,12 +269,12 @@
       await this.getFileTree()
     },
     mounted() {
-      this.listener = document.querySelector('body').addEventListener('click', ev => {
+      document.querySelector('body').addEventListener('click', ev => {
         this.isShowCreatePopoverDict = {}
       })
     },
     destroyed() {
-      document.querySelector('body').removeEventListener('click', this.listener)
+      document.querySelector('body').removeEventListener('click')
     },
     methods: {
       onEdit() {

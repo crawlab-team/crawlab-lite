@@ -27,6 +27,7 @@
         default: ''
       },
       value: {
+        type: String,
         default: ''
       },
       type: {
