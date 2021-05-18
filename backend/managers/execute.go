@@ -15,10 +15,8 @@ import (
 	"github.com/spf13/viper"
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 )
@@ -254,21 +252,6 @@ func queryLatestSpiderVersion(spiderId uuid.UUID) (version *models.SpiderVersion
 
 // 设置环境变量
 func setEnv(cmd *exec.Cmd, task *models.Task) {
-	// 默认把 Node.js 的全局 node_modules 加入环境变量
-	envPath := os.Getenv("PATH")
-	homePath := os.Getenv("HOME")
-	nodeVersion := "v10.19.0"
-	nodePath := path.Join(homePath, ".nvm/versions/node", nodeVersion, "lib/node_modules")
-	if !strings.Contains(envPath, nodePath) {
-		_ = os.Setenv("PATH", nodePath+":"+envPath)
-	}
-	_ = os.Setenv("NODE_PATH", nodePath)
-
-	// 默认环境变量
-	cmd.Env = append(cmd.Env, "PYTHONUNBUFFERED=0")
-	cmd.Env = append(cmd.Env, "PYTHONIOENCODING=utf-8")
-	cmd.Env = append(cmd.Env, "TZ=Asia/Shanghai")
-
 	//任务环境变量
 	//for _, env := range envs {
 	//	cmd.Env = append(cmd.Env, env.Name+"="+env.Value)
@@ -279,6 +262,9 @@ func setEnv(cmd *exec.Cmd, task *models.Task) {
 	//for _, variable := range variables {
 	//	cmd.Env = append(cmd.Env, variable.Key+"="+variable.Value)
 	//}
+
+	// 读取系统环境变量（靠后的重复变量会被忽略）
+	cmd.Env = append(cmd.Env, os.Environ()...)
 }
 
 func logPrefix(workerId int, taskId uuid.UUID) string {

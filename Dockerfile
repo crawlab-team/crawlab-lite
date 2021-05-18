@@ -65,6 +65,17 @@ ENV TZ Asia/Shanghai
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 
+# cache environment
+ENV XDG_CACHE_HOME /tmp/.cache
+
+# develop environment
+ENV PYTHONUNBUFFERED 0
+ENV PYTHONIOENCODING utf-8
+ENV GO111MODULE on
+ENV GOPROXY https://goproxy.io
+ENV NODE_PATH /usr/lib/node_modules
+ENV PATH ${PATH}:/usr/lib/node_modules
+
 # frontend port
 EXPOSE 8080
 

@@ -13,10 +13,6 @@ touch /tmp/install-go.lock
 apt-get update
 apt-get install -y golang
 
-# environment variables
-export GOPROXY=https://goproxy.io
-export GOPATH=/opt/go
-
 # unlock global
 rm /tmp/install.lock
 
