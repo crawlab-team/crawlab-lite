@@ -255,20 +255,20 @@
             <!--                @click="onView(scope.row, $event)"-->
             <!--              />-->
             <!--            </el-tooltip>-->
-            <el-tooltip :content="$t('Spider Version List')" placement="top">
-              <el-button
-                type="warning"
-                icon="fa fa-archive"
-                size="mini"
-                @click="onViewSpiderVersions(scope.row, $event)"
-              />
-            </el-tooltip>
             <el-tooltip :content="$t('Run')" placement="top">
               <el-button
                 type="success"
                 icon="fa fa-bug"
                 size="mini"
                 @click="onCrawl(scope.row, $event)"
+              />
+            </el-tooltip>
+            <el-tooltip :content="$t('Spider Version List')" placement="top">
+              <el-button
+                type="warning"
+                icon="fa fa-archive"
+                size="mini"
+                @click="onViewSpiderVersions(scope.row, $event)"
               />
             </el-tooltip>
             <el-tooltip :content="$t('Remove')" placement="top">
