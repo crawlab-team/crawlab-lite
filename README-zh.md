@@ -28,7 +28,7 @@
 
 ## 快速开始
 
-#### Docker Compose
+#### 通过 Docker Compose 运行
 
 1. 在任意目录下创建 `docker-compose.yml`，内容如下：
 
@@ -52,7 +52,7 @@ docker-compose up -d
 
 3. 访问 `http://localhost:8080`
 
-#### 源代码
+#### 源代码运行
 
 1. 克隆仓库
 
@@ -90,3 +90,18 @@ npm i && npm run serve
 #### 定时列表
 
 ![](https://github.com/crawlab-team/crawlab-docs/blob/master/assets/images/lite-schedule-list.png)
+
+## 与 Crawlab 比较
+
+| | Crawlab Lite | Crawlab |
+| :---: | :---: | :---: |
+| 跨语言爬虫 | ✅ | ✅ |
+| 多节点部署 | ❌ | ✅ |
+| 定时任务 | ✅ | ✅ |
+| 查看日志 | ✅ | ✅ |
+| 爬虫版本管理 | ✅ | ❌ |
+| 数据统计 | ❌ | ✅ |
+| 消息通知 | ❌ | ✅ |
+| 在线编辑 | ❌ | ✅ |
+| 可配置爬虫 | ❌ | ✅ |
+| SDK | ❌ | ✅ |

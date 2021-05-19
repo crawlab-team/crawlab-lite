@@ -90,3 +90,18 @@ npm i && npm run serve
 #### Schedule List
 
 ![](https://github.com/crawlab-team/crawlab-docs/blob/master/assets/images/lite-schedule-list.png)
+
+## Comparison with Crawlab
+
+| | Crawlab Lite | Crawlab |
+| :---: | :---: | :---: |
+| Cross-language spider | ✅ | ✅ |
+| Multi node | ❌ | ✅ |
+| Cron | ✅ | ✅ |
+| Log output | ✅ | ✅ |
+| Spider version manage | ✅ | ❌ |
+| Analytics | ❌ | ✅ |
+| Notification | ❌ | ✅ |
+| Online code editor | ❌ | ✅ |
+| Configurable spider | ❌ | ✅ |
+| SDK | ❌ | ✅ |
