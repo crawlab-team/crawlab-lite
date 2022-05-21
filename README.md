@@ -81,15 +81,15 @@ npm i && npm run serve
 
 #### Spider List
 
-![](https://github.com/crawlab-team/crawlab-docs/blob/master/assets/images/lite-spider-list.png)
+![](https://github.com/crawlab-team/crawlab-docs/blob/master/legacy/assets/images/lite-spider-list.png)
 
 #### Task List
 
-![](https://github.com/crawlab-team/crawlab-docs/blob/master/assets/images/lite-task-list.png)
+![](https://github.com/crawlab-team/crawlab-docs/blob/master/legacy/assets/images/lite-task-list.png)
 
 #### Schedule List
 
-![](https://github.com/crawlab-team/crawlab-docs/blob/master/assets/images/lite-schedule-list.png)
+![](https://github.com/crawlab-team/crawlab-docs/blob/master/legacy/assets/images/lite-schedule-list.png)
 
 ## Comparison with Crawlab
 
