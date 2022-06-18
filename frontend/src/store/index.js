@@ -29,9 +29,9 @@ const store = new Vuex.Store({
     lang,
     version,
     doc,
-    stats
+    stats,
   },
-  getters
+  getters,
 })
 
 export default store

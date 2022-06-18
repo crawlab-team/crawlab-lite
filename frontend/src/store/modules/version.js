@@ -4,8 +4,8 @@ const state = {
   version: '',
   latestRelease: {
     name: '',
-    body: ''
-  }
+    body: '',
+  },
 }
 
 const getters = {}
@@ -16,7 +16,7 @@ const mutations = {
   },
   SET_LATEST_RELEASE: (state, value) => {
     state.latestRelease = value
-  }
+  },
 }
 
 const actions = {
@@ -25,7 +25,7 @@ const actions = {
     if (res.data && res.data.code === 200) {
       commit('SET_LATEST_RELEASE', res.data.data)
     }
-  }
+  },
 }
 
 export default {
@@ -33,5 +33,5 @@ export default {
   state,
   getters,
   mutations,
-  actions
+  actions,
 }

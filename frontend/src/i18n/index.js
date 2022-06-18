@@ -9,9 +9,9 @@ const i18n = new VueI18n({
   locale: localStorage.getItem('lang') || 'zh',
   messages: {
     en,
-    zh
+    zh,
   },
-  silentTranslationWarn: true
+  silentTranslationWarn: true,
 })
 
 export default i18n

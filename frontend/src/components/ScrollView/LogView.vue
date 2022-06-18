@@ -34,10 +34,7 @@
           :page-count="3"
           layout="sizes, prev, pager, next"
         />
-        <el-badge
-          v-if="errorLogData.length > 0"
-          :value="errorLogData.length"
-        >
+        <el-badge v-if="errorLogData.length > 0" :value="errorLogData.length">
           <el-button
             type="danger"
             size="small"
@@ -89,289 +86,288 @@
 </template>
 
 <script>
-  import {
-    mapState,
-    mapGetters
-  } from 'vuex'
-  import VirtualList from 'vue-virtual-scroll-list'
-  import Convert from 'ansi-to-html'
-  import hasAnsi from 'has-ansi'
+import { mapState, mapGetters } from 'vuex'
+import VirtualList from 'vue-virtual-scroll-list'
+import Convert from 'ansi-to-html'
+import hasAnsi from 'has-ansi'
 
-  import LogItem from './LogItem'
+import LogItem from './LogItem'
 
-  const convert = new Convert()
-  export default {
-    name: 'LogView',
-    components: {
-      VirtualList
+const convert = new Convert()
+export default {
+  name: 'LogView',
+  components: {
+    VirtualList,
+  },
+  props: {
+    data: {
+      type: String,
+      default: '',
     },
-    props: {
-      data: {
-        type: String,
-        default: ''
+  },
+  data() {
+    return {
+      itemComponent: LogItem,
+      searchString: '',
+      isScrolling: false,
+      isScrolling2nd: false,
+      errorRegex: this.$utils.log.errorRegex,
+      currentOffset: 0,
+      isErrorsCollapsed: true,
+      isErrorCollapsing: false,
+    }
+  },
+  computed: {
+    ...mapState('task', [
+      'taskForm',
+      'taskLogTotal',
+      'logKeyword',
+      'isLogFetchLoading',
+      'errorLogData',
+    ]),
+    ...mapGetters('task', ['logData']),
+    currentLogIndex: {
+      get() {
+        return this.$store.state.task.currentLogIndex
+      },
+      set(value) {
+        this.$store.commit('task/SET_CURRENT_LOG_INDEX', value)
+      },
+    },
+    logKeyword: {
+      get() {
+        return this.$store.state.task.logKeyword
+      },
+      set(value) {
+        this.$store.commit('task/SET_LOG_KEYWORD', value)
+      },
+    },
+    taskLogPage: {
+      get() {
+        return this.$store.state.task.taskLogPage
+      },
+      set(value) {
+        this.$store.commit('task/SET_TASK_LOG_PAGE', value)
+      },
+    },
+    taskLogPageSize: {
+      get() {
+        return this.$store.state.task.taskLogPageSize
+      },
+      set(value) {
+        this.$store.commit('task/SET_TASK_LOG_PAGE_SIZE', value)
+      },
+    },
+    isLogAutoScroll: {
+      get() {
+        return this.$store.state.task.isLogAutoScroll
+      },
+      set(value) {
+        this.$store.commit('task/SET_IS_LOG_AUTO_SCROLL', value)
+      },
+    },
+    isLogAutoFetch: {
+      get() {
+        return this.$store.state.task.isLogAutoFetch
+      },
+      set(value) {
+        this.$store.commit('task/SET_IS_LOG_AUTO_FETCH', value)
+      },
+    },
+    isLogFetchLoading: {
+      get() {
+        return this.$store.state.task.isLogFetchLoading
+      },
+      set(value) {
+        this.$store.commit('task/SET_IS_LOG_FETCH_LOADING', value)
+      },
+    },
+    items() {
+      if (!this.logData || this.logData.length === 0) {
+        return []
       }
+      const filteredLogData = this.logData.filter((d) => {
+        if (!this.searchString) return true
+        return !!d.line_text
+          .toLowerCase()
+          .match(this.searchString.toLowerCase())
+      })
+      return filteredLogData.map((logItem) => {
+        const isAnsi = hasAnsi(logItem.line_text)
+        return {
+          index: logItem.line_num,
+          data: isAnsi ? convert.toHtml(logItem.line_text) : logItem.line_text,
+          searchString: this.logKeyword,
+          active: logItem.active,
+          isAnsi,
+        }
+      })
     },
-    data() {
-      return {
-        itemComponent: LogItem,
-        searchString: '',
-        isScrolling: false,
-        isScrolling2nd: false,
-        errorRegex: this.$utils.log.errorRegex,
-        currentOffset: 0,
-        isErrorsCollapsed: true,
-        isErrorCollapsing: false
-      }
+  },
+  watch: {
+    taskLogPage() {
+      this.$emit('search')
+      this.$st.sendEv('任务详情', '日志', '改变页数')
     },
-    computed: {
-      ...mapState('task', [
-        'taskForm',
-        'taskLogTotal',
-        'logKeyword',
-        'isLogFetchLoading',
-        'errorLogData'
-      ]),
-      ...mapGetters('task', [
-        'logData'
-      ]),
-      currentLogIndex: {
-        get() {
-          return this.$store.state.task.currentLogIndex
-        },
-        set(value) {
-          this.$store.commit('task/SET_CURRENT_LOG_INDEX', value)
-        }
-      },
-      logKeyword: {
-        get() {
-          return this.$store.state.task.logKeyword
-        },
-        set(value) {
-          this.$store.commit('task/SET_LOG_KEYWORD', value)
-        }
-      },
-      taskLogPage: {
-        get() {
-          return this.$store.state.task.taskLogPage
-        },
-        set(value) {
-          this.$store.commit('task/SET_TASK_LOG_PAGE', value)
-        }
-      },
-      taskLogPageSize: {
-        get() {
-          return this.$store.state.task.taskLogPageSize
-        },
-        set(value) {
-          this.$store.commit('task/SET_TASK_LOG_PAGE_SIZE', value)
-        }
-      },
-      isLogAutoScroll: {
-        get() {
-          return this.$store.state.task.isLogAutoScroll
-        },
-        set(value) {
-          this.$store.commit('task/SET_IS_LOG_AUTO_SCROLL', value)
-        }
-      },
-      isLogAutoFetch: {
-        get() {
-          return this.$store.state.task.isLogAutoFetch
-        },
-        set(value) {
-          this.$store.commit('task/SET_IS_LOG_AUTO_FETCH', value)
-        }
-      },
-      isLogFetchLoading: {
-        get() {
-          return this.$store.state.task.isLogFetchLoading
-        },
-        set(value) {
-          this.$store.commit('task/SET_IS_LOG_FETCH_LOADING', value)
-        }
-      },
-      items() {
-        if (!this.logData || this.logData.length === 0) {
-          return []
-        }
-        const filteredLogData = this.logData.filter(d => {
-          if (!this.searchString) return true
-          return !!d.line_text.toLowerCase().match(this.searchString.toLowerCase())
-        })
-        return filteredLogData.map(logItem => {
-          const isAnsi = hasAnsi(logItem.line_text)
-          return {
-            index: logItem.line_num,
-            data: isAnsi ? convert.toHtml(logItem.line_text) : logItem.line_text,
-            searchString: this.logKeyword,
-            active: logItem.active,
-            isAnsi
-          }
-        })
-      }
+    taskLogPageSize() {
+      this.$emit('search')
+      this.$st.sendEv('任务详情', '日志', '改变日志每页条数')
     },
-    watch: {
-      taskLogPage() {
-        this.$emit('search')
-        this.$st.sendEv('任务详情', '日志', '改变页数')
-      },
-      taskLogPageSize() {
-        this.$emit('search')
-        this.$st.sendEv('任务详情', '日志', '改变日志每页条数')
-      },
-      isLogAutoScroll() {
-        if (this.isLogAutoScroll) {
-          this.$store.dispatch('task/getTaskLogs', {
+    isLogAutoScroll() {
+      if (this.isLogAutoScroll) {
+        this.$store
+          .dispatch('task/getTaskLogs', {
             id: this.$route.params.id,
-            keyword: this.logKeyword
-          }).then(() => {
+            keyword: this.logKeyword,
+          })
+          .then(() => {
             this.toBottom()
           })
-          this.$st.sendEv('任务详情', '日志', '点击自动滚动')
-        } else {
-          this.$st.sendEv('任务详情', '日志', '取消自动滚动')
-        }
+        this.$st.sendEv('任务详情', '日志', '点击自动滚动')
+      } else {
+        this.$st.sendEv('任务详情', '日志', '取消自动滚动')
       }
     },
-    mounted() {
-      this.currentLogIndex = 0
-      this.handle = setInterval(() => {
-        if (this.isLogAutoScroll) {
-          this.toBottom()
-        }
-      }, 200)
-    },
-    destroyed() {
-      clearInterval(this.handle)
-    },
-    methods: {
-      toBottom() {
-        this.$el.querySelector('.log-view').scrollTo({ top: 99999999 })
-      },
-      toggleErrors() {
-        this.isErrorsCollapsed = !this.isErrorsCollapsed
-        this.isErrorCollapsing = true
-        setTimeout(() => {
-          this.isErrorCollapsing = false
-        }, 300)
-      },
-      async onClickError(item) {
-        const page = Math.ceil(item.line_num / this.taskLogPageSize)
-        this.$store.commit('task/SET_LOG_KEYWORD', '')
-        this.$store.commit('task/SET_TASK_LOG_PAGE', page)
-        this.$store.commit('task/SET_IS_LOG_AUTO_SCROLL', false)
-        this.$store.commit('task/SET_ACTIVE_ERROR_LOG_ITEM', item)
-        this.$emit('search')
-        this.$st.sendEv('任务详情', '日志', '点击错误日志')
-      },
-      onSearchLog() {
-        this.$emit('search')
-        this.$st.sendEv('任务详情', '日志', '搜索日志')
+  },
+  mounted() {
+    this.currentLogIndex = 0
+    this.handle = setInterval(() => {
+      if (this.isLogAutoScroll) {
+        this.toBottom()
       }
-    }
-  }
+    }, 200)
+  },
+  destroyed() {
+    clearInterval(this.handle)
+  },
+  methods: {
+    toBottom() {
+      this.$el.querySelector('.log-view').scrollTo({ top: 99999999 })
+    },
+    toggleErrors() {
+      this.isErrorsCollapsed = !this.isErrorsCollapsed
+      this.isErrorCollapsing = true
+      setTimeout(() => {
+        this.isErrorCollapsing = false
+      }, 300)
+    },
+    async onClickError(item) {
+      const page = Math.ceil(item.line_num / this.taskLogPageSize)
+      this.$store.commit('task/SET_LOG_KEYWORD', '')
+      this.$store.commit('task/SET_TASK_LOG_PAGE', page)
+      this.$store.commit('task/SET_IS_LOG_AUTO_SCROLL', false)
+      this.$store.commit('task/SET_ACTIVE_ERROR_LOG_ITEM', item)
+      this.$emit('search')
+      this.$st.sendEv('任务详情', '日志', '点击错误日志')
+    },
+    onSearchLog() {
+      this.$emit('search')
+      this.$st.sendEv('任务详情', '日志', '搜索日志')
+    },
+  },
+}
 </script>
 
 <style scoped>
-  .filter-wrapper {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-  }
+.filter-wrapper {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
 
-  .content {
-    display: block;
-  }
+.content {
+  display: block;
+}
 
-  .log-view-wrapper {
-    float: left;
-    flex-basis: calc(100% - 240px);
-    width: calc(100% - 300px);
-    transition: width 0.3s;
-  }
+.log-view-wrapper {
+  float: left;
+  flex-basis: calc(100% - 240px);
+  width: calc(100% - 300px);
+  transition: width 0.3s;
+}
 
-  .log-view-wrapper.errors-collapsed {
-    flex-basis: 100%;
-    width: 100%;
-  }
+.log-view-wrapper.errors-collapsed {
+  flex-basis: 100%;
+  width: 100%;
+}
 
-  .log-view {
-    margin-top: 0 !important;
-    overflow-y: scroll !important;
-    height: 600px;
-    list-style: none;
-    color: #A9B7C6;
-    background: #2B2B2B;
-    border: none;
-  }
+.log-view {
+  margin-top: 0 !important;
+  overflow-y: scroll !important;
+  height: 600px;
+  list-style: none;
+  color: #a9b7c6;
+  background: #2b2b2b;
+  border: none;
+}
 
-  .errors-wrapper {
-    float: left;
-    display: inline-block;
-    margin: 0;
-    padding: 0;
-    flex-basis: 240px;
-    width: 300px;
-    transition: opacity 0.3s;
-    border-top: 1px solid #DCDFE6;
-    border-right: 1px solid #DCDFE6;
-    border-bottom: 1px solid #DCDFE6;
-    height: calc(100vh - 240px);
-    font-size: 16px;
-    overflow: auto;
-  }
+.errors-wrapper {
+  float: left;
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+  flex-basis: 240px;
+  width: 300px;
+  transition: opacity 0.3s;
+  border-top: 1px solid #dcdfe6;
+  border-right: 1px solid #dcdfe6;
+  border-bottom: 1px solid #dcdfe6;
+  height: calc(100vh - 240px);
+  font-size: 16px;
+  overflow: auto;
+}
 
-  .errors-wrapper.collapsed {
-    width: 0;
-  }
+.errors-wrapper.collapsed {
+  width: 0;
+}
 
-  .errors-wrapper .error-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
+.errors-wrapper .error-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
 
-  .errors-wrapper .error-list .error-item {
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    /*height: 18px;*/
-    border-bottom: 1px solid white;
-    padding: 5px 0;
-    background: #F56C6C;
-    color: white;
-    cursor: pointer;
-  }
+.errors-wrapper .error-list .error-item {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  /*height: 18px;*/
+  border-bottom: 1px solid white;
+  padding: 5px 0;
+  background: #f56c6c;
+  color: white;
+  cursor: pointer;
+}
 
-  .errors-wrapper .error-list .error-item.active {
-    background: #E6A23C;
-    font-weight: bolder;
-    text-decoration: underline;
-  }
+.errors-wrapper .error-list .error-item.active {
+  background: #e6a23c;
+  font-weight: bolder;
+  text-decoration: underline;
+}
 
-  .errors-wrapper .error-list .error-item:hover {
-    font-weight: bolder;
-    text-decoration: underline;
-  }
+.errors-wrapper .error-list .error-item:hover {
+  font-weight: bolder;
+  text-decoration: underline;
+}
 
-  .errors-wrapper .error-list .error-item .line-no {
-    display: inline-block;
-    text-align: right;
-    width: 70px;
-  }
+.errors-wrapper .error-list .error-item .line-no {
+  display: inline-block;
+  text-align: right;
+  width: 70px;
+}
 
-  .errors-wrapper .error-list .error-item .line-content {
-    display: inline;
-    width: calc(100% - 70px);
-    padding-left: 10px;
-  }
+.errors-wrapper .error-list .error-item .line-content {
+  display: inline;
+  width: calc(100% - 70px);
+  padding-left: 10px;
+}
 
-  .right {
-    display: flex;
-    align-items: center;
-  }
+.right {
+  display: flex;
+  align-items: center;
+}
 
-  .right .el-pagination {
-    margin-right: 10px;
-  }
+.right .el-pagination {
+  margin-right: 10px;
+}
 </style>

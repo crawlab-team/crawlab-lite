@@ -10,7 +10,11 @@ import { library } from '@fortawesome/fontawesome-svg-core'
 import { fab } from '@fortawesome/free-brands-svg-icons'
 import { fas } from '@fortawesome/free-solid-svg-icons'
 import { far } from '@fortawesome/free-regular-svg-icons'
-import { FontAwesomeIcon, FontAwesomeLayers, FontAwesomeLayersText } from '@fortawesome/vue-fontawesome'
+import {
+  FontAwesomeIcon,
+  FontAwesomeLayers,
+  FontAwesomeLayersText,
+} from '@fortawesome/vue-fontawesome'
 
 import 'codemirror/lib/codemirror.js'
 import { codemirror } from 'vue-codemirror-lite'
@@ -45,8 +49,8 @@ Vue.config.productionTip = false
 
 // 百度统计
 if (localStorage.getItem('useStats') !== '0') {
-  window._hmt = window._hmt || [];
-  (function() {
+  window._hmt = window._hmt || []
+  ;(function () {
     const hm = document.createElement('script')
     hm.src = 'https://hm.baidu.com/hm.js?c35e3a563a06caee2524902c81975add'
     const s = document.getElementsByTagName('script')[0]
@@ -68,6 +72,6 @@ const app = new Vue({
   i18n,
   router,
   store,
-  render: h => h(App)
+  render: (h) => h(App),
 })
 export default app

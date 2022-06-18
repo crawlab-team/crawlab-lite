@@ -1,16 +1,18 @@
 import axios from 'axios'
 
 const sendEvCrawlab = (eventCategory, eventAction, eventLabel) => {
-  axios.get(process.env.VUE_APP_CRAWLAB_BASE_URL + '/track', {
-    params: {
-      uid: localStorage.getItem('uid'),
-      sid: sessionStorage.getItem('sid'),
-      ec: eventCategory,
-      ea: eventAction,
-      el: eventLabel,
-      v: 'lite-' + sessionStorage.getItem('v')
-    }
-  }).catch(() => {})
+  axios
+    .get(process.env.VUE_APP_CRAWLAB_BASE_URL + '/track', {
+      params: {
+        uid: localStorage.getItem('uid'),
+        sid: sessionStorage.getItem('sid'),
+        ec: eventCategory,
+        ea: eventAction,
+        el: eventLabel,
+        v: 'lite-' + sessionStorage.getItem('v'),
+      },
+    })
+    .catch(() => {})
 }
 
 export default {
@@ -25,5 +27,5 @@ export default {
       window._hmt.push(['_trackEvent', category, eventName, optLabel, optValue])
       sendEvCrawlab(category, eventName, optLabel)
     }
-  }
+  },
 }

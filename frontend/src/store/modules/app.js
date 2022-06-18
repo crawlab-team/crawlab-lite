@@ -4,12 +4,12 @@ const app = {
   state: {
     sidebar: {
       opened: !+Cookies.get('sidebarStatus'),
-      withoutAnimation: false
+      withoutAnimation: false,
     },
-    device: 'desktop'
+    device: 'desktop',
   },
   mutations: {
-    TOGGLE_SIDEBAR: state => {
+    TOGGLE_SIDEBAR: (state) => {
       if (state.sidebar.opened) {
         Cookies.set('sidebarStatus', 1)
       } else {
@@ -25,7 +25,7 @@ const app = {
     },
     TOGGLE_DEVICE: (state, device) => {
       state.device = device
-    }
+    },
   },
   actions: {
     ToggleSideBar: ({ commit }) => {
@@ -36,8 +36,8 @@ const app = {
     },
     ToggleDevice({ commit }, device) {
       commit('TOGGLE_DEVICE', device)
-    }
-  }
+    },
+  },
 }
 
 export default app

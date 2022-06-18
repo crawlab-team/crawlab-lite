@@ -26,7 +26,11 @@ Vue.use(Router)
   }
  **/
 export const constantRouterMap = [
-  { path: '/login', component: () => import('../views/login/index'), hidden: true },
+  {
+    path: '/login',
+    component: () => import('../views/login/index'),
+    hidden: true,
+  },
   { path: '/404', component: () => import('../views/404'), hidden: true },
   { path: '/', redirect: '/spiders' },
 
@@ -50,7 +54,7 @@ export const constantRouterMap = [
     component: Layout,
     meta: {
       title: 'Spider',
-      icon: 'fa fa-bug'
+      icon: 'fa fa-bug',
     },
     children: [
       {
@@ -59,9 +63,9 @@ export const constantRouterMap = [
         component: () => import('../views/spider/SpiderList'),
         meta: {
           title: 'Spiders',
-          icon: 'fa fa-bug'
-        }
-      }
+          icon: 'fa fa-bug',
+        },
+      },
       // {
       //   path: ':id',
       //   name: 'SpiderDetail',
@@ -72,14 +76,14 @@ export const constantRouterMap = [
       //   },
       //   hidden: true
       // }
-    ]
+    ],
   },
   {
     path: '/tasks',
     component: Layout,
     meta: {
       title: 'Task',
-      icon: 'fa fa-list'
+      icon: 'fa fa-list',
     },
     children: [
       {
@@ -88,8 +92,8 @@ export const constantRouterMap = [
         component: () => import('../views/task/TaskList'),
         meta: {
           title: 'Tasks',
-          icon: 'fa fa-list'
-        }
+          icon: 'fa fa-list',
+        },
       },
       {
         path: ':id',
@@ -97,18 +101,18 @@ export const constantRouterMap = [
         component: () => import('../views/task/TaskDetail'),
         meta: {
           title: 'Task Detail',
-          icon: 'fa fa-circle-o'
+          icon: 'fa fa-circle-o',
         },
-        hidden: true
-      }
-    ]
+        hidden: true,
+      },
+    ],
   },
   {
     path: '/schedules',
     component: Layout,
     meta: {
       title: 'Schedules',
-      icon: 'fa fa-calendar'
+      icon: 'fa fa-calendar',
     },
     hidden: false,
     children: [
@@ -118,10 +122,10 @@ export const constantRouterMap = [
         component: () => import('../views/schedule/ScheduleList'),
         meta: {
           title: 'Schedules',
-          icon: 'fa fa-calendar'
-        }
-      }
-    ]
+          icon: 'fa fa-calendar',
+        },
+      },
+    ],
   },
   // {
   //   path: '/setting',
@@ -143,13 +147,13 @@ export const constantRouterMap = [
   //   ]
   // },
 
-  { path: '*', redirect: '/404', hidden: true }
+  { path: '*', redirect: '/404', hidden: true },
 ]
 
 const router = new Router({
   // mode: 'history', //后端支持可开
   scrollBehavior: () => ({ y: 0 }),
-  routes: constantRouterMap
+  routes: constantRouterMap,
 })
 
 router.beforeEach((to, from, next) => {
@@ -170,7 +174,7 @@ router.beforeEach((to, from, next) => {
   }
 })
 
-router.afterEach(async(to, from, next) => {
+router.afterEach(async (to, from, next) => {
   if (to.path) {
     const res = await request.get('/version')
     const version = res.data.data

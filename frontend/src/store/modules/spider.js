@@ -21,7 +21,7 @@ const state = {
   dailyStats: [],
 
   // spider file tree
-  fileTree: {}
+  fileTree: {},
 }
 
 const getters = {}
@@ -50,19 +50,18 @@ const mutations = {
   },
   SET_FILE_TREE(state, value) {
     state.fileTree = value
-  }
+  },
 }
 
 const actions = {
   getSpiderList({ state, commit }, params = {}) {
-    return request.get('/spiders', params)
-      .then(response => {
-        if (!response || !response.data || !response.data.data) {
-          return
-        }
-        commit('SET_SPIDER_LIST', response.data.data.list || [])
-        commit('SET_SPIDER_TOTAL', response.data.data.total || 0)
-      })
+    return request.get('/spiders', params).then((response) => {
+      if (!response || !response.data || !response.data.data) {
+        return
+      }
+      commit('SET_SPIDER_LIST', response.data.data.list || [])
+      commit('SET_SPIDER_TOTAL', response.data.data.total || 0)
+    })
   },
   editSpider({ state, dispatch }) {
     return request.post(`/spiders/${state.spiderForm.id}`, state.spiderForm)
@@ -71,30 +70,29 @@ const actions = {
     return request.delete(`/spiders/${id}`)
   },
   getSpider({ state, commit }, id) {
-    return request.get(`/spiders/${id}`)
-      .then(response => {
-        const data = response.data.data
-        commit('SET_SPIDER_FORM', data)
-      })
+    return request.get(`/spiders/${id}`).then((response) => {
+      const data = response.data.data
+      commit('SET_SPIDER_FORM', data)
+    })
   },
   crawlSpider({ state, dispatch }, payload) {
     const { spiderId, spiderVersionId, cmd } = payload
     return request.post(`/tasks`, {
       spider_id: spiderId,
       spider_version_id: spiderVersionId,
-      cmd: cmd
+      cmd: cmd,
     })
   },
   getDir({ state, commit }, path) {
     const id = state.spiderForm.id
-    return request.get(`/spiders/${id}/dir`)
-      .then(response => {
-        commit('')
-      })
+    return request.get(`/spiders/${id}/dir`).then((response) => {
+      commit('')
+    })
   },
   getSpiderStats({ state, commit }) {
-    return request.get(`/spiders/${state.spiderForm.id}/stats`)
-      .then(response => {
+    return request
+      .get(`/spiders/${state.spiderForm.id}/stats`)
+      .then((response) => {
         commit('SET_OVERVIEW_STATS', response.data.data.overview)
         // commit('SET_STATUS_STATS', response.data.task_count_by_status)
         commit('SET_DAILY_STATS', response.data.data.daily)
@@ -106,14 +104,13 @@ const actions = {
   },
   getSpiderVersionList({ state, commit }, params = {}) {
     const { spider_id } = params
-    return request.get(`/spiders/${spider_id}/versions`)
-      .then(response => {
-        if (!response || !response.data || !response.data.data) {
-          return
-        }
-        commit('SET_SPIDER_VERSION_LIST', response.data.data.list || [])
-        commit('SET_SPIDER_VERSION_TOTAL', response.data.data.total || 0)
-      })
+    return request.get(`/spiders/${spider_id}/versions`).then((response) => {
+      if (!response || !response.data || !response.data.data) {
+        return
+      }
+      commit('SET_SPIDER_VERSION_LIST', response.data.data.list || [])
+      commit('SET_SPIDER_VERSION_TOTAL', response.data.data.total || 0)
+    })
   },
   deleteSpiderVersion({ state, dispatch }, payload) {
     const { spider_id, version_id } = payload
@@ -124,7 +121,7 @@ const actions = {
     const res = await request.get(`/spiders/${id}/schedules`)
     let data = res.data.data
     if (data) {
-      data = data.map(d => {
+      data = data.map((d) => {
         const arr = d.cron.split(' ')
         arr.splice(0, 1)
         d.cron = arr.join(' ')
@@ -137,7 +134,7 @@ const actions = {
     const id = payload ? payload.id : state.spiderForm.id
     const res = await request.get(`/spiders/${id}/file/tree`)
     commit('SET_FILE_TREE', res.data.data)
-  }
+  },
 }
 
 export default {
@@ -145,5 +142,5 @@ export default {
   state,
   getters,
   mutations,
-  actions
+  actions,
 }

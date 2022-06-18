@@ -7,5 +7,5 @@ export default {
   stats,
   encrypt,
   log,
-  doc
+  doc,
 }
