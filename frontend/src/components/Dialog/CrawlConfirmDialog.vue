@@ -3,7 +3,7 @@
     <disclaimer-dialog v-model:value="disclaimerVisible" />
     <el-dialog
       :title="$t('Notification')"
-      :visible="visible"
+      :model-value="visible"
       class="crawl-confirm-dialog"
       width="480px"
       :before-close="beforeClose"
@@ -22,10 +22,7 @@
           prop="cmd"
           required
         >
-          <el-input
-            v-model:value="form.cmd"
-            :placeholder="$t('Execute Command')"
-          />
+          <el-input v-model="form.cmd" :placeholder="$t('Execute Command')" />
         </el-form-item>
         <el-form-item
           :label="$t('Version')"
@@ -34,7 +31,7 @@
           required
         >
           <el-select
-            v-model:value="form.spider_version_id"
+            v-model="form.spider_version_id"
             :loading="loadingVersions"
             :placeholder="$t('Latest Version')"
             @focus="onSelectSpiderVersion"
@@ -53,7 +50,7 @@
         </el-form-item>
       </el-form>
       <div>
-        <el-checkbox v-model:value="isAllowDisclaimer" />
+        <el-checkbox v-model="isAllowDisclaimer" />
         <span v-if="lang === 'zh'" style="margin-left: 5px">
           我已阅读并同意
           <a href="javascript:" @click="onClickDisclaimer"> 《免责声明》 </a>

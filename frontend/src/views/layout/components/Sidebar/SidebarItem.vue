@@ -21,7 +21,7 @@
       </app-link>
     </template>
 
-    <el-submenu v-else :index="resolvePath(item.path)">
+    <el-sub-menu v-else :index="resolvePath(item.path)">
       <template v-slot:title>
         <item
           v-if="item.meta"
@@ -48,7 +48,7 @@
           </el-menu-item>
         </app-link>
       </template>
-    </el-submenu>
+    </el-sub-menu>
   </div>
 </template>
 

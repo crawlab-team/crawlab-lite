@@ -7,7 +7,7 @@
           <el-form :model="filter" label-position="right" inline>
             <el-form-item prop="spider_id" :label="$t('Spider')">
               <el-select
-                v-model:value="filter.spider_id"
+                v-model="filter.spider_id"
                 size="small"
                 :placeholder="$t('All')"
                 :disabled="isFilterSpiderDisabled"
@@ -25,7 +25,7 @@
             </el-form-item>
             <el-form-item prop="status" :label="$t('Status')">
               <el-select
-                v-model:value="filter.status"
+                v-model="filter.status"
                 size="small"
                 :placeholder="$t('Status')"
                 @change="onFilterChange"
@@ -43,7 +43,7 @@
         <div class="right">
           <el-button
             v-if="multipleSelection.length > 0"
-            icon="el-icon-delete"
+            :icon="ElIconDelete"
             class="btn-delete"
             size="small"
             type="danger"
@@ -163,7 +163,7 @@
             <el-tooltip :content="$t('View')" placement="top">
               <el-button
                 type="primary"
-                icon="el-icon-search"
+                :icon="ElIconSearch"
                 size="mini"
                 @click="onView(scope.row)"
               />
@@ -171,7 +171,7 @@
             <el-tooltip :content="$t('Restart')" placement="top">
               <el-button
                 type="warning"
-                icon="el-icon-refresh"
+                :icon="ElIconRefresh"
                 size="mini"
                 @click="onRestart(scope.row, $event)"
               />
@@ -183,7 +183,7 @@
             >
               <el-button
                 type="danger"
-                icon="el-icon-video-pause"
+                :icon="ElIconVideoPause"
                 size="mini"
                 @click="onCancel(scope.row, $event)"
               />
@@ -191,7 +191,7 @@
             <el-tooltip v-else :content="$t('Remove')" placement="top">
               <el-button
                 type="danger"
-                icon="el-icon-delete"
+                :icon="ElIconDelete"
                 size="mini"
                 @click="onRemove(scope.row, $event)"
               />
@@ -216,16 +216,18 @@
 </template>
 
 <script>
+import {
+  Delete as ElIconDelete,
+  Search as ElIconSearch,
+  Refresh as ElIconRefresh,
+  VideoPause as ElIconVideoPause,
+} from '@element-plus/icons'
 import * as Vue from 'vue'
 import { mapState } from 'vuex'
 import dayjs from 'dayjs'
 import StatusTag from '../../components/Status/StatusTag'
 
 export default {
-  name: 'TaskList',
-  components: {
-    StatusTag,
-  },
   data() {
     return {
       filter: {},
@@ -259,7 +261,15 @@ export default {
         // { name: 'result_count', label: 'Results Count', align: 'right' }
       ],
       isFilterSpiderDisabled: false,
+      ElIconDelete,
+      ElIconSearch,
+      ElIconRefresh,
+      ElIconVideoPause,
     }
+  },
+  name: 'TaskList',
+  components: {
+    StatusTag,
   },
   computed: {
     ...mapState('task', ['taskList', 'taskTotal', 'taskForm']),

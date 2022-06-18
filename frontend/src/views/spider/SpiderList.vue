@@ -4,7 +4,7 @@
     <el-dialog
       :title="$t('Add Spider')"
       width="40%"
-      v-model:visible="addDialogVisible"
+      v-model="addDialogVisible"
       :before-close="onAddDialogClose"
     >
       <el-form
@@ -16,14 +16,14 @@
         <el-form-item :label="$t('Spider Name')" prop="name" required>
           <el-input
             id="spider-name"
-            v-model:value="spiderForm.name"
+            v-model="spiderForm.name"
             :placeholder="$t('Spider Name')"
           />
         </el-form-item>
         <el-form-item :label="$t('Description')" prop="description">
           <el-input
             id="spider-description"
-            v-model:value="spiderForm.description"
+            v-model="spiderForm.description"
             :placeholder="$t('Description')"
           />
         </el-form-item>
@@ -46,7 +46,7 @@
           >
             <el-button
               id="upload"
-              icon="el-icon-upload"
+              :icon="ElIconUpload"
               size="small"
               type="primary"
             >
@@ -70,7 +70,7 @@
 
     <!--version list dialog-->
     <el-dialog
-      v-model:visible="versionListDialogVisible"
+      v-model="versionListDialogVisible"
       :title="`${$t('Spider Version List')} (${$t('Spider')}: ${
         activeSpider ? activeSpider.name : ''
       })`"
@@ -85,7 +85,7 @@
         :on-error="onUploadError"
         align="right"
       >
-        <el-button icon="el-icon-upload" size="small" type="success">
+        <el-button :icon="ElIconUpload" size="small" type="success">
           {{ $t('Upload') }}
         </el-button>
       </el-upload>
@@ -111,7 +111,7 @@
             <el-tooltip :content="$t('Remove')" placement="top">
               <el-button
                 type="danger"
-                icon="el-icon-delete"
+                :icon="ElIconDelete"
                 size="mini"
                 @click="onRemoveVersion(scope.row, $event)"
               />
@@ -169,7 +169,7 @@
           <el-button
             size="small"
             type="success"
-            icon="el-icon-plus"
+            :icon="ElIconPlus"
             class="btn add"
             style="font-weight: bolder"
             @click="onAdd"
@@ -221,7 +221,7 @@
             align="left"
           >
             <template v-slot="scope">
-              <el-input v-model:value="scope.row[col.name]" />
+              <el-input v-model="scope.row[col.name]" />
             </template>
           </el-table-column>
           <el-table-column
@@ -275,7 +275,7 @@
             <el-tooltip :content="$t('Run')" placement="top">
               <el-button
                 type="success"
-                icon="fa fa-bug"
+                :icon="ElIconFa faBug"
                 size="mini"
                 @click="onCrawl(scope.row, $event)"
               />
@@ -283,7 +283,7 @@
             <el-tooltip :content="$t('Spider Version List')" placement="top">
               <el-button
                 type="warning"
-                icon="fa fa-archive"
+                :icon="ElIconFa faArchive"
                 size="mini"
                 @click="onViewSpiderVersions(scope.row, $event)"
               />
@@ -291,7 +291,7 @@
             <el-tooltip :content="$t('Remove')" placement="top">
               <el-button
                 type="danger"
-                icon="el-icon-delete"
+                :icon="ElIconDelete"
                 size="mini"
                 @click="onRemove(scope.row, $event)"
               />

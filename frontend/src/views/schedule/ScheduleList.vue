@@ -3,7 +3,7 @@
     <!--add schedule dialog-->
     <el-dialog
       :title="$t(dialogTitle)"
-      v-model:visible="dialogVisible"
+      v-model="dialogVisible"
       width="640px"
       :before-close="onDialogClose"
     >
@@ -18,7 +18,7 @@
         <el-form-item :label="$t('Spider')" prop="spider_id" required>
           <el-select
             id="spider-id"
-            v-model:value="scheduleForm.spider_id"
+            v-model="scheduleForm.spider_id"
             :placeholder="$t('Spider')"
             :loading="loadingSpiders"
             @focus="onSelectSpider"
@@ -40,7 +40,7 @@
           required=""
         >
           <el-select
-            v-model:value="scheduleForm.spider_version_id"
+            v-model="scheduleForm.spider_version_id"
             :loading="loadingVersions"
             :placeholder="$t('Latest Version')"
             @focus="onSelectSpiderVersion"
@@ -61,7 +61,7 @@
           <el-input
             id="cron"
             ref="cron"
-            v-model:value="scheduleForm.cron"
+            v-model="scheduleForm.cron"
             class="cron"
             :placeholder="`${$t(
               '[second] [minute] [hour] [day] [month] [day of week]'
@@ -71,7 +71,7 @@
           <el-button
             class="cron-edit"
             type="primary"
-            icon="el-icon-edit"
+            :icon="ElIconEdit"
             style="width: 100px"
             @click="onShowCronDialog"
           >
@@ -81,14 +81,14 @@
         <el-form-item :label="$t('Execute Command')" prop="cmd" required>
           <el-input
             id="cmd"
-            v-model:value="scheduleForm.cmd"
+            v-model="scheduleForm.cmd"
             :placeholder="$t('Execute Command')"
           />
         </el-form-item>
         <el-form-item :label="$t('Schedule Description')" prop="description">
           <el-input
             id="schedule-description"
-            v-model:value="scheduleForm.description"
+            v-model="scheduleForm.description"
             type="textarea"
             :placeholder="$t('Schedule Description')"
           />
@@ -116,7 +116,7 @@
     <!--view tasks dialog-->
     <el-dialog
       :title="$t('Tasks')"
-      v-model:visible="tasksDialogVisible"
+      v-model="tasksDialogVisible"
       width="calc(100% - 240px)"
       :before-close="onCloseTasksDialog"
     >
@@ -125,7 +125,7 @@
     <!--./view tasks dialog-->
 
     <!--cron generation dialog-->
-    <el-dialog title="生成 Cron" v-model:visible="cronDialogVisible">
+    <el-dialog title="生成 Cron" v-model="cronDialogVisible">
       <vue-cron-linux
         ref="vue-cron-linux"
         :data="scheduleForm.cron"
@@ -161,7 +161,7 @@
           <el-button
             size="small"
             type="primary"
-            icon="el-icon-plus"
+            :icon="ElIconPlus"
             class="btn-add"
             @click="onAdd"
           >
@@ -209,7 +209,7 @@
           >
             <template v-slot="scope">
               <el-switch
-                v-model:value="scope.row.enabled"
+                v-model="scope.row.enabled"
                 active-color="#13ce66"
                 inactive-color="#ff4949"
                 @change="onEnabledChange(scope.row)"
@@ -241,7 +241,7 @@
             <el-tooltip :content="$t('Edit')" placement="top">
               <el-button
                 type="warning"
-                icon="el-icon-edit"
+                :icon="ElIconEdit"
                 size="mini"
                 @click="onEdit(scope.row)"
               />
@@ -252,7 +252,7 @@
             <el-tooltip :content="$t('Remove')" placement="top">
               <el-button
                 type="danger"
-                icon="el-icon-delete"
+                :icon="ElIconDelete"
                 size="mini"
                 @click="onRemove(scope.row)"
               />
@@ -263,7 +263,7 @@
             <el-tooltip :content="$t('View Tasks')" placement="top">
               <el-button
                 type="primary"
-                icon="el-icon-search"
+                :icon="ElIconSearch"
                 size="mini"
                 @click="onViewTasks(scope.row)"
               />
@@ -274,7 +274,7 @@
             <el-tooltip :content="$t('Run')" placement="top">
               <el-button
                 type="success"
-                icon="fa fa-bug"
+                :icon="ElIconFa faBug"
                 size="mini"
                 @click="onRun(scope.row)"
               />

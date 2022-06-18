@@ -19,7 +19,7 @@
       </h3>
       <el-form-item prop="username" style="margin-bottom: 28px">
         <el-input
-          v-model:value="loginForm.username"
+          v-model="loginForm.username"
           name="username"
           type="text"
           auto-complete="on"
@@ -28,7 +28,7 @@
       </el-form-item>
       <el-form-item prop="password" style="margin-bottom: 28px">
         <el-input
-          v-model:value="loginForm.password"
+          v-model="loginForm.password"
           :type="pwdType"
           name="password"
           auto-complete="on"

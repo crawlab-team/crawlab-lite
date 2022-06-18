@@ -1,11 +1,7 @@
 <template>
   <div class="app-container">
     <!--tabs-->
-    <el-tabs
-      v-model:value="activeTabName"
-      type="border-card"
-      @tab-click="onTabClick"
-    >
+    <el-tabs v-model="activeTabName" type="border-card" @tab-click="onTabClick">
       <!--      <el-tab-pane :label="$t('Overview')" name="overview">-->
       <!--        <task-overview @click-log="activeTabName = 'log'" />-->
       <!--      </el-tab-pane>-->

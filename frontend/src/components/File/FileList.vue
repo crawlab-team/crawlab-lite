@@ -2,15 +2,12 @@
   <div class="file-list-container">
     <el-dialog
       :title="$t('New Directory')"
-      v-model:visible="dirDialogVisible"
+      v-model="dirDialogVisible"
       width="30%"
     >
       <el-form>
         <el-form-item :label="$t('Enter new directory name')">
-          <el-input
-            v-model:value="name"
-            :placeholder="$t('New directory name')"
-          />
+          <el-input v-model="name" :placeholder="$t('New directory name')" />
         </el-form-item>
       </el-form>
       <template v-slot:footer>
@@ -25,14 +22,10 @@
       </template>
     </el-dialog>
 
-    <el-dialog
-      :title="$t('New File')"
-      v-model:visible="fileDialogVisible"
-      width="30%"
-    >
+    <el-dialog :title="$t('New File')" v-model="fileDialogVisible" width="30%">
       <el-form>
         <el-form-item :label="$t('Enter new file name')">
-          <el-input v-model:value="name" :placeholder="$t('New file name')" />
+          <el-input v-model="name" :placeholder="$t('New file name')" />
         </el-form-item>
       </el-form>
       <template v-slot:footer>
@@ -63,7 +56,7 @@
         <template v-slot="{ data }">
           <span class="custom-tree-node">
             <el-popover
-              v-model:value="isShowCreatePopoverDict[data.path]"
+              v-model="isShowCreatePopoverDict[data.path]"
               trigger="manual"
               placement="right"
               popper-class="create-item-popover"
@@ -170,7 +163,7 @@
               class="add-btn"
               size="small"
               type="primary"
-              icon="el-icon-plus"
+              :icon="ElIconPlus"
               @click="onEmptyClick"
             >
               {{ $t('Add') }}
@@ -188,7 +181,7 @@
         <div class="top-part">
           <!--back-->
           <div class="action-container">
-            <el-popover v-model:value="isShowDelete" trigger="click">
+            <el-popover v-model="isShowDelete" trigger="click">
               <el-button
                 size="small"
                 type="default"
@@ -211,9 +204,9 @@
                 </el-button>
               </template>
             </el-popover>
-            <el-popover v-model:value="isShowRename" trigger="click">
+            <el-popover v-model="isShowRename" trigger="click">
               <el-input
-                v-model:value="name"
+                v-model="name"
                 :placeholder="$t('Name')"
                 style="margin-bottom: 10px"
               />
@@ -263,13 +256,12 @@
 </template>
 
 <script>
+import { Plus as ElIconPlus } from '@element-plus/icons'
 import * as Vue from 'vue'
 import { mapState } from 'vuex'
 import FileDetail from './FileDetail'
 
 export default {
-  name: 'FileList',
-  components: { FileDetail },
   data() {
     return {
       isEdit: false,
@@ -286,8 +278,11 @@ export default {
       fileDialogVisible: false,
       nodeExpandedDict: {},
       isShowDeleteNav: false,
+      ElIconPlus,
     }
   },
+  name: 'FileList',
+  components: { FileDetail },
   computed: {
     ...mapState('spider', ['fileTree', 'spiderForm']),
     ...mapState('file', ['fileList']),

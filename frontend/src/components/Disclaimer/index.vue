@@ -1,7 +1,7 @@
 <template>
   <el-dialog
     class="disclaimer"
-    v-model:visible="visible"
+    v-model="visible"
     width="60%"
     :title="$t('Disclaimer')"
   >

@@ -23,13 +23,13 @@ export default {
   methods: {
     handleScroll(e) {
       const eventDelta = e.wheelDelta || -e.deltaY * 40
-      const $scrollWrapper = this.$refs.scrollContainer.$refs.wrap
+      const $scrollWrapper = this.$refs.scrollContainer.$refs.wrap$
       $scrollWrapper.scrollLeft = $scrollWrapper.scrollLeft + eventDelta / 4
     },
     moveToTarget(currentTag) {
       const $container = this.$refs.scrollContainer.$el
       const $containerWidth = $container.offsetWidth
-      const $scrollWrapper = this.$refs.scrollContainer.$refs.wrap
+      const $scrollWrapper = this.$refs.scrollContainer.$refs.wrap$
       const tagList = this.$parent.$refs.tag
 
       let firstTag = null

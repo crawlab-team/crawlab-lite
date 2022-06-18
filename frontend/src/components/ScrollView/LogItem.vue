@@ -4,7 +4,7 @@
     <div class="line-content">
       <span v-if="isLogEnd" style="color: #e6a23c">
         <span class="loading-text">{{ $t('Updating log...') }}</span>
-        <i class="el-icon-loading" />
+        <el-icon><el-icon-loading /></el-icon>
       </span>
       <span v-else-if="source.isAnsi" v-html="dataHtml" />
       <span v-else v-html="dataHtml" />
@@ -13,8 +13,12 @@
 </template>
 
 <script>
+import { Loading as ElIconLoading } from '@element-plus/icons'
 import * as Vue from 'vue'
 export default {
+  components: {
+    ElIconLoading,
+  },
   name: 'LogItem',
   props: {
     source: {

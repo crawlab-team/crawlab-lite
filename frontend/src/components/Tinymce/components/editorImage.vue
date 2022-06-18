@@ -2,13 +2,13 @@
   <div class="upload-container">
     <el-button
       :style="{ background: color, borderColor: color }"
-      icon="el-icon-upload"
+      :icon="ElIconUpload"
       size="mini"
       type="primary"
       @click="dialogVisible = true"
       >上传图片
     </el-button>
-    <el-dialog v-model:visible="dialogVisible">
+    <el-dialog v-model="dialogVisible">
       <el-upload
         :multiple="true"
         :file-list="fileList"
@@ -29,22 +29,24 @@
 </template>
 
 <script>
+import { Upload as ElIconUpload } from '@element-plus/icons'
 import { $on, $off, $once, $emit } from '../../../utils/gogocodeTransfer'
 import * as Vue from 'vue'
 export default {
+  data() {
+    return {
+      dialogVisible: false,
+      listObj: {},
+      fileList: [],
+      ElIconUpload,
+    }
+  },
   name: 'EditorSlideUpload',
   props: {
     color: {
       type: String,
       default: '#1890ff',
     },
-  },
-  data() {
-    return {
-      dialogVisible: false,
-      listObj: {},
-      fileList: [],
-    }
   },
   methods: {
     checkAllSuccess() {

@@ -3,10 +3,10 @@
     <disclaimer-dialog v-model:value="disclaimerVisible" />
     <div class="navbar">
       <el-dialog
-        v-model:visible="isLatestReleaseNoteVisible"
+        v-model="isLatestReleaseNoteVisible"
         :title="$t('Release') + ` ${this.latestRelease.name}`"
       >
-        <el-tabs v-model:value="activeTabName">
+        <el-tabs v-model="activeTabName">
           <el-tab-pane :label="$t('Release Note')" name="release-note">
             <div class="content markdown-body" v-html="latestReleaseNoteHtml" />
             <template v-slot:footer>
@@ -41,7 +41,7 @@
       <el-dropdown class="avatar-container right" trigger="click">
         <span class="el-dropdown-link">
           {{ username }}
-          <i class="el-icon-arrow-down el-icon--right" />
+          <el-icon class="el-icon--right"><el-icon-arrow-down /></el-icon>
         </span>
         <template v-slot:dropdown>
           <el-dropdown-menu class="user-dropdown">
@@ -56,7 +56,7 @@
       <el-dropdown class="lang-list right" trigger="click">
         <span class="el-dropdown-link">
           {{ $t($store.getters['lang/lang']) }}
-          <i class="el-icon-arrow-down el-icon--right" />
+          <el-icon class="el-icon--right"><el-icon-arrow-down /></el-icon>
         </span>
         <template v-slot:dropdown>
           <el-dropdown-menu>
@@ -121,6 +121,7 @@
 </template>
 
 <script>
+import { ArrowDown as ElIconArrowDown } from '@element-plus/icons'
 import * as Vue from 'vue'
 import { mapGetters, mapState } from 'vuex'
 import Breadcrumb from '@/components/Breadcrumb'
@@ -136,6 +137,7 @@ export default {
     Hamburger,
     GithubButton,
     DisclaimerDialog,
+    ElIconArrowDown,
   },
   data() {
     const converter = new showdown.Converter()

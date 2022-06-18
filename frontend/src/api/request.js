@@ -1,6 +1,6 @@
 import axios from 'axios'
 import router from '../router'
-import { Message } from 'element-ui'
+import { ElMessage as Message } from 'element-plus'
 
 // 根据 VUE_APP_BASE_URL 生成 baseUrl
 let baseUrl = process.env.VUE_APP_BASE_URL

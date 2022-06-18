@@ -3,7 +3,7 @@
     <div class="filter-wrapper">
       <div class="left">
         <el-switch
-          v-model:value="isLogAutoScroll"
+          v-model="isLogAutoScroll"
           :inactive-text="$t('Auto-Scroll')"
           style="margin-right: 10px"
         />
@@ -34,11 +34,14 @@
           :page-count="3"
           layout="sizes, prev, pager, next"
         />
-        <el-badge v-if="errorLogData.length > 0" :value="errorLogData.length">
+        <el-badge
+          v-if="errorLogData.length > 0"
+          :model-value="errorLogData.length"
+        >
           <el-button
             type="danger"
             size="small"
-            icon="el-icon-warning-outline"
+            :icon="ElIconWarningOutline"
             @click="toggleErrors"
           >
             {{ $t('Error Count') }}
@@ -86,6 +89,7 @@
 </template>
 
 <script>
+import { WarningOutline as ElIconWarningOutline } from '@element-plus/icons'
 import { $on, $off, $once, $emit } from '../../utils/gogocodeTransfer'
 import * as Vue from 'vue'
 import { mapState, mapGetters } from 'vuex'
@@ -97,16 +101,6 @@ import LogItem from './LogItem'
 
 const convert = new Convert()
 export default {
-  name: 'LogView',
-  components: {
-    VirtualList,
-  },
-  props: {
-    data: {
-      type: String,
-      default: '',
-    },
-  },
   data() {
     return {
       itemComponent: LogItem,
@@ -117,7 +111,18 @@ export default {
       currentOffset: 0,
       isErrorsCollapsed: true,
       isErrorCollapsing: false,
+      ElIconWarningOutline,
     }
+  },
+  name: 'LogView',
+  components: {
+    VirtualList,
+  },
+  props: {
+    data: {
+      type: String,
+      default: '',
+    },
   },
   computed: {
     ...mapState('task', [

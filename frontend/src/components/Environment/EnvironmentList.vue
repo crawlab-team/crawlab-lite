@@ -5,7 +5,7 @@
         <el-button
           size="small"
           type="primary"
-          icon="el-icon-plus"
+          :icon="ElIconPlus"
           @click="addEnv"
           >{{ $t('Add Environment Variables') }}</el-button
         >
@@ -18,25 +18,19 @@
       <el-table :data="spiderForm.envs">
         <el-table-column :label="$t('Variable')">
           <template v-slot="scope">
-            <el-input
-              v-model:value="scope.row.name"
-              :placeholder="$t('Variable')"
-            />
+            <el-input v-model="scope.row.name" :placeholder="$t('Variable')" />
           </template>
         </el-table-column>
         <el-table-column :label="$t('Value')">
           <template v-slot="scope">
-            <el-input
-              v-model:value="scope.row.value"
-              :placeholder="$t('Value')"
-            />
+            <el-input v-model="scope.row.value" :placeholder="$t('Value')" />
           </template>
         </el-table-column>
         <el-table-column :label="$t('Action')">
           <template v-slot="scope">
             <el-button
               size="mini"
-              icon="el-icon-delete"
+              :icon="ElIconDelete"
               type="danger"
               @click="deleteEnv(scope.$index)"
             />
@@ -48,10 +42,17 @@
 </template>
 
 <script>
+import { Plus as ElIconPlus, Delete as ElIconDelete } from '@element-plus/icons'
 import * as Vue from 'vue'
 import { mapState } from 'vuex'
 
 export default {
+  data() {
+    return {
+      ElIconPlus,
+      ElIconDelete,
+    }
+  },
   name: 'EnvironmentList',
   computed: {
     ...mapState('spider', ['spiderForm']),
