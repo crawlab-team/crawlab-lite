@@ -13,6 +13,7 @@
 </template>
 
 <script>
+import * as Vue from 'vue'
 export default {
   name: 'LogItem',
   props: {
@@ -66,16 +67,13 @@ export default {
 .log-item {
   display: block;
 }
-
 .log-item:hover {
   background: rgba(55, 57, 59, 0.5);
 }
-
 .log-item:first-child .line-no {
   padding-top: 10px;
   text-align: right;
 }
-
 .log-item .line-no {
   display: inline-block;
   width: 70px;
@@ -84,28 +82,23 @@ export default {
   padding-right: 10px;
   text-align: right;
 }
-
 .log-item .line-content {
   padding-left: 10px;
   display: inline-block;
   width: calc(100% - 70px);
   white-space: nowrap;
 }
-
 .loading-text {
   margin-right: 5px;
   animation: blink 2s ease-in infinite;
 }
-
 @keyframes blink {
   0% {
     opacity: 1;
   }
-
   50% {
     opacity: 0.3;
   }
-
   100% {
     opacity: 1;
   }

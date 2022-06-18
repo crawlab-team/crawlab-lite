@@ -48,6 +48,7 @@
 </template>
 
 <script>
+import * as Vue from 'vue'
 import request from '../../api/request'
 import echarts from 'echarts'
 
@@ -145,14 +146,13 @@ export default {
 }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .metric-list {
   margin-top: 0;
   padding-left: 0;
   list-style: none;
   display: flex;
   font-size: 16px;
-
   .metric-item:last-child .metric-card {
     margin-right: 0;
   }
@@ -227,21 +227,16 @@ export default {
     }
   }
 }
-
 .title {
   padding: 0;
   margin: 0;
 }
-
 #echarts-daily-tasks {
   height: 360px;
   width: 100%;
 }
-
 .el-card {
-  /*border: 1px solid lightgrey;*/
 }
-
 .svg-inline--fa {
   width: 100%;
   height: 100%;

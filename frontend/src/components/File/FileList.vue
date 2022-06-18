@@ -2,42 +2,49 @@
   <div class="file-list-container">
     <el-dialog
       :title="$t('New Directory')"
-      :visible.sync="dirDialogVisible"
+      v-model:visible="dirDialogVisible"
       width="30%"
     >
       <el-form>
         <el-form-item :label="$t('Enter new directory name')">
-          <el-input v-model="name" :placeholder="$t('New directory name')" />
+          <el-input
+            v-model:value="name"
+            :placeholder="$t('New directory name')"
+          />
         </el-form-item>
       </el-form>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="dirDialogVisible = false">{{
-          $t('Cancel')
-        }}</el-button>
-        <el-button type="primary" @click="onAddDir">{{
-          $t('Confirm')
-        }}</el-button>
-      </span>
+      <template v-slot:footer>
+        <span class="dialog-footer">
+          <el-button @click="dirDialogVisible = false">{{
+            $t('Cancel')
+          }}</el-button>
+          <el-button type="primary" @click="onAddDir">{{
+            $t('Confirm')
+          }}</el-button>
+        </span>
+      </template>
     </el-dialog>
 
     <el-dialog
       :title="$t('New File')"
-      :visible.sync="fileDialogVisible"
+      v-model:visible="fileDialogVisible"
       width="30%"
     >
       <el-form>
         <el-form-item :label="$t('Enter new file name')">
-          <el-input v-model="name" :placeholder="$t('New file name')" />
+          <el-input v-model:value="name" :placeholder="$t('New file name')" />
         </el-form-item>
       </el-form>
-      <span slot="footer" class="dialog-footer">
-        <el-button size="small" @click="fileDialogVisible = false">{{
-          $t('Cancel')
-        }}</el-button>
-        <el-button size="small" type="primary" @click="onAddFile">{{
-          $t('Confirm')
-        }}</el-button>
-      </span>
+      <template v-slot:footer>
+        <span class="dialog-footer">
+          <el-button size="small" @click="fileDialogVisible = false">{{
+            $t('Cancel')
+          }}</el-button>
+          <el-button size="small" type="primary" @click="onAddFile">{{
+            $t('Confirm')
+          }}</el-button>
+        </span>
+      </template>
     </el-dialog>
 
     <div class="file-tree-wrapper">
@@ -53,88 +60,90 @@
         @node-expand="onDirClick"
         @node-collapse="onDirClick"
       >
-        <span slot-scope="{ data }" class="custom-tree-node">
-          <el-popover
-            v-model="isShowCreatePopoverDict[data.path]"
-            trigger="manual"
-            placement="right"
-            popper-class="create-item-popover"
-            :visible-arrow="false"
-            @hide="onHideCreate(data)"
-          >
-            <ul class="action-item-list">
-              <li class="action-item" @click="fileDialogVisible = true">
-                <font-awesome-icon icon="file-alt" color="rgba(3,47,98,.5)" />
-                <span class="action-item-text">{{ $t('Create File') }}</span>
-              </li>
-              <li class="action-item" @click="dirDialogVisible = true">
-                <font-awesome-icon
-                  :icon="['fa', 'folder']"
-                  color="rgba(3,47,98,.5)"
-                />
-                <span class="action-item-text">{{
-                  $t('Create Directory')
-                }}</span>
-              </li>
-            </ul>
-            <ul class="action-item-list">
-              <li class="action-item" @click="onClickRemoveNav(data)">
-                <font-awesome-icon
-                  :icon="['fa', 'trash']"
-                  color="rgba(3,47,98,.5)"
-                />
-                <span class="action-item-text">{{ $t('Remove') }}</span>
-              </li>
-            </ul>
-            <template slot="reference">
-              <div>
-                <span class="item-icon">
+        <template v-slot="{ data }">
+          <span class="custom-tree-node">
+            <el-popover
+              v-model:value="isShowCreatePopoverDict[data.path]"
+              trigger="manual"
+              placement="right"
+              popper-class="create-item-popover"
+              :visible-arrow="false"
+              @hide="onHideCreate(data)"
+            >
+              <ul class="action-item-list">
+                <li class="action-item" @click="fileDialogVisible = true">
+                  <font-awesome-icon icon="file-alt" color="rgba(3,47,98,.5)" />
+                  <span class="action-item-text">{{ $t('Create File') }}</span>
+                </li>
+                <li class="action-item" @click="dirDialogVisible = true">
                   <font-awesome-icon
-                    v-if="data.is_dir"
                     :icon="['fa', 'folder']"
                     color="rgba(3,47,98,.5)"
                   />
+                  <span class="action-item-text">{{
+                    $t('Create Directory')
+                  }}</span>
+                </li>
+              </ul>
+              <ul class="action-item-list">
+                <li class="action-item" @click="onClickRemoveNav(data)">
                   <font-awesome-icon
-                    v-else-if="data.path.match(/\.py$/)"
-                    :icon="['fab', 'python']"
+                    :icon="['fa', 'trash']"
                     color="rgba(3,47,98,.5)"
                   />
-                  <font-awesome-icon
-                    v-else-if="data.path.match(/\.js$/)"
-                    :icon="['fab', 'node-js']"
-                    color="rgba(3,47,98,.5)"
-                  />
-                  <font-awesome-icon
-                    v-else-if="data.path.match(/\.(java|jar|class)$/)"
-                    :icon="['fab', 'java']"
-                    color="rgba(3,47,98,.5)"
-                  />
-                  <font-awesome-icon
-                    v-else-if="data.path.match(/\.go$/)"
-                    :icon="['fab', 'go']"
-                    color="rgba(3,47,98,.5)"
-                  />
-                  <font-awesome-icon
-                    v-else-if="data.path.match(/\.zip$/)"
-                    :icon="['fa', 'file-archive']"
-                    color="rgba(3,47,98,.5)"
-                  />
-                  <font-awesome-icon
-                    v-else
-                    icon="file-alt"
-                    color="rgba(3,47,98,.5)"
-                  />
-                </span>
-                <span
-                  class="item-name"
-                  :class="isActiveFile(data) ? 'active' : ''"
-                >
-                  {{ data.name }}
-                </span>
-              </div>
-            </template>
-          </el-popover>
-        </span>
+                  <span class="action-item-text">{{ $t('Remove') }}</span>
+                </li>
+              </ul>
+              <template v-slot:reference>
+                <div>
+                  <span class="item-icon">
+                    <font-awesome-icon
+                      v-if="data.is_dir"
+                      :icon="['fa', 'folder']"
+                      color="rgba(3,47,98,.5)"
+                    />
+                    <font-awesome-icon
+                      v-else-if="data.path.match(/\.py$/)"
+                      :icon="['fab', 'python']"
+                      color="rgba(3,47,98,.5)"
+                    />
+                    <font-awesome-icon
+                      v-else-if="data.path.match(/\.js$/)"
+                      :icon="['fab', 'node-js']"
+                      color="rgba(3,47,98,.5)"
+                    />
+                    <font-awesome-icon
+                      v-else-if="data.path.match(/\.(java|jar|class)$/)"
+                      :icon="['fab', 'java']"
+                      color="rgba(3,47,98,.5)"
+                    />
+                    <font-awesome-icon
+                      v-else-if="data.path.match(/\.go$/)"
+                      :icon="['fab', 'go']"
+                      color="rgba(3,47,98,.5)"
+                    />
+                    <font-awesome-icon
+                      v-else-if="data.path.match(/\.zip$/)"
+                      :icon="['fa', 'file-archive']"
+                      color="rgba(3,47,98,.5)"
+                    />
+                    <font-awesome-icon
+                      v-else
+                      icon="file-alt"
+                      color="rgba(3,47,98,.5)"
+                    />
+                  </span>
+                  <span
+                    class="item-name"
+                    :class="isActiveFile(data) ? 'active' : ''"
+                  >
+                    {{ data.name }}
+                  </span>
+                </div>
+              </template>
+            </el-popover>
+          </span>
+        </template>
       </el-tree>
       <div class="add-btn-wrapper">
         <el-popover
@@ -156,16 +165,17 @@
               <span class="action-item-text">{{ $t('Create Directory') }}</span>
             </li>
           </ul>
-          <el-button
-            slot="reference"
-            class="add-btn"
-            size="small"
-            type="primary"
-            icon="el-icon-plus"
-            @click="onEmptyClick"
-          >
-            {{ $t('Add') }}
-          </el-button>
+          <template v-slot:reference>
+            <el-button
+              class="add-btn"
+              size="small"
+              type="primary"
+              icon="el-icon-plus"
+              @click="onEmptyClick"
+            >
+              {{ $t('Add') }}
+            </el-button>
+          </template>
         </el-popover>
       </div>
     </div>
@@ -178,7 +188,7 @@
         <div class="top-part">
           <!--back-->
           <div class="action-container">
-            <el-popover v-model="isShowDelete" trigger="click">
+            <el-popover v-model:value="isShowDelete" trigger="click">
               <el-button
                 size="small"
                 type="default"
@@ -189,7 +199,7 @@
               <el-button size="small" type="danger" @click="onFileDelete">
                 {{ $t('Confirm') }}
               </el-button>
-              <template slot="reference">
+              <template v-slot:reference>
                 <el-button
                   type="danger"
                   size="small"
@@ -201,9 +211,9 @@
                 </el-button>
               </template>
             </el-popover>
-            <el-popover v-model="isShowRename" trigger="click">
+            <el-popover v-model:value="isShowRename" trigger="click">
               <el-input
-                v-model="name"
+                v-model:value="name"
                 :placeholder="$t('Name')"
                 style="margin-bottom: 10px"
               />
@@ -212,7 +222,7 @@
                   {{ $t('Confirm') }}
                 </el-button>
               </div>
-              <template slot="reference">
+              <template v-slot:reference>
                 <div>
                   <el-button
                     type="warning"
@@ -253,6 +263,7 @@
 </template>
 
 <script>
+import * as Vue from 'vue'
 import { mapState } from 'vuex'
 import FileDetail from './FileDetail'
 
@@ -314,7 +325,7 @@ export default {
       this.isShowCreatePopoverDict = {}
     })
   },
-  destroyed() {
+  unmounted() {
     document.querySelector('body').removeEventListener('click')
   },
   methods: {
@@ -461,19 +472,19 @@ export default {
     },
     onFileRightClick(ev, data) {
       this.isShowCreatePopoverDict = {}
-      this.$set(this.isShowCreatePopoverDict, data.path, true)
+      this.isShowCreatePopoverDict[data.path] = true
       this.activeFileNode = data
       this.$st.sendEv('爬虫详情', '文件', '右键点击导航栏')
     },
     onEmptyClick() {
       const data = { path: '' }
       this.isShowCreatePopoverDict = {}
-      this.$set(this.isShowCreatePopoverDict, data.path, true)
+      this.isShowCreatePopoverDict[data.path] = true
       this.activeFileNode = data
       this.$st.sendEv('爬虫详情', '文件', '空白点击添加')
     },
     onHideCreate(data) {
-      this.$set(this.isShowCreatePopoverDict, data.path, false)
+      this.isShowCreatePopoverDict[data.path] = false
       this.name = ''
     },
     onClickRemoveNav(data) {
@@ -505,9 +516,9 @@ export default {
       const data = node.data
       this.onFileClick(data)
       node.parent.expanded = true
-      this.$set(this.nodeExpandedDict, node.parent.data.path, true)
+      this.nodeExpandedDict[node.parent.data.path] = true
       node.parent.parent.expanded = true
-      this.$set(this.nodeExpandedDict, node.parent.parent.data.path, true)
+      this.nodeExpandedDict[node.parent.parent.data.path] = true
     },
     clickPipeline() {
       const filename = 'pipelines.py'
@@ -520,7 +531,7 @@ export default {
             if (dataLv2.path.match(filename)) {
               this.onFileClick(dataLv2)
               nodeLv1.expanded = true
-              this.$set(this.nodeExpandedDict, dataLv1.path, true)
+              this.nodeExpandedDict[dataLv1.path] = true
               return
             }
           }
@@ -531,12 +542,11 @@ export default {
 }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .file-list-container {
   margin-left: -15px;
   height: 100%;
   min-height: 100%;
-
   .top-part {
     display: flex;
     height: 33px;

@@ -4,7 +4,7 @@
     <el-dialog
       :title="$t('Add Spider')"
       width="40%"
-      :visible.sync="addDialogVisible"
+      v-model:visible="addDialogVisible"
       :before-close="onAddDialogClose"
     >
       <el-form
@@ -16,14 +16,14 @@
         <el-form-item :label="$t('Spider Name')" prop="name" required>
           <el-input
             id="spider-name"
-            v-model="spiderForm.name"
+            v-model:value="spiderForm.name"
             :placeholder="$t('Spider Name')"
           />
         </el-form-item>
         <el-form-item :label="$t('Description')" prop="description">
           <el-input
             id="spider-description"
-            v-model="spiderForm.description"
+            v-model:value="spiderForm.description"
             :placeholder="$t('Description')"
           />
         </el-form-item>
@@ -70,7 +70,7 @@
 
     <!--version list dialog-->
     <el-dialog
-      :visible.sync="versionListDialogVisible"
+      v-model:visible="versionListDialogVisible"
       :title="`${$t('Spider Version List')} (${$t('Spider')}: ${
         activeSpider ? activeSpider.name : ''
       })`"
@@ -97,7 +97,7 @@
         style="margin: 5px 10px"
       >
         <el-table-column :label="$t('Upload Time')" prop="create_ts">
-          <template slot-scope="scope">
+          <template v-slot="scope">
             {{
               `${getTime(scope.row.create_ts)}${
                 scope.$index === 0 ? ' (' + $t('Latest') + ')' : ''
@@ -107,7 +107,7 @@
         </el-table-column>
         <el-table-column :label="$t('MD5')" prop="md5" />
         <el-table-column :label="$t('Action')" width="120px">
-          <template slot-scope="scope">
+          <template v-slot="scope">
             <el-tooltip :content="$t('Remove')" placement="top">
               <el-button
                 type="danger"
@@ -120,7 +120,7 @@
         </el-table-column>
       </el-table>
 
-      <template slot="footer">
+      <template v-slot:footer>
         <el-button
           size="small"
           type="primary"
@@ -192,25 +192,23 @@
         <template v-for="col in columns">
           <el-table-column
             v-if="col.name === 'type'"
-            :key="col.name"
             :property="col.name"
             :label="$t(col.label)"
             :sortable="col.sortable"
             align="left"
             :width="col.width"
           >
-            <template slot-scope="scope">
+            <template v-slot="scope">
               {{ $t(scope.row.type) }}
             </template>
           </el-table-column>
           <el-table-column
             v-else-if="col.name === 'last_5_errors'"
-            :key="col.name"
             :label="$t(col.label)"
             :width="col.width"
             align="center"
           >
-            <template slot-scope="scope">
+            <template v-slot="scope">
               <div :style="{ color: scope.row[col.name] > 0 ? 'red' : '' }">
                 {{ scope.row[col.name] }}
               </div>
@@ -218,34 +216,31 @@
           </el-table-column>
           <el-table-column
             v-else-if="col.name === 'cmd'"
-            :key="col.name"
             :label="$t(col.label)"
             :width="col.width"
             align="left"
           >
-            <template slot-scope="scope">
-              <el-input v-model="scope.row[col.name]" />
+            <template v-slot="scope">
+              <el-input v-model:value="scope.row[col.name]" />
             </template>
           </el-table-column>
           <el-table-column
             v-else-if="col.name.match(/_ts$/)"
-            :key="col.name"
             :label="$t(col.label)"
             :align="col.align"
             :width="col.width"
           >
-            <template slot-scope="scope">
+            <template v-slot="scope">
               {{ getTime(scope.row[col.name]) }}
             </template>
           </el-table-column>
           <el-table-column
             v-else-if="col.name === 'last_status'"
-            :key="col.name"
             :label="$t(col.label)"
             align="left"
             :width="col.width"
           >
-            <template slot-scope="scope">
+            <template v-slot="scope">
               <template v-if="scope.row.last_status === 'ERROR'">
                 <el-tooltip :content="scope.row.last_error" placement="top">
                   <status-tag :status="scope.row.last_status" />
@@ -256,7 +251,6 @@
           </el-table-column>
           <el-table-column
             v-else
-            :key="col.name"
             :property="col.name"
             :label="$t(col.label)"
             :align="col.align || 'left'"
@@ -269,7 +263,7 @@
           fixed="right"
           width="130"
         >
-          <template slot-scope="scope">
+          <template v-slot="scope">
             <!--            <el-tooltip :content="$t('View')" placement="top">-->
             <!--              <el-button-->
             <!--                type="primary"-->
@@ -307,9 +301,9 @@
       </el-table>
       <div class="pagination">
         <el-pagination
-          :current-page.sync="pagination.page_num"
+          v-model:current-page="pagination.page_num"
           :page-sizes="[10, 20, 50, 100]"
-          :page-size.sync="pagination.page_size"
+          v-model:page-size="pagination.page_size"
           layout="sizes, prev, pager, next"
           :total="spiderTotal"
           @current-change="getSpiderList"
@@ -322,6 +316,7 @@
 </template>
 
 <script>
+import * as Vue from 'vue'
 import { mapGetters, mapState } from 'vuex'
 import dayjs from 'dayjs'
 import CrawlConfirmDialog from '../../components/Dialog/CrawlConfirmDialog'
@@ -403,7 +398,7 @@ export default {
       vm.$store.commit('spider/SET_SPIDER_FORM', this.spiderForm)
     })
   },
-  destroyed() {
+  unmounted() {
     clearInterval(this.refreshHandle)
   },
   methods: {
@@ -590,17 +585,15 @@ export default {
 }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .el-dialog {
   .el-select {
     width: 100%;
   }
 }
-
 .filter {
   display: flex;
   justify-content: space-between;
-
   .filter-search {
     width: 240px;
   }
@@ -611,24 +604,19 @@ export default {
     }
   }
 }
-
 .table {
   margin-top: 8px;
   border-radius: 5px;
-
   .el-button {
     padding: 7px;
   }
 }
-
 .delete-confirm {
   background-color: red;
 }
-
 .add-spider-wrapper {
   display: flex;
   justify-content: center;
-
   .add-spider-item {
     cursor: pointer;
     width: 180px;
@@ -659,7 +647,6 @@ export default {
     border: 1px solid #e9e9eb;
   }
 }
-
 .el-autocomplete {
   width: 100%;
 }

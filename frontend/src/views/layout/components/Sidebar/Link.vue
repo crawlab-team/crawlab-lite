@@ -6,6 +6,7 @@
 </template>
 
 <script>
+import * as Vue from 'vue'
 import { isExternal } from '@/utils/validate'
 
 export default {

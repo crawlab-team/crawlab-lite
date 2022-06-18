@@ -19,7 +19,7 @@
       </h3>
       <el-form-item prop="username" style="margin-bottom: 28px">
         <el-input
-          v-model="loginForm.username"
+          v-model:value="loginForm.username"
           name="username"
           type="text"
           auto-complete="on"
@@ -28,12 +28,12 @@
       </el-form-item>
       <el-form-item prop="password" style="margin-bottom: 28px">
         <el-input
-          v-model="loginForm.password"
+          v-model:value="loginForm.password"
           :type="pwdType"
           name="password"
           auto-complete="on"
           :placeholder="$t('Password')"
-          @keyup.enter.native="onKeyEnter"
+          @keyup.enter="onKeyEnter"
         />
       </el-form-item>
       <el-form-item style="border: none">
@@ -41,7 +41,7 @@
           :loading="loading"
           type="primary"
           style="width: 100%"
-          @click.native.prevent="handleLogin"
+          @click.prevent="handleLogin"
         >
           {{ $t('Sign in') }}
         </el-button>
@@ -87,6 +87,7 @@
 </template>
 
 <script>
+import * as Vue from 'vue'
 import { mapState } from 'vuex'
 import { isValidUsername } from '../../utils/validate'
 
@@ -188,7 +189,7 @@ export default {
     },
     setLang(lang) {
       window.localStorage.setItem('lang', lang)
-      this.$set(this.$i18n, 'locale', lang)
+      this.$i18n['locale'] = lang
       this.$store.commit('lang/SET_LANG', lang)
     },
   },
@@ -326,7 +327,7 @@ const initCanvas = () => {
 }
 </script>
 
-<style rel="stylesheet/scss" lang="scss">
+<style lang="scss" rel="stylesheet/scss">
 $bg: #2d3a4b;
 $light_gray: #eee;
 
@@ -373,14 +374,13 @@ $light_gray: #eee;
     left: 0;
   }
 }
-
 .message-error .el-message__content {
   width: 360px;
   line-height: 18px;
 }
 </style>
 
-<style rel="stylesheet/scss" lang="scss" scoped>
+<style lang="scss" rel="stylesheet/scss" scoped>
 $bg: white;
 $dark_gray: #889aa4;
 $light_gray: #aaa;

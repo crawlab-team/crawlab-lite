@@ -1,6 +1,6 @@
 <template>
   <el-breadcrumb class="app-breadcrumb" separator="/">
-    <transition-group name="breadcrumb">
+    <transition-group tag="span" name="breadcrumb">
       <el-breadcrumb-item v-for="(item, index) in levelList" :key="item.path">
         <span
           v-if="
@@ -18,6 +18,7 @@
 </template>
 
 <script>
+import * as Vue from 'vue'
 import pathToRegexp from 'path-to-regexp'
 
 export default {
@@ -80,13 +81,12 @@ export default {
 }
 </script>
 
-<style rel="stylesheet/scss" lang="scss" scoped>
+<style lang="scss" rel="stylesheet/scss" scoped>
 .app-breadcrumb.el-breadcrumb {
   display: inline-block;
   font-size: 14px;
   line-height: 50px;
   margin-left: 10px;
-
   .no-redirect {
     color: #97a8be;
     cursor: text;

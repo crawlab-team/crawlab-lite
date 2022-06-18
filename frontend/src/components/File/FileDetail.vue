@@ -1,10 +1,15 @@
 <template>
   <div class="file-detail">
-    <codemirror v-model="fileContent" class="file-content" :options="options" />
+    <codemirror
+      v-model:value="fileContent"
+      class="file-content"
+      :options="options"
+    />
   </div>
 </template>
 
 <script>
+import * as Vue from 'vue'
 import { mapState } from 'vuex'
 import { codemirror } from 'vue-codemirror-lite'
 
@@ -82,7 +87,6 @@ export default {
   border: 1px solid #eaecef;
   height: calc(100vh - 256px);
 }
-
 .file-content >>> .CodeMirror {
   min-height: 100%;
 }

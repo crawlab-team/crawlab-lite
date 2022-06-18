@@ -6,6 +6,7 @@
 </template>
 
 <script>
+import * as Vue from 'vue'
 export default {
   name: 'StatusTag',
   props: {
@@ -58,5 +59,3 @@ export default {
   },
 }
 </script>
-
-<style scoped></style>

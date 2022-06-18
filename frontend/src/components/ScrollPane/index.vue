@@ -3,13 +3,14 @@
     ref="scrollContainer"
     :vertical="false"
     class="scroll-container"
-    @wheel.native.prevent="handleScroll"
+    @wheel.prevent="handleScroll"
   >
     <slot />
   </el-scrollbar>
 </template>
 
 <script>
+import * as Vue from 'vue'
 const tagAndTagSpacing = 4 // tagAndTagSpacing
 
 export default {
@@ -71,13 +72,12 @@ export default {
 }
 </script>
 
-<style rel="stylesheet/scss" lang="scss" scoped>
+<style lang="scss" rel="stylesheet/scss" scoped>
 .scroll-container {
   white-space: nowrap;
   position: relative;
   overflow: hidden;
   width: 100%;
-
   /deep/ {
     .el-scrollbar__bar {
       bottom: 0px;

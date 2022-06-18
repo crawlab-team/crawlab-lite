@@ -15,6 +15,7 @@
 </template>
 
 <script>
+import * as Vue from 'vue'
 export default {
   name: 'MetricCard',
   props: {
@@ -50,6 +51,7 @@ export default {
       }
     },
   },
+  emits: ['update:value'],
 }
 </script>
 
@@ -57,22 +59,18 @@ export default {
 .metric-card {
   margin-right: 20px;
 }
-
 .metric-card:last-child {
   margin-right: 0;
 }
-
 .metric-card .icon-col i {
   margin-bottom: 15px;
   font-size: 56px;
 }
-
 .metric-card .text-col {
   padding-left: 10px;
   height: 76px;
   text-align: center;
 }
-
 .metric-card .text-col label {
   font-size: 16px;
   display: block;
@@ -80,7 +78,6 @@ export default {
   color: grey;
   font-weight: 900;
 }
-
 .metric-card .text-col .value {
   font-size: 24px;
   display: block;

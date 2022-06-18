@@ -1,14 +1,14 @@
 <template>
   <el-dialog
     class="disclaimer"
-    :visible.sync="visible"
+    v-model:visible="visible"
     width="60%"
     :title="$t('Disclaimer')"
   >
     <div class="text-container">
       <div v-html="text" />
     </div>
-    <template slot="footer">
+    <template v-slot:footer>
       <el-button size="small" type="primary" @click="visible = false">{{
         $t('Ok')
       }}</el-button>
@@ -17,6 +17,8 @@
 </template>
 
 <script>
+import { $on, $off, $once, $emit } from '../../utils/gogocodeTransfer'
+import * as Vue from 'vue'
 import { mapState } from 'vuex'
 import showdown from 'showdown'
 
@@ -43,7 +45,7 @@ This Disclaimer and privacy protection statement (hereinafter referred to as "di
 6. Crawlab respects and protects the personal privacy of all users and will not steal any information from users' computers.
 7. Copyright of the system: the crawleb development team owns the intellectual property rights, copyrights, copyrights and use rights for all developed or jointly developed products, which are protected by applicable intellectual property rights, copyrights, trademarks, service trademarks, patents or other laws.
 8. Communication: any company or individual who publishes or disseminates our software on the Internet is allowed, but the crawlab development team shall not be responsible for any legal and criminal events that may be caused by the company or individual disseminating the software.
-      `,
+    `,
       textZh: `
 本免责及隐私保护声明(下简称“免责声明”或“本声明”)适用于 Crawlab 开发组 (以下简称“开发组”)研发的系列软件(以下简称"Crawlab") 在您阅读本声明后若不同意此声明中的任何条款，或对本声明存在质疑，请立刻停止使用我们的软件。若您已经开始或正在使用 Crawlab，则表示您已阅读并同意本声明的所有条款之约定。
 
@@ -55,7 +57,7 @@ This Disclaimer and privacy protection statement (hereinafter referred to as "di
 6. Crawlab 尊重并保护所有用户的个人隐私权，不会窃取任何用户计算机中的信息。
 7. 系统的版权：Crawlab 开发组对所有开发的或合作开发的产品拥有知识产权，著作权，版权和使用权，这些产品受到适用的知识产权、版权、商标、服务商标、专利或其他法律的保护。
 8. 传播:任何公司或个人在网络上发布，传播我们软件的行为都是允许的，但因公司或个人传播软件可能造成的任何法律和刑事事件 Crawlab 开发组不负任何责任。
-      `,
+    `,
     }
   },
   computed: {
@@ -74,9 +76,10 @@ This Disclaimer and privacy protection statement (hereinafter referred to as "di
       this.visible = current
     },
     visible: function (current) {
-      this.$emit('input', current)
+      $emit(this, 'update:value', current)
     },
   },
+  emits: ['update:value'],
 }
 </script>
 
@@ -84,15 +87,12 @@ This Disclaimer and privacy protection statement (hereinafter referred to as "di
 .disclaimer >>> ol li {
   margin: 10px 0;
 }
-
 .disclaimer >>> a {
   color: #409eff;
 }
-
 .disclaimer >>> a:hover {
   text-decoration: underline;
 }
-
 .disclaimer .text-container {
   max-height: 480px;
   overflow-y: scroll;

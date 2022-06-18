@@ -1,14 +1,15 @@
 <template>
   <section class="app-main">
-    <transition name="fade-transform" mode="out-in">
-      <!-- or name="fade" -->
-      <router-view :key="key" />
-      <!--<router-view/>-->
-    </transition>
+    <router-view v-slot="{ Component }" :key="key">
+      <transition name="fade-transform" mode="out-in">
+        <component :is="Component"></component>
+      </transition>
+    </router-view>
   </section>
 </template>
 
 <script>
+import * as Vue from 'vue'
 export default {
   name: 'AppMain',
   computed: {
@@ -23,7 +24,6 @@ export default {
 
 <style scoped>
 .app-main {
-  /*50 = navbar  */
   min-height: calc(100vh - 100px);
   position: relative;
   overflow: hidden;

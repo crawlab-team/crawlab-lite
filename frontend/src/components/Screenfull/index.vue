@@ -8,6 +8,7 @@
 </template>
 
 <script>
+import * as Vue from 'vue'
 import screenfull from 'screenfull'
 
 export default {

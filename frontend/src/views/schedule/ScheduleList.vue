@@ -3,7 +3,7 @@
     <!--add schedule dialog-->
     <el-dialog
       :title="$t(dialogTitle)"
-      :visible.sync="dialogVisible"
+      v-model:visible="dialogVisible"
       width="640px"
       :before-close="onDialogClose"
     >
@@ -18,7 +18,7 @@
         <el-form-item :label="$t('Spider')" prop="spider_id" required>
           <el-select
             id="spider-id"
-            v-model="scheduleForm.spider_id"
+            v-model:value="scheduleForm.spider_id"
             :placeholder="$t('Spider')"
             :loading="loadingSpiders"
             @focus="onSelectSpider"
@@ -40,7 +40,7 @@
           required=""
         >
           <el-select
-            v-model="scheduleForm.spider_version_id"
+            v-model:value="scheduleForm.spider_version_id"
             :loading="loadingVersions"
             :placeholder="$t('Latest Version')"
             @focus="onSelectSpiderVersion"
@@ -61,7 +61,7 @@
           <el-input
             id="cron"
             ref="cron"
-            v-model="scheduleForm.cron"
+            v-model:value="scheduleForm.cron"
             class="cron"
             :placeholder="`${$t(
               '[second] [minute] [hour] [day] [month] [day of week]'
@@ -81,38 +81,42 @@
         <el-form-item :label="$t('Execute Command')" prop="cmd" required>
           <el-input
             id="cmd"
-            v-model="scheduleForm.cmd"
+            v-model:value="scheduleForm.cmd"
             :placeholder="$t('Execute Command')"
           />
         </el-form-item>
         <el-form-item :label="$t('Schedule Description')" prop="description">
           <el-input
             id="schedule-description"
-            v-model="scheduleForm.description"
+            v-model:value="scheduleForm.description"
             type="textarea"
             :placeholder="$t('Schedule Description')"
           />
         </el-form-item>
       </el-form>
       <!--取消、保存-->
-      <span slot="footer" class="dialog-footer">
-        <el-button size="small" @click="onCancel">{{ $t('Cancel') }}</el-button>
-        <el-button
-          id="btn-submit"
-          size="small"
-          type="primary"
-          :disabled="submitting"
-          @click="onAddSubmit"
-          >{{ $t('Submit') }}</el-button
-        >
-      </span>
+      <template v-slot:footer>
+        <span class="dialog-footer">
+          <el-button size="small" @click="onCancel">{{
+            $t('Cancel')
+          }}</el-button>
+          <el-button
+            id="btn-submit"
+            size="small"
+            type="primary"
+            :disabled="submitting"
+            @click="onAddSubmit"
+            >{{ $t('Submit') }}</el-button
+          >
+        </span>
+      </template>
     </el-dialog>
     <!--./add schedule dialog-->
 
     <!--view tasks dialog-->
     <el-dialog
       :title="$t('Tasks')"
-      :visible.sync="tasksDialogVisible"
+      v-model:visible="tasksDialogVisible"
       width="calc(100% - 240px)"
       :before-close="onCloseTasksDialog"
     >
@@ -121,21 +125,23 @@
     <!--./view tasks dialog-->
 
     <!--cron generation dialog-->
-    <el-dialog title="生成 Cron" :visible.sync="cronDialogVisible">
+    <el-dialog title="生成 Cron" v-model:visible="cronDialogVisible">
       <vue-cron-linux
         ref="vue-cron-linux"
         :data="scheduleForm.cron"
         :i18n="lang"
         @submit="onCronChange"
       />
-      <span slot="footer" class="dialog-footer">
-        <el-button size="small" @click="cronDialogVisible = false">{{
-          $t('Cancel')
-        }}</el-button>
-        <el-button size="small" type="primary" @click="onCronDialogSubmit">{{
-          $t('Confirm')
-        }}</el-button>
-      </span>
+      <template v-slot:footer>
+        <span class="dialog-footer">
+          <el-button size="small" @click="cronDialogVisible = false">{{
+            $t('Cancel')
+          }}</el-button>
+          <el-button size="small" type="primary" @click="onCronDialogSubmit">{{
+            $t('Confirm')
+          }}</el-button>
+        </span>
+      </template>
     </el-dialog>
     <!--./cron generation dialog-->
 
@@ -175,14 +181,13 @@
         <template v-for="col in columns">
           <el-table-column
             v-if="col.name === 'status'"
-            :key="col.name"
             :property="col.name"
             :label="$t(col.label)"
             :sortable="col.sortable"
             :align="col.align"
             :width="col.width"
           >
-            <template slot-scope="scope">
+            <template v-slot="scope">
               <el-tooltip
                 v-if="scope.row[col.name] === 'error'"
                 :content="$t(scope.row['message'])"
@@ -199,13 +204,12 @@
           </el-table-column>
           <el-table-column
             v-else-if="col.name === 'enable'"
-            :key="col.name"
             :label="$t(col.label)"
             :width="col.width"
           >
-            <template slot-scope="scope">
+            <template v-slot="scope">
               <el-switch
-                v-model="scope.row.enabled"
+                v-model:value="scope.row.enabled"
                 active-color="#13ce66"
                 inactive-color="#ff4949"
                 @change="onEnabledChange(scope.row)"
@@ -214,14 +218,13 @@
           </el-table-column>
           <el-table-column
             v-else
-            :key="col.name"
             :property="col.name"
             :label="$t(col.label)"
             :sortable="col.sortable"
             :align="col.align"
             :width="col.width"
           >
-            <template slot-scope="scope">
+            <template v-slot="scope">
               {{ scope.row[col.name] }}
             </template>
           </el-table-column>
@@ -233,7 +236,7 @@
           width="170"
           fixed="right"
         >
-          <template slot-scope="scope">
+          <template v-slot="scope">
             <!--edit-->
             <el-tooltip :content="$t('Edit')" placement="top">
               <el-button
@@ -282,9 +285,9 @@
       </el-table>
       <div class="pagination">
         <el-pagination
-          :current-page.sync="pagination.page_num"
+          v-model:current-page="pagination.page_num"
           :page-sizes="[10, 20, 50, 100]"
-          :page-size.sync="pagination.page_size"
+          v-model:page-size="pagination.page_size"
           layout="sizes, prev, pager, next"
           :total="scheduleTotal"
           @current-change="getScheduleList"
@@ -297,6 +300,7 @@
 </template>
 
 <script>
+import * as Vue from 'vue'
 import VueCronLinux from '../../components/Cron'
 import { mapState } from 'vuex'
 import ScheduleTaskList from '../../components/Schedule/ScheduleTaskList'
@@ -381,9 +385,9 @@ export default {
         if (res) {
           const form = Object.assign({}, this.scheduleForm)
           if (form.cron.search(/^\S+?\s\S+?\s\S+?\s\S+?\s\S+?$/) !== -1) {
-            this.$set(form, 'cron', '0 ' + form.cron)
+            form['cron'] = '0 ' + form.cron
           }
-          this.$set(form, 'enabled', form.enabled ? 1 : 0)
+          form['enabled'] = form.enabled ? 1 : 0
           if (this.isEdit) {
             this.$store
               .dispatch('schedule/editSchedule', form)
@@ -496,7 +500,7 @@ export default {
       this.$st.sendEv('定时任务', '启用/禁用')
     },
     onCronChange(value) {
-      this.$set(this.scheduleForm, 'cron', value)
+      this.scheduleForm['cron'] = value
       this.$st.sendEv('定时任务', '配置Cron')
     },
     onCronDialogSubmit() {
@@ -506,11 +510,8 @@ export default {
       }
     },
     onSpiderChange() {
-      this.$set(
-        this.scheduleForm,
-        'spider_version_id',
+      this.scheduleForm['spider_version_id'] =
         '00000000-0000-0000-0000-000000000000'
-      )
     },
     onShowCronDialog() {
       this.cronDialogVisible = true
@@ -544,48 +545,39 @@ export default {
 .filter .right {
   text-align: right;
 }
-
 .table {
   margin-top: 8px;
   border-radius: 5px;
 }
-
 .table .el-button {
   width: 28px;
   height: 28px;
   padding: 0;
 }
-
 .status-tag {
   cursor: pointer;
 }
-
 .schedule-list >>> .param-input {
   width: calc(100% - 56px);
 }
-
 .schedule-list >>> .param-input .el-input__inner {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
   border-right: none;
 }
-
 .schedule-list >>> .param-btn {
   width: 56px;
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
 }
-
 .cron {
   width: calc(100% - 100px);
 }
-
 .cron >>> .el-input__inner {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
   border-right: none;
 }
-
 .cron-edit {
   width: 100px;
   border-top-left-radius: 0;

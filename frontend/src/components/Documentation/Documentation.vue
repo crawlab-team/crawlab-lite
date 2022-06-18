@@ -1,32 +1,34 @@
 <template>
   <el-tree ref="documentation-tree" :data="docData" node-key="fullUrl">
-    <span
-      slot-scope="{ node, data }"
-      class="custom-tree-node"
-      :class="[data.active ? 'active' : '', `level-${data.level}`]"
-    >
-      <template
-        v-if="data.level === 1 && data.children && data.children.length"
+    <template v-slot="{ node, data }">
+      <span
+        class="custom-tree-node"
+        :class="[data.active ? 'active' : '', `level-${data.level}`]"
       >
-        <span>{{ node.label }}</span>
-      </template>
-      <template v-else>
-        <span>
-          <a
-            :href="data.fullUrl"
-            target="_blank"
-            style="display: block"
-            @click="onClickDocumentationLink"
-          >
-            {{ node.label }}
-          </a>
-        </span>
-      </template>
-    </span>
+        <template
+          v-if="data.level === 1 && data.children && data.children.length"
+        >
+          <span>{{ node.label }}</span>
+        </template>
+        <template v-else>
+          <span>
+            <a
+              :href="data.fullUrl"
+              target="_blank"
+              style="display: block"
+              @click="onClickDocumentationLink"
+            >
+              {{ node.label }}
+            </a>
+          </span>
+        </template>
+      </span>
+    </template>
   </el-tree>
 </template>
 
 <script>
+import * as Vue from 'vue'
 import { mapState } from 'vuex'
 
 export default {
@@ -79,7 +81,7 @@ export default {
           const isActive = this.isActiveNode(d)
           const node = this.$refs['documentation-tree'].getNode(d)
           node.expanded = isActive
-          this.$set(d, 'active', isActive)
+          d['active'] = isActive
 
           // child nodes
           d.children.forEach((c) => {
@@ -88,7 +90,7 @@ export default {
             if (!node.parent.expanded && isActive) {
               node.parent.expanded = true
             }
-            this.$set(c, 'active', isActive)
+            c['active'] = isActive
           })
         })
       }, 100)
@@ -103,12 +105,11 @@ export default {
   },
 }
 </script>
+
 <style scoped>
 .el-tree >>> .custom-tree-node.active {
   color: #409eff;
-  /*text-decoration: underline;*/
 }
-
 .el-tree >>> .custom-tree-node.level-1 {
   font-weight: bolder;
 }

@@ -42,6 +42,7 @@
 </template>
 
 <script>
+import * as Vue from 'vue'
 export default {
   name: 'Page404',
   computed: {
@@ -57,7 +58,7 @@ export default {
 }
 </script>
 
-<style rel="stylesheet/scss" lang="scss" scoped>
+<style lang="scss" rel="stylesheet/scss" scoped>
 .wscn-http404-container {
   transform: translate(-50%, -50%);
   position: absolute;

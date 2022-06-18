@@ -27,7 +27,7 @@
       <!--      </el-tooltip>-->
       <el-drawer
         :title="$t('Related Documentation')"
-        :visible.sync="isShowDocumentation"
+        v-model:visible="isShowDocumentation"
         :before-close="onCloseDocumentation"
         size="300px"
       >
@@ -39,6 +39,7 @@
 </template>
 
 <script>
+import * as Vue from 'vue'
 import { AppMain, Navbar, Sidebar, TagsView } from './components'
 import ResizeMixin from './mixin/ResizeHandler'
 import Documentation from '../../components/Documentation/Documentation'
@@ -93,22 +94,19 @@ export default {
 }
 </script>
 
-<style rel="stylesheet/scss" lang="scss" scoped>
+<style lang="scss" rel="stylesheet/scss" scoped>
 @import '../../../src/styles/mixin.scss';
-
 .app-wrapper {
   @include clearfix;
   position: relative;
   height: 100%;
   width: 100%;
   background: white;
-
   &.mobile.openSidebar {
     position: fixed;
     top: 0;
   }
 }
-
 .drawer-bg {
   background: #000;
   opacity: 0.3;
@@ -118,7 +116,6 @@ export default {
   position: absolute;
   z-index: 999;
 }
-
 .documentation {
   z-index: 9999;
   position: fixed;

@@ -1,7 +1,11 @@
 <template>
   <div class="app-container">
     <!--tabs-->
-    <el-tabs v-model="activeTabName" type="border-card" @tab-click="onTabClick">
+    <el-tabs
+      v-model:value="activeTabName"
+      type="border-card"
+      @tab-click="onTabClick"
+    >
       <!--      <el-tab-pane :label="$t('Overview')" name="overview">-->
       <!--        <task-overview @click-log="activeTabName = 'log'" />-->
       <!--      </el-tab-pane>-->
@@ -28,6 +32,7 @@
 </template>
 
 <script>
+import * as Vue from 'vue'
 import { mapState, mapGetters } from 'vuex'
 import LogView from '../../components/ScrollView/LogView'
 
@@ -132,7 +137,7 @@ export default {
     }, 5000)
   },
   mounted() {},
-  destroyed() {
+  unmounted() {
     clearInterval(this.handle)
   },
   methods: {
@@ -175,15 +180,12 @@ export default {
   align-items: center;
   position: absolute;
   right: 20px;
-  /*float: right;*/
   z-index: 999;
   margin-top: -7px;
 }
-
 .selector .el-select {
   padding-left: 10px;
 }
-
 .button-group {
   margin-bottom: 10px;
   text-align: right;

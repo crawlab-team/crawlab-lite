@@ -7,7 +7,7 @@
           <el-form :model="filter" label-position="right" inline>
             <el-form-item prop="spider_id" :label="$t('Spider')">
               <el-select
-                v-model="filter.spider_id"
+                v-model:value="filter.spider_id"
                 size="small"
                 :placeholder="$t('All')"
                 :disabled="isFilterSpiderDisabled"
@@ -25,7 +25,7 @@
             </el-form-item>
             <el-form-item prop="status" :label="$t('Status')">
               <el-select
-                v-model="filter.status"
+                v-model:value="filter.status"
                 size="small"
                 :placeholder="$t('Status')"
                 @change="onFilterChange"
@@ -75,73 +75,67 @@
         <template v-for="col in columns">
           <el-table-column
             v-if="col.name === 'spider_name'"
-            :key="col.name"
             :label="$t(col.label)"
             :sortable="col.sortable"
             :align="col.align"
           >
-            <template slot-scope="scope">
+            <template v-slot="scope">
               <!--<a href="javascript:" class="a-tag" @click="onClickSpider(scope.row)">{{ scope.row[col.name] }}</a>-->
               {{ scope.row[col.name] }}
             </template>
           </el-table-column>
           <el-table-column
             v-else-if="col.name.match(/_ts$/)"
-            :key="col.name"
             :label="$t(col.label)"
             :sortable="col.sortable"
             :align="col.align"
             :width="col.width"
           >
-            <template slot-scope="scope">
+            <template v-slot="scope">
               {{ getTime(scope.row[col.name]) }}
             </template>
           </el-table-column>
           <el-table-column
             v-else-if="col.name === 'wait_duration'"
-            :key="col.name"
             :label="$t(col.label)"
             :sortable="col.sortable"
             :align="col.align"
             :width="col.width"
           >
-            <template slot-scope="scope">
+            <template v-slot="scope">
               {{ getWaitDuration(scope.row) }}
             </template>
           </el-table-column>
           <el-table-column
             v-else-if="col.name === 'runtime_duration'"
-            :key="col.name"
             :label="$t(col.label)"
             :sortable="col.sortable"
             :align="col.align"
             :width="col.width"
           >
-            <template slot-scope="scope">
+            <template v-slot="scope">
               {{ getRuntimeDuration(scope.row) }}
             </template>
           </el-table-column>
           <el-table-column
             v-else-if="col.name === 'total_duration'"
-            :key="col.name"
             :label="$t(col.label)"
             :sortable="col.sortable"
             :align="col.align"
             :width="col.width"
           >
-            <template slot-scope="scope">
+            <template v-slot="scope">
               {{ getTotalDuration(scope.row) }}
             </template>
           </el-table-column>
           <el-table-column
             v-else-if="col.name === 'status'"
-            :key="col.name"
             :label="$t(col.label)"
             :sortable="col.sortable"
             :align="col.align"
             :width="col.width"
           >
-            <template slot-scope="scope">
+            <template v-slot="scope">
               <template v-if="scope.row[col.name] === 'ERROR'">
                 <el-tooltip :content="scope.row.error" placement="top">
                   <status-tag :status="scope.row[col.name]" />
@@ -152,7 +146,6 @@
           </el-table-column>
           <el-table-column
             v-else
-            :key="col.name"
             :property="col.name"
             :label="$t(col.label)"
             :sortable="col.sortable"
@@ -166,7 +159,7 @@
           fixed="right"
           width="130px"
         >
-          <template slot-scope="scope">
+          <template v-slot="scope">
             <el-tooltip :content="$t('View')" placement="top">
               <el-button
                 type="primary"
@@ -208,9 +201,9 @@
       </el-table>
       <div class="pagination">
         <el-pagination
-          :current-page.sync="pagination.page_num"
+          v-model:current-page="pagination.page_num"
           :page-sizes="[10, 20, 50, 100]"
-          :page-size.sync="pagination.page_size"
+          v-model:page-size="pagination.page_size"
           layout="sizes, prev, pager, next"
           :total="taskTotal"
           @current-change="getTaskList"
@@ -223,6 +216,7 @@
 </template>
 
 <script>
+import * as Vue from 'vue'
 import { mapState } from 'vuex'
 import dayjs from 'dayjs'
 import StatusTag from '../../components/Status/StatusTag'
@@ -300,7 +294,7 @@ export default {
       this.getTaskList()
     }, 5000)
   },
-  destroyed() {
+  unmounted() {
     clearInterval(this.refreshHandle)
   },
   methods: {
@@ -446,17 +440,15 @@ export default {
 }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .el-dialog {
   .el-select {
     width: 100%;
   }
 }
-
 .filter {
   display: flex;
   justify-content: space-between;
-
   .left {
     .filter-select {
       width: 180px;
@@ -471,24 +463,19 @@ export default {
   .add {
   }
 }
-
 .table {
   margin-top: 8px;
   border-radius: 5px;
-
   .el-button {
     padding: 7px;
   }
 }
-
 .delete-confirm {
   background-color: red;
 }
-
 .el-table .a-tag {
   text-decoration: underline;
 }
-
 .pagination {
   margin-top: 10px;
   text-align: right;

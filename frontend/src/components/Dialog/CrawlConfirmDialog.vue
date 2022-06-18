@@ -1,6 +1,6 @@
 <template>
   <div class="crawl-confirm-dialog-wrapper">
-    <disclaimer-dialog v-model="disclaimerVisible" />
+    <disclaimer-dialog v-model:value="disclaimerVisible" />
     <el-dialog
       :title="$t('Notification')"
       :visible="visible"
@@ -22,7 +22,10 @@
           prop="cmd"
           required
         >
-          <el-input v-model="form.cmd" :placeholder="$t('Execute Command')" />
+          <el-input
+            v-model:value="form.cmd"
+            :placeholder="$t('Execute Command')"
+          />
         </el-form-item>
         <el-form-item
           :label="$t('Version')"
@@ -31,7 +34,7 @@
           required
         >
           <el-select
-            v-model="form.spider_version_id"
+            v-model:value="form.spider_version_id"
             :loading="loadingVersions"
             :placeholder="$t('Latest Version')"
             @focus="onSelectSpiderVersion"
@@ -50,7 +53,7 @@
         </el-form-item>
       </el-form>
       <div>
-        <el-checkbox v-model="isAllowDisclaimer" />
+        <el-checkbox v-model:value="isAllowDisclaimer" />
         <span v-if="lang === 'zh'" style="margin-left: 5px">
           我已阅读并同意
           <a href="javascript:" @click="onClickDisclaimer"> 《免责声明》 </a>
@@ -65,7 +68,7 @@
       <!--            <el-checkbox v-model="isRedirect"/>-->
       <!--            <span style="margin-left: 5px">{{$t('Redirect to task detail')}}</span>-->
       <!--          </div>-->
-      <template slot="footer">
+      <template v-slot:footer>
         <el-button type="plain" size="small" @click="$emit('close')">{{
           $t('Cancel')
         }}</el-button>
@@ -83,6 +86,8 @@
 </template>
 
 <script>
+import { $on, $off, $once, $emit } from '../../utils/gogocodeTransfer'
+import * as Vue from 'vue'
 import { mapState } from 'vuex'
 import dayjs from 'dayjs'
 import DisclaimerDialog from '@/components/Disclaimer'
@@ -122,7 +127,7 @@ export default {
   },
   watch: {
     visible: function (current) {
-      this.$emit('input', current)
+      $emit(this, 'update:value', current)
       if (!this.visible) {
         this.$nextTick(() => {
           this.form = this.defaultForm()
@@ -146,7 +151,7 @@ export default {
       this.loadingVersions = false
     },
     beforeClose() {
-      this.$emit('close')
+      $emit(this, 'close')
     },
     async onConfirm() {
       this.$refs['form'].validate(async (valid) => {
@@ -161,7 +166,7 @@ export default {
         // 消息提示
         this.$message.success(this.$t('A task has been scheduled successfully'))
 
-        this.$emit('close')
+        $emit(this, 'close')
 
         // 是否重定向
         if (this.isRedirect) {
@@ -171,7 +176,7 @@ export default {
           this.$st.sendEv('爬虫确认', '跳转到任务详情')
         }
 
-        this.$emit('confirm')
+        $emit(this, 'confirm')
       })
     },
     onClickDisclaimer() {
@@ -181,6 +186,7 @@ export default {
       return dayjs(str)
     },
   },
+  emits: ['close', 'update:value', 'confirm'],
 }
 </script>
 
@@ -189,25 +195,20 @@ export default {
   padding-left: 3rem;
   padding-right: 3rem;
 }
-
 .crawl-confirm-dialog >>> .el-form .el-form-item {
   margin-bottom: 20px;
 }
-
 .crawl-confirm-dialog >>> .checkbox-wrapper a {
   color: #409eff;
 }
-
 .crawl-confirm-dialog >>> .param-input {
   width: calc(100% - 56px);
 }
-
 .crawl-confirm-dialog >>> .param-input .el-input__inner {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
   border-right: none;
 }
-
 .crawl-confirm-dialog >>> .param-btn {
   width: 56px;
   border-top-left-radius: 0;

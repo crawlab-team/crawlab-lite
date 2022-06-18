@@ -5,6 +5,7 @@
 </template>
 
 <script>
+import * as Vue from 'vue'
 export default {
   name: 'App',
   data() {
@@ -53,38 +54,30 @@ export default {
   line-height: 18px;
   font-size: 12px;
 }
-
 .el-table .el-table__header th,
 .el-table .el-table__body td {
   padding: 3px 0;
 }
-
 .el-table .el-table__header th .cell,
 .el-table .el-table__body td .cell {
   word-break: break-word;
 }
-
 .el-select {
   width: 100%;
 }
-
 .el-table .el-tag {
   font-size: 12px;
   height: 24px;
   line-height: 24px;
   font-weight: 900;
-  /*padding: 0;*/
 }
-
 .pagination {
   margin-top: 10px;
   text-align: right;
 }
-
 .el-form .el-form-item {
   margin-bottom: 10px;
 }
-
 .message-btn {
   margin: 0 5px;
   padding: 5px 10px;
@@ -95,18 +88,15 @@ export default {
   cursor: pointer;
   border: 1px solid #909399;
 }
-
 .message-btn:hover {
   opacity: 0.8;
   text-decoration: underline;
 }
-
 .message-btn.success {
   background: #67c23a;
   border-color: #67c23a;
   color: #fff;
 }
-
 .message-btn.danger {
   background: #f56c6c;
   border-color: #f56c6c;

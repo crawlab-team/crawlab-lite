@@ -52,6 +52,7 @@
 </template>
 
 <script>
+import * as Vue from 'vue'
 import { mapState } from 'vuex'
 import MetricCard from './MetricCard'
 import echarts from 'echarts'
@@ -167,24 +168,19 @@ export default {
 .metric-list {
   display: flex;
 }
-
 .metric-list .metric-card {
   flex-basis: 25%;
 }
-
 .chart-wrapper {
   margin-top: 20px;
 }
-
 .chart {
   width: 100%;
   height: 240px;
 }
-
 .table {
   height: 240px;
 }
-
 h4 {
   display: inline-block;
   margin: 0;

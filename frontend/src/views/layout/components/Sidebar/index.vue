@@ -28,6 +28,7 @@
 </template>
 
 <script>
+import * as Vue from 'vue'
 import { mapGetters, mapState } from 'vuex'
 import variables from '@/styles/variables.scss'
 import SidebarItem from './SidebarItem'
@@ -70,7 +71,6 @@ export default {
 .sidebar-container .sidebar-logo {
   height: 52px;
   display: flex;
-  /*justify-content: center;*/
   align-items: center;
   padding-left: 20px;
   color: #fff;

@@ -1,4 +1,5 @@
 <script>
+import * as Vue from 'vue'
 import ScheduleList from '../schedule/ScheduleList'
 
 export default {

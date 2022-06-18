@@ -18,6 +18,7 @@
 </template>
 
 <script>
+import * as Vue from 'vue'
 export default {
   name: 'Sticky',
   props: {
@@ -51,7 +52,7 @@ export default {
   activated() {
     this.handleScroll()
   },
-  destroyed() {
+  unmounted() {
     window.removeEventListener('scroll', this.handleScroll)
     window.removeEventListener('resize', this.handleReize)
   },

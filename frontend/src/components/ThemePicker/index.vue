@@ -1,12 +1,13 @@
 <template>
   <el-color-picker
-    v-model="theme"
+    v-model:value="theme"
     class="theme-picker"
     popper-class="theme-picker-dropdown"
   />
 </template>
 
 <script>
+import * as Vue from 'vue'
 const version = require('element-ui/package.json').version // element-ui version from node_modules
 const ORIGINAL_THEME = '#409EFF' // default color
 
@@ -154,7 +155,6 @@ export default {
   width: 26px !important;
   padding: 2px;
 }
-
 .theme-picker-dropdown .el-color-dropdown__link-btn {
   display: none;
 }

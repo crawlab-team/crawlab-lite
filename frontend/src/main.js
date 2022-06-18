@@ -1,4 +1,4 @@
-import Vue from 'vue'
+import * as Vue from 'vue'
 
 import 'normalize.css/normalize.css' // A modern alternative to CSS resets
 import ElementUI from 'element-ui'
@@ -32,20 +32,18 @@ import i18n from './i18n'
 import utils from './utils'
 
 // code mirror
-Vue.use(codemirror)
+window.$vueApp.use(codemirror)
 
 // element-ui
-Vue.use(ElementUI, { locale })
+window.$vueApp.use(ElementUI, { locale })
 
 // font-awesome
 library.add(fab)
 library.add(far)
 library.add(fas)
-Vue.component('FontAwesomeIcon', FontAwesomeIcon)
-Vue.component('FontAwesomeLayers', FontAwesomeLayers)
-Vue.component('FontAwesomeLayersText', FontAwesomeLayersText)
-
-Vue.config.productionTip = false
+window.$vueApp.component('FontAwesomeIcon', FontAwesomeIcon)
+window.$vueApp.component('FontAwesomeLayers', FontAwesomeLayers)
+window.$vueApp.component('FontAwesomeLayersText', FontAwesomeLayersText)
 
 // 百度统计
 if (localStorage.getItem('useStats') !== '0') {
@@ -59,19 +57,19 @@ if (localStorage.getItem('useStats') !== '0') {
 }
 
 // inject request api
-Vue.prototype.$request = request
+window.$vueApp.config.globalProperties.$request = request
 
 // inject utils
-Vue.prototype.$utils = utils
+window.$vueApp.config.globalProperties.$utils = utils
 
 // inject stats
-Vue.prototype.$st = utils.stats
+window.$vueApp.config.globalProperties.$st = utils.stats
 
-const app = new Vue({
-  el: '#app',
-  i18n,
-  router,
-  store,
-  render: (h) => h(App),
-})
+const app = (window.$vueApp = Vue.createApp(App))
+window.$vueApp.config.globalProperties.routerAppend = (path, pathToAppend) => {
+  return path + (path.endsWith('/') ? '' : '/') + pathToAppend
+}
+window.$vueApp.use(store)
+window.$vueApp.use(router)
+window.$vueApp.mount('#app')
 export default app

@@ -1,15 +1,15 @@
 <template>
   <div>
-    <disclaimer-dialog v-model="disclaimerVisible" />
+    <disclaimer-dialog v-model:value="disclaimerVisible" />
     <div class="navbar">
       <el-dialog
-        :visible.sync="isLatestReleaseNoteVisible"
+        v-model:visible="isLatestReleaseNoteVisible"
         :title="$t('Release') + ` ${this.latestRelease.name}`"
       >
-        <el-tabs v-model="activeTabName">
+        <el-tabs v-model:value="activeTabName">
           <el-tab-pane :label="$t('Release Note')" name="release-note">
             <div class="content markdown-body" v-html="latestReleaseNoteHtml" />
-            <template slot="footer">
+            <template v-slot:footer>
               <el-button
                 type="primary"
                 size="small"
@@ -22,7 +22,7 @@
             <div class="content markdown-body" v-html="howToUpgradeHtml" />
           </el-tab-pane>
         </el-tabs>
-        <template slot="footer">
+        <template v-slot:footer>
           <el-button
             type="primary"
             size="small"
@@ -43,27 +43,31 @@
           {{ username }}
           <i class="el-icon-arrow-down el-icon--right" />
         </span>
-        <el-dropdown-menu slot="dropdown" class="user-dropdown">
-          <el-dropdown-item>
-            <span style="display: block" @click="logout">{{
-              $t('Logout')
-            }}</span>
-          </el-dropdown-item>
-        </el-dropdown-menu>
+        <template v-slot:dropdown>
+          <el-dropdown-menu class="user-dropdown">
+            <el-dropdown-item>
+              <span style="display: block" @click="logout">{{
+                $t('Logout')
+              }}</span>
+            </el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
       </el-dropdown>
       <el-dropdown class="lang-list right" trigger="click">
         <span class="el-dropdown-link">
           {{ $t($store.getters['lang/lang']) }}
           <i class="el-icon-arrow-down el-icon--right" />
         </span>
-        <el-dropdown-menu slot="dropdown">
-          <el-dropdown-item @click.native="setLang('zh')">
-            <span>中文</span>
-          </el-dropdown-item>
-          <el-dropdown-item @click.native="setLang('en')">
-            <span>English</span>
-          </el-dropdown-item>
-        </el-dropdown-menu>
+        <template v-slot:dropdown>
+          <el-dropdown-menu>
+            <el-dropdown-item @click="setLang('zh')">
+              <span>中文</span>
+            </el-dropdown-item>
+            <el-dropdown-item @click="setLang('en')">
+              <span>English</span>
+            </el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
       </el-dropdown>
       <!--    <div class="documentation right">-->
       <!--      <a href="http://docs.crawlab.cn" target="_blank">-->
@@ -93,9 +97,11 @@
             src="http://static-docs.crawlab.cn/wechat.jpg"
           />
         </div>
-        <div slot="reference">
-          <i class="fa fa-wechat" />
-        </div>
+        <template v-slot:reference>
+          <div>
+            <i class="fa fa-wechat" />
+          </div>
+        </template>
       </el-popover>
       <div class="github right">
         <!-- Place this tag where you want the button to render. -->
@@ -115,6 +121,7 @@
 </template>
 
 <script>
+import * as Vue from 'vue'
 import { mapGetters, mapState } from 'vuex'
 import Breadcrumb from '@/components/Breadcrumb'
 import Hamburger from '@/components/Hamburger'
@@ -243,12 +250,11 @@ docker-compose up -d
 }
 </script>
 
-<style rel="stylesheet/scss" lang="scss" scoped>
+<style lang="scss" rel="stylesheet/scss" scoped>
 .navbar {
   height: 50px;
   line-height: 50px;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.12), 0 0 3px 0 rgba(0, 0, 0, 0.04);
-
   .hamburger-container {
     line-height: 58px;
     height: 50px;
@@ -322,11 +328,13 @@ docker-compose up -d
   }
 }
 </style>
+
 <style scoped>
 .navbar >>> .el-dialog__body {
   padding-top: 0;
 }
 </style>
+
 <style>
 .wechat-img {
   width: 240px;

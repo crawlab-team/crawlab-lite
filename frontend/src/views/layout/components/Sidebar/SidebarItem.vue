@@ -22,7 +22,7 @@
     </template>
 
     <el-submenu v-else :index="resolvePath(item.path)">
-      <template slot="title">
+      <template v-slot:title>
         <item
           v-if="item.meta"
           :icon="item.meta.icon"
@@ -33,13 +33,12 @@
       <template v-for="child in item.children">
         <sidebar-item
           v-if="!child.hidden && child.children && child.children.length > 0"
-          :key="child.path"
           :is-nest="true"
           :item="child"
           :base-path="resolvePath(child.path)"
           class="nest-menu"
         />
-        <app-link v-else :key="child.name" :to="resolvePath(child.path)">
+        <app-link v-else :to="resolvePath(child.path)">
           <el-menu-item :index="resolvePath(child.path)">
             <item
               v-if="child.meta"
@@ -54,6 +53,7 @@
 </template>
 
 <script>
+import * as Vue from 'vue'
 import path from 'path'
 import { isExternal } from '@/utils/validate'
 import Item from './Item'

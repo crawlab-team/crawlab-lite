@@ -15,6 +15,8 @@
 </template>
 
 <script>
+import { $on, $off, $once, $emit } from '../../utils/gogocodeTransfer'
+import * as Vue from 'vue'
 import editorImage from './components/editorImage'
 import plugins from './plugins'
 import toolbar from './toolbar'
@@ -93,7 +95,7 @@ export default {
   deactivated() {
     this.destroyTinymce()
   },
-  destroyed() {
+  unmounted() {
     this.destroyTinymce()
   },
   methods: {
@@ -125,7 +127,7 @@ export default {
           _this.hasInit = true
           editor.on('NodeChange Change KeyUp SetContent', () => {
             this.hasChange = true
-            this.$emit('input', editor.getContent())
+            $emit(this, 'update:value', editor.getContent())
           })
         },
         setup(editor) {
@@ -192,6 +194,7 @@ export default {
       })
     },
   },
+  emits: ['update:value'],
 }
 </script>
 
@@ -211,7 +214,6 @@ export default {
   position: absolute;
   right: 4px;
   top: 4px;
-  /*z-index: 2005;*/
 }
 .fullscreen .editor-custom-btn-container {
   z-index: 10000;

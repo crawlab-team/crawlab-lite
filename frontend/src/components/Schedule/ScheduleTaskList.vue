@@ -1,4 +1,5 @@
 <script>
+import * as Vue from 'vue'
 import { mapState } from 'vuex'
 import TaskList from '@/views/task/TaskList'
 

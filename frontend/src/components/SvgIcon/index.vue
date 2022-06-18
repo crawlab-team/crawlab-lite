@@ -1,10 +1,11 @@
 <template>
-  <svg :class="svgClass" aria-hidden="true" v-on="$listeners">
+  <svg v-bind="$attrs" :class="svgClass" aria-hidden="true">
     <use :xlink:href="iconName" />
   </svg>
 </template>
 
 <script>
+import * as Vue from 'vue'
 export default {
   name: 'SvgIcon',
   props: {

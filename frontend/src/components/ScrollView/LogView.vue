@@ -3,7 +3,7 @@
     <div class="filter-wrapper">
       <div class="left">
         <el-switch
-          v-model="isLogAutoScroll"
+          v-model:value="isLogAutoScroll"
           :inactive-text="$t('Auto-Scroll')"
           style="margin-right: 10px"
         />
@@ -28,9 +28,9 @@
         <el-pagination
           size="small"
           :total="taskLogTotal"
-          :current-page.sync="taskLogPage"
+          v-model:current-page="taskLogPage"
           :page-sizes="[100, 500, 1000, 5000]"
-          :page-size.sync="taskLogPageSize"
+          v-model:page-size="taskLogPageSize"
           :page-count="3"
           layout="sizes, prev, pager, next"
         />
@@ -86,6 +86,8 @@
 </template>
 
 <script>
+import { $on, $off, $once, $emit } from '../../utils/gogocodeTransfer'
+import * as Vue from 'vue'
 import { mapState, mapGetters } from 'vuex'
 import VirtualList from 'vue-virtual-scroll-list'
 import Convert from 'ansi-to-html'
@@ -206,11 +208,11 @@ export default {
   },
   watch: {
     taskLogPage() {
-      this.$emit('search')
+      $emit(this, 'search')
       this.$st.sendEv('任务详情', '日志', '改变页数')
     },
     taskLogPageSize() {
-      this.$emit('search')
+      $emit(this, 'search')
       this.$st.sendEv('任务详情', '日志', '改变日志每页条数')
     },
     isLogAutoScroll() {
@@ -237,7 +239,7 @@ export default {
       }
     }, 200)
   },
-  destroyed() {
+  unmounted() {
     clearInterval(this.handle)
   },
   methods: {
@@ -257,14 +259,15 @@ export default {
       this.$store.commit('task/SET_TASK_LOG_PAGE', page)
       this.$store.commit('task/SET_IS_LOG_AUTO_SCROLL', false)
       this.$store.commit('task/SET_ACTIVE_ERROR_LOG_ITEM', item)
-      this.$emit('search')
+      $emit(this, 'search')
       this.$st.sendEv('任务详情', '日志', '点击错误日志')
     },
     onSearchLog() {
-      this.$emit('search')
+      $emit(this, 'search')
       this.$st.sendEv('任务详情', '日志', '搜索日志')
     },
   },
+  emits: ['search'],
 }
 </script>
 
@@ -274,23 +277,19 @@ export default {
   justify-content: space-between;
   margin-bottom: 10px;
 }
-
 .content {
   display: block;
 }
-
 .log-view-wrapper {
   float: left;
   flex-basis: calc(100% - 240px);
   width: calc(100% - 300px);
   transition: width 0.3s;
 }
-
 .log-view-wrapper.errors-collapsed {
   flex-basis: 100%;
   width: 100%;
 }
-
 .log-view {
   margin-top: 0 !important;
   overflow-y: scroll !important;
@@ -300,7 +299,6 @@ export default {
   background: #2b2b2b;
   border: none;
 }
-
 .errors-wrapper {
   float: left;
   display: inline-block;
@@ -316,57 +314,47 @@ export default {
   font-size: 16px;
   overflow: auto;
 }
-
 .errors-wrapper.collapsed {
   width: 0;
 }
-
 .errors-wrapper .error-list {
   list-style: none;
   padding: 0;
   margin: 0;
 }
-
 .errors-wrapper .error-list .error-item {
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
-  /*height: 18px;*/
   border-bottom: 1px solid white;
   padding: 5px 0;
   background: #f56c6c;
   color: white;
   cursor: pointer;
 }
-
 .errors-wrapper .error-list .error-item.active {
   background: #e6a23c;
   font-weight: bolder;
   text-decoration: underline;
 }
-
 .errors-wrapper .error-list .error-item:hover {
   font-weight: bolder;
   text-decoration: underline;
 }
-
 .errors-wrapper .error-list .error-item .line-no {
   display: inline-block;
   text-align: right;
   width: 70px;
 }
-
 .errors-wrapper .error-list .error-item .line-content {
   display: inline;
   width: calc(100% - 70px);
   padding-left: 10px;
 }
-
 .right {
   display: flex;
   align-items: center;
 }
-
 .right .el-pagination {
   margin-right: 10px;
 }

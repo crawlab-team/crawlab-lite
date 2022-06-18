@@ -1,16 +1,11 @@
-import Vue from 'vue'
-import Router from 'vue-router'
+import * as Vue from 'vue'
+import * as VueRouter from 'vue-router'
 
 import store from '../store'
 import request from '../api/request'
 import stats from '../utils/stats'
 /* Layout */
 import Layout from '../views/layout/Layout'
-
-// in development-env not use lazy-loading, because lazy-loading too many pages will cause webpack hot update too slow. so only in production use lazy-loading;
-// detail: https://panjiachen.github.io/vue-element-admin-site/#/lazy-loading
-
-Vue.use(Router)
 
 /**
  * hidden: true                   if `hidden:true` will not show in the sidebar(default is false)
@@ -28,10 +23,14 @@ Vue.use(Router)
 export const constantRouterMap = [
   {
     path: '/login',
-    component: () => import('../views/login/index'),
+    component: Vue.defineAsyncComponent(() => import('../views/login/index')),
     hidden: true,
   },
-  { path: '/404', component: () => import('../views/404'), hidden: true },
+  {
+    path: '/404',
+    component: Vue.defineAsyncComponent(() => import('../views/404')),
+    hidden: true,
+  },
   { path: '/', redirect: '/spiders' },
 
   // Crawlab Pages
@@ -60,7 +59,9 @@ export const constantRouterMap = [
       {
         path: '',
         name: 'SpiderList',
-        component: () => import('../views/spider/SpiderList'),
+        component: Vue.defineAsyncComponent(
+          () => import('../views/spider/SpiderList')
+        ),
         meta: {
           title: 'Spiders',
           icon: 'fa fa-bug',
@@ -89,7 +90,9 @@ export const constantRouterMap = [
       {
         path: '',
         name: 'TaskList',
-        component: () => import('../views/task/TaskList'),
+        component: Vue.defineAsyncComponent(
+          () => import('../views/task/TaskList')
+        ),
         meta: {
           title: 'Tasks',
           icon: 'fa fa-list',
@@ -98,7 +101,9 @@ export const constantRouterMap = [
       {
         path: ':id',
         name: 'TaskDetail',
-        component: () => import('../views/task/TaskDetail'),
+        component: Vue.defineAsyncComponent(
+          () => import('../views/task/TaskDetail')
+        ),
         meta: {
           title: 'Task Detail',
           icon: 'fa fa-circle-o',
@@ -119,7 +124,9 @@ export const constantRouterMap = [
       {
         path: '',
         name: 'ScheduleList',
-        component: () => import('../views/schedule/ScheduleList'),
+        component: Vue.defineAsyncComponent(
+          () => import('../views/schedule/ScheduleList')
+        ),
         meta: {
           title: 'Schedules',
           icon: 'fa fa-calendar',
@@ -150,10 +157,12 @@ export const constantRouterMap = [
   { path: '*', redirect: '/404', hidden: true },
 ]
 
-const router = new Router({
-  // mode: 'history', //后端支持可开
-  scrollBehavior: () => ({ y: 0 }),
-  routes: constantRouterMap,
+const router = VueRouter.createRouter({
+  history: VueRouter.createWebHashHistory(),
+  routes: constantRouterMap, // mode: 'history', //后端支持可开
+  scrollBehavior: () => ({
+    top: 0,
+  }),
 })
 
 router.beforeEach((to, from, next) => {

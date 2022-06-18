@@ -3,19 +3,22 @@
     <div>
       <svg-icon class-name="size-icon" icon-class="size" />
     </div>
-    <el-dropdown-menu slot="dropdown">
-      <el-dropdown-item
-        v-for="item of sizeOptions"
-        :key="item.value"
-        :disabled="size === item.value"
-        :command="item.value"
-        >{{ item.label }}</el-dropdown-item
-      >
-    </el-dropdown-menu>
+    <template v-slot:dropdown>
+      <el-dropdown-menu>
+        <el-dropdown-item
+          v-for="item of sizeOptions"
+          :key="item.value"
+          :disabled="size === item.value"
+          :command="item.value"
+          >{{ item.label }}</el-dropdown-item
+        >
+      </el-dropdown-menu>
+    </template>
   </el-dropdown>
 </template>
 
 <script>
+import * as Vue from 'vue'
 export default {
   data() {
     return {

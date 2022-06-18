@@ -17,17 +17,23 @@
     <el-row>
       <el-table :data="spiderForm.envs">
         <el-table-column :label="$t('Variable')">
-          <template slot-scope="scope">
-            <el-input v-model="scope.row.name" :placeholder="$t('Variable')" />
+          <template v-slot="scope">
+            <el-input
+              v-model:value="scope.row.name"
+              :placeholder="$t('Variable')"
+            />
           </template>
         </el-table-column>
         <el-table-column :label="$t('Value')">
-          <template slot-scope="scope">
-            <el-input v-model="scope.row.value" :placeholder="$t('Value')" />
+          <template v-slot="scope">
+            <el-input
+              v-model:value="scope.row.value"
+              :placeholder="$t('Value')"
+            />
           </template>
         </el-table-column>
         <el-table-column :label="$t('Action')">
-          <template slot-scope="scope">
+          <template v-slot="scope">
             <el-button
               size="mini"
               icon="el-icon-delete"
@@ -42,6 +48,7 @@
 </template>
 
 <script>
+import * as Vue from 'vue'
 import { mapState } from 'vuex'
 
 export default {
@@ -52,7 +59,7 @@ export default {
   methods: {
     addEnv() {
       if (!this.spiderForm.envs) {
-        this.$set(this.spiderForm, 'envs', [])
+        this.spiderForm['envs'] = []
       }
       this.spiderForm.envs.push({
         name: '',
@@ -86,7 +93,6 @@ export default {
   width: 100%;
   text-align: right;
 }
-
 .el-table {
   min-height: 360px;
 }
