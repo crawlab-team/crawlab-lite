@@ -1,9 +1,10 @@
 import * as Vue from 'vue'
+import { createApp } from 'vue'
 
 import 'normalize.css/normalize.css' // A modern alternative to CSS resets
 import ElementUI from 'element-plus'
-import 'element-ui/lib/theme-chalk/index.css'
-import locale from 'element-ui/lib/locale/lang/en' // lang i18n
+import 'element-plus/theme-chalk/index.css'
+import locale from 'element-plus/lib/locale/lang/en' // lang i18n
 import '@/styles/index.scss' // global css
 import 'font-awesome/scss/font-awesome.scss' // FontAwesome
 import { library } from '@fortawesome/fontawesome-svg-core'
@@ -31,19 +32,23 @@ import request from './api/request'
 import i18n from './i18n'
 import utils from './utils'
 
+const app = (window.$vueApp = createApp(App))
+
+app.use(i18n)
+
 // code mirror
-window.$vueApp.use(codemirror)
+app.use(codemirror)
 
 // element-ui
-window.$vueApp.use(ElementUI, { locale })
+app.use(ElementUI, { locale })
 
 // font-awesome
 library.add(fab)
 library.add(far)
 library.add(fas)
-window.$vueApp.component('FontAwesomeIcon', FontAwesomeIcon)
-window.$vueApp.component('FontAwesomeLayers', FontAwesomeLayers)
-window.$vueApp.component('FontAwesomeLayersText', FontAwesomeLayersText)
+app.component('FontAwesomeIcon', FontAwesomeIcon)
+app.component('FontAwesomeLayers', FontAwesomeLayers)
+app.component('FontAwesomeLayersText', FontAwesomeLayersText)
 
 // 百度统计
 if (localStorage.getItem('useStats') !== '0') {
@@ -57,19 +62,19 @@ if (localStorage.getItem('useStats') !== '0') {
 }
 
 // inject request api
-window.$vueApp.config.globalProperties.$request = request
+app.config.globalProperties.$request = request
 
 // inject utils
-window.$vueApp.config.globalProperties.$utils = utils
+app.config.globalProperties.$utils = utils
 
 // inject stats
-window.$vueApp.config.globalProperties.$st = utils.stats
+app.config.globalProperties.$st = utils.stats
 
-const app = (window.$vueApp = Vue.createApp(App))
-window.$vueApp.config.globalProperties.routerAppend = (path, pathToAppend) => {
+app.config.globalProperties.routerAppend = (path, pathToAppend) => {
   return path + (path.endsWith('/') ? '' : '/') + pathToAppend
 }
-window.$vueApp.use(store)
-window.$vueApp.use(router)
-window.$vueApp.mount('#app')
+app.use(store)
+app.use(router)
+app.mount('#app')
+
 export default app

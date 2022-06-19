@@ -105,7 +105,7 @@
       </el-popover>
       <div class="github right">
         <!-- Place this tag where you want the button to render. -->
-        <github-button
+        <!-- <github-button
           href="https://github.com/crawlab-team/crawlab-lite"
           data-color-scheme="no-preference: light; light: light; dark: dark;"
           data-size="large"
@@ -114,7 +114,7 @@
           style="color: white"
         >
           Star
-        </github-button>
+        </github-button> -->
       </div>
     </div>
   </div>
@@ -127,7 +127,7 @@ import { mapGetters, mapState } from 'vuex'
 import Breadcrumb from '@/components/Breadcrumb'
 import Hamburger from '@/components/Hamburger'
 import DisclaimerDialog from '@/components/Disclaimer'
-import GithubButton from 'vue-github-button'
+// import GithubButton from 'vue-github-button'
 import showdown from 'showdown'
 import 'github-markdown-css/github-markdown.css'
 
@@ -135,7 +135,7 @@ export default {
   components: {
     Breadcrumb,
     Hamburger,
-    GithubButton,
+    // GithubButton,
     DisclaimerDialog,
     ElIconArrowDown,
   },

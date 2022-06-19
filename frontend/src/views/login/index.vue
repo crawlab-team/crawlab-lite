@@ -77,7 +77,7 @@
         <el-alert type="error" :closable="false">
           {{
             $t(
-              'You are running on a mobile device, which is not optimized yet. Please try with a laptop or desktop.'
+              'You are running on a mobile device, which is not optimized yet. Please try with a laptop or desktop.',
             )
           }}
         </el-alert>
@@ -104,7 +104,7 @@ export default {
     const validatePass = (rule, value, callback) => {
       if (value.length < 5) {
         callback(
-          new Error(this.$t('Password length should be no shorter than 5'))
+          new Error(this.$t('Password length should be no shorter than 5')),
         )
       } else {
         callback()
@@ -159,7 +159,7 @@ export default {
           this.$message({
             type: 'error',
             message: this.$t(
-              'No response from the server. Please make sure your server is running correctly. You can also refer to the documentation to solve this issue.'
+              'No response from the server. Please make sure your server is running correctly. You can also refer to the documentation to solve this issue.',
             ),
             customClass: 'message-error',
             duration: 5000,

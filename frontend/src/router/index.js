@@ -59,8 +59,8 @@ export const constantRouterMap = [
       {
         path: '',
         name: 'SpiderList',
-        component: Vue.defineAsyncComponent(
-          () => import('../views/spider/SpiderList')
+        component: Vue.defineAsyncComponent(() =>
+          import('../views/spider/SpiderList'),
         ),
         meta: {
           title: 'Spiders',
@@ -90,8 +90,8 @@ export const constantRouterMap = [
       {
         path: '',
         name: 'TaskList',
-        component: Vue.defineAsyncComponent(
-          () => import('../views/task/TaskList')
+        component: Vue.defineAsyncComponent(() =>
+          import('../views/task/TaskList'),
         ),
         meta: {
           title: 'Tasks',
@@ -101,8 +101,8 @@ export const constantRouterMap = [
       {
         path: ':id',
         name: 'TaskDetail',
-        component: Vue.defineAsyncComponent(
-          () => import('../views/task/TaskDetail')
+        component: Vue.defineAsyncComponent(() =>
+          import('../views/task/TaskDetail'),
         ),
         meta: {
           title: 'Task Detail',
@@ -124,8 +124,8 @@ export const constantRouterMap = [
       {
         path: '',
         name: 'ScheduleList',
-        component: Vue.defineAsyncComponent(
-          () => import('../views/schedule/ScheduleList')
+        component: Vue.defineAsyncComponent(() =>
+          import('../views/schedule/ScheduleList'),
         ),
         meta: {
           title: 'Schedules',
@@ -154,7 +154,7 @@ export const constantRouterMap = [
   //   ]
   // },
 
-  { path: '*', redirect: '/404', hidden: true },
+  { path: '/:pathMatch(.*)*', redirect: '/404', hidden: true },
 ]
 
 const router = VueRouter.createRouter({

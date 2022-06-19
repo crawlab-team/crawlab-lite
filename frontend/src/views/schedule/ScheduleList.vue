@@ -274,7 +274,7 @@
             <el-tooltip :content="$t('Run')" placement="top">
               <el-button
                 type="success"
-                :icon="ElIconFa faBug"
+                :icon="faBug"
                 size="mini"
                 @click="onRun(scope.row)"
               />

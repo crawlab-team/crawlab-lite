@@ -275,7 +275,7 @@
             <el-tooltip :content="$t('Run')" placement="top">
               <el-button
                 type="success"
-                :icon="ElIconFa faBug"
+                :icon="faBug"
                 size="mini"
                 @click="onCrawl(scope.row, $event)"
               />
@@ -283,7 +283,7 @@
             <el-tooltip :content="$t('Spider Version List')" placement="top">
               <el-button
                 type="warning"
-                :icon="ElIconFa faArchive"
+                :icon="faArchive"
                 size="mini"
                 @click="onViewSpiderVersions(scope.row, $event)"
               />
@@ -373,7 +373,12 @@ export default {
     },
     columns() {
       const columns = []
-      columns.push({ name: 'name', label: 'Name', width: '160', align: 'left' })
+      columns.push({
+        name: 'name',
+        label: 'Name',
+        width: '160',
+        align: 'left',
+      })
       // columns.push({ name: 'latest_tasks', label: 'Latest Tasks', width: '180' })
       columns.push({ name: 'last_status', label: 'Last Status', width: '120' })
       columns.push({ name: 'last_run_ts', label: 'Last Run', width: '140' })
