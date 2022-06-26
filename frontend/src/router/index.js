@@ -1,11 +1,11 @@
 import * as Vue from 'vue'
 import * as VueRouter from 'vue-router'
 
-import store from '../store'
-import request from '../api/request'
-import stats from '../utils/stats'
 /* Layout */
 import Layout from '../views/layout/Layout'
+import request from '../api/request'
+import stats from '../utils/stats'
+import store from '../store'
 
 /**
  * hidden: true                   if `hidden:true` will not show in the sidebar(default is false)
@@ -23,7 +23,7 @@ import Layout from '../views/layout/Layout'
 export const constantRouterMap = [
   {
     path: '/login',
-    component: Vue.defineAsyncComponent(() => import('../views/login/index')),
+    component: Vue.defineAsyncComponent(() => import('../views/login/Login')),
     hidden: true,
   },
   {

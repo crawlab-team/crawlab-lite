@@ -1,40 +1,40 @@
-import * as Vue from 'vue'
-import { createApp } from 'vue'
-
 import 'normalize.css/normalize.css' // A modern alternative to CSS resets
-import ElementUI from 'element-plus'
 import 'element-plus/theme-chalk/index.css'
-import locale from 'element-plus/lib/locale/lang/en' // lang i18n
 import '@/styles/index.scss' // global css
 import 'font-awesome/scss/font-awesome.scss' // FontAwesome
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { fab } from '@fortawesome/free-brands-svg-icons'
-import { fas } from '@fortawesome/free-solid-svg-icons'
-import { far } from '@fortawesome/free-regular-svg-icons'
+import 'codemirror/lib/codemirror.js'
+import 'codemirror/lib/codemirror.css'
+import 'codemirror/theme/darcula.css'
+import '@/icons' // icon
+import '@/permission' // permission control
+
+import * as Vue from 'vue'
+
 import {
   FontAwesomeIcon,
   FontAwesomeLayers,
   FontAwesomeLayersText,
 } from '@fortawesome/vue-fontawesome'
 
-import 'codemirror/lib/codemirror.js'
-import { codemirror } from 'vue-codemirror-lite'
-import 'codemirror/lib/codemirror.css'
-import 'codemirror/theme/darcula.css'
-
 import App from './App'
-import store from './store'
-import router from './router'
-
-import '@/icons' // icon
-import '@/permission' // permission control
+import ElementUI from 'element-plus'
+import { codemirror } from 'vue-codemirror-lite'
+import { createApp } from 'vue'
+import { fab } from '@fortawesome/free-brands-svg-icons'
+import { far } from '@fortawesome/free-regular-svg-icons'
+import { fas } from '@fortawesome/free-solid-svg-icons'
+import { getI18n } from 'crawlab-ui'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import locale from 'element-plus/lib/locale/lang/en' // lang i18n
 import request from './api/request'
-import i18n from './i18n'
+import router from './router'
+import store from './store'
+// import i18n from './i18n'
 import utils from './utils'
 
 const app = (window.$vueApp = createApp(App))
 
-app.use(i18n)
+app.use(getI18n())
 
 // code mirror
 app.use(codemirror)
