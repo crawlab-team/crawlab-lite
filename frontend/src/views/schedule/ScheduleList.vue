@@ -2,7 +2,7 @@
   <div class="app-container schedule-list">
     <!--add schedule dialog-->
     <el-dialog
-      :title="$t(dialogTitle)"
+      :title="t(dialogTitle)"
       v-model="dialogVisible"
       width="640px"
       :before-close="onDialogClose"
@@ -15,11 +15,11 @@
         :inline-message="true"
         label-position="right"
       >
-        <el-form-item :label="$t('Spider')" prop="spider_id" required>
+        <el-form-item :label="t('Spider')" prop="spider_id" required>
           <el-select
             id="spider-id"
             v-model="scheduleForm.spider_id"
-            :placeholder="$t('Spider')"
+            :placeholder="t('Spider')"
             :loading="loadingSpiders"
             @focus="onSelectSpider"
             @change="onSpiderChange"
@@ -34,7 +34,7 @@
         </el-form-item>
         <el-form-item
           v-if="scheduleForm.spider_id"
-          :label="$t('Version')"
+          :label="t('Version')"
           inline-message
           prop="spider_version_id"
           required=""
@@ -42,12 +42,12 @@
           <el-select
             v-model="scheduleForm.spider_version_id"
             :loading="loadingVersions"
-            :placeholder="$t('Latest Version')"
+            :placeholder="t('Latest Version')"
             @focus="onSelectSpiderVersion"
           >
             <el-option
               value="00000000-0000-0000-0000-000000000000"
-              :label="$t('Latest Version')"
+              :label="t('Latest Version')"
             />
             <el-option
               v-for="version in spiderVersionList"
@@ -57,14 +57,14 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item :label="$t('Cron')" prop="cron" required>
+        <el-form-item :label="t('Cron')" prop="cron" required>
           <el-input
             id="cron"
             ref="cron"
             v-model="scheduleForm.cron"
             class="cron"
-            :placeholder="`${$t(
-              '[second] [minute] [hour] [day] [month] [day of week]'
+            :placeholder="`${t(
+              '[second] [minute] [hour] [day] [month] [day of week]',
             )}`"
             style="width: calc(100% - 100px)"
           />
@@ -75,22 +75,22 @@
             style="width: 100px"
             @click="onShowCronDialog"
           >
-            {{ $t('Edit') }}
+            {{ t('Edit') }}
           </el-button>
         </el-form-item>
-        <el-form-item :label="$t('Execute Command')" prop="cmd" required>
+        <el-form-item :label="t('Execute Command')" prop="cmd" required>
           <el-input
             id="cmd"
             v-model="scheduleForm.cmd"
-            :placeholder="$t('Execute Command')"
+            :placeholder="t('Execute Command')"
           />
         </el-form-item>
-        <el-form-item :label="$t('Schedule Description')" prop="description">
+        <el-form-item :label="t('Schedule Description')" prop="description">
           <el-input
             id="schedule-description"
             v-model="scheduleForm.description"
             type="textarea"
-            :placeholder="$t('Schedule Description')"
+            :placeholder="t('Schedule Description')"
           />
         </el-form-item>
       </el-form>
@@ -98,7 +98,7 @@
       <template v-slot:footer>
         <span class="dialog-footer">
           <el-button size="small" @click="onCancel">{{
-            $t('Cancel')
+            t('Cancel')
           }}</el-button>
           <el-button
             id="btn-submit"
@@ -106,7 +106,7 @@
             type="primary"
             :disabled="submitting"
             @click="onAddSubmit"
-            >{{ $t('Submit') }}</el-button
+            >{{ t('Submit') }}</el-button
           >
         </span>
       </template>
@@ -115,7 +115,7 @@
 
     <!--view tasks dialog-->
     <el-dialog
-      :title="$t('Tasks')"
+      :title="t('Tasks')"
       v-model="tasksDialogVisible"
       width="calc(100% - 240px)"
       :before-close="onCloseTasksDialog"
@@ -135,10 +135,10 @@
       <template v-slot:footer>
         <span class="dialog-footer">
           <el-button size="small" @click="cronDialogVisible = false">{{
-            $t('Cancel')
+            t('Cancel')
           }}</el-button>
           <el-button size="small" type="primary" @click="onCronDialogSubmit">{{
-            $t('Confirm')
+            t('Confirm')
           }}</el-button>
         </span>
       </template>
@@ -165,7 +165,7 @@
             class="btn-add"
             @click="onAdd"
           >
-            {{ $t('Add Schedule') }}
+            {{ t('Add Schedule') }}
           </el-button>
         </div>
       </div>
@@ -182,7 +182,7 @@
           <el-table-column
             v-if="col.name === 'status'"
             :property="col.name"
-            :label="$t(col.label)"
+            :label="t(col.label)"
             :sortable="col.sortable"
             :align="col.align"
             :width="col.width"
@@ -190,21 +190,21 @@
             <template v-slot="scope">
               <el-tooltip
                 v-if="scope.row[col.name] === 'error'"
-                :content="$t(scope.row['message'])"
+                :content="t(scope.row['message'])"
                 placement="top"
               >
                 <el-tag class="status-tag" type="danger">
-                  {{ scope.row[col.name] ? $t(scope.row[col.name]) : $t('NA') }}
+                  {{ scope.row[col.name] ? t(scope.row[col.name]) : t('NA') }}
                 </el-tag>
               </el-tooltip>
               <el-tag v-else class="status-tag">
-                {{ scope.row[col.name] ? $t(scope.row[col.name]) : $t('NA') }}
+                {{ scope.row[col.name] ? t(scope.row[col.name]) : t('NA') }}
               </el-tag>
             </template>
           </el-table-column>
           <el-table-column
             v-else-if="col.name === 'enable'"
-            :label="$t(col.label)"
+            :label="t(col.label)"
             :width="col.width"
           >
             <template v-slot="scope">
@@ -219,7 +219,7 @@
           <el-table-column
             v-else
             :property="col.name"
-            :label="$t(col.label)"
+            :label="t(col.label)"
             :sortable="col.sortable"
             :align="col.align"
             :width="col.width"
@@ -230,7 +230,7 @@
           </el-table-column>
         </template>
         <el-table-column
-          :label="$t('Action')"
+          :label="t('Action')"
           class="actions"
           align="left"
           width="170"
@@ -238,7 +238,7 @@
         >
           <template v-slot="scope">
             <!--edit-->
-            <el-tooltip :content="$t('Edit')" placement="top">
+            <el-tooltip :content="t('Edit')" placement="top">
               <el-button
                 type="warning"
                 :icon="ElIconEdit"
@@ -249,7 +249,7 @@
             <!--./edit-->
 
             <!--delete-->
-            <el-tooltip :content="$t('Remove')" placement="top">
+            <el-tooltip :content="t('Remove')" placement="top">
               <el-button
                 type="danger"
                 :icon="ElIconDelete"
@@ -260,7 +260,7 @@
             <!--./delete-->
 
             <!--view tasks-->
-            <el-tooltip :content="$t('View Tasks')" placement="top">
+            <el-tooltip :content="t('View Tasks')" placement="top">
               <el-button
                 type="primary"
                 :icon="ElIconSearch"
@@ -271,7 +271,7 @@
             <!--./view tasks-->
 
             <!--run-->
-            <el-tooltip :content="$t('Run')" placement="top">
+            <el-tooltip :content="t('Run')" placement="top">
               <el-button
                 type="success"
                 :icon="faBug"
@@ -306,6 +306,7 @@ import { mapState } from 'vuex'
 import ScheduleTaskList from '../../components/Schedule/ScheduleTaskList'
 import CrawlConfirmDialog from '../../components/Dialog/CrawlConfirmDialog'
 import dayjs from 'dayjs'
+import { useI18n } from 'vue-i18n'
 
 export default {
   name: 'ScheduleList',
@@ -313,6 +314,10 @@ export default {
     CrawlConfirmDialog,
     ScheduleTaskList,
     VueCronLinux,
+  },
+  setup(props) {
+    const { t } = useI18n()
+    return { t }
   },
   data() {
     return {
@@ -398,7 +403,7 @@ export default {
                 }
                 this.dialogVisible = false
                 this.getScheduleList()
-                this.$message.success(this.$t('The schedule has been saved'))
+                this.$message.success(this.t('The schedule has been saved'))
               })
           } else {
             this.$store
@@ -410,7 +415,7 @@ export default {
                 }
                 this.dialogVisible = false
                 this.getScheduleList()
-                this.$message.success(this.$t('The schedule has been added'))
+                this.$message.success(this.t('The schedule has been added'))
               })
           }
         }
@@ -431,19 +436,19 @@ export default {
     },
     onRemove(row) {
       this.$confirm(
-        this.$t('Are you sure to delete the schedule task?'),
-        this.$t('Notification'),
+        this.t('Are you sure to delete the schedule task?'),
+        this.t('Notification'),
         {
-          confirmButtonText: this.$t('Confirm'),
-          cancelButtonText: this.$t('Cancel'),
+          confirmButtonText: this.t('Confirm'),
+          cancelButtonText: this.t('Cancel'),
           type: 'warning',
-        }
+        },
       )
         .then(() => {
           this.$store.dispatch('schedule/removeSchedule', row.id).then(() => {
             setTimeout(() => {
               this.getScheduleList()
-              this.$message.success(this.$t('The schedule has been removed'))
+              this.$message.success(this.t('The schedule has been removed'))
             }, 100)
           })
         })
@@ -484,17 +489,17 @@ export default {
       }
       if (res.data && res.data.code === 200) {
         this.$message.success(
-          this.$t(
-            `${row.enabled ? 'Enabling' : 'Disabling'} the schedule successful`
-          )
+          this.t(
+            `${row.enabled ? 'Enabling' : 'Disabling'} the schedule successful`,
+          ),
         )
       } else {
         this.$message.error(
-          this.$t(
+          this.t(
             `${
               row.enabled ? 'Enabling' : 'Disabling'
-            } the schedule unsuccessful`
-          )
+            } the schedule unsuccessful`,
+          ),
         )
       }
       this.$st.sendEv('定时任务', '启用/禁用')

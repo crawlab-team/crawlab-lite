@@ -1,3 +1,5 @@
+//@ts-nocheck
+
 import 'normalize.css/normalize.css' // A modern alternative to CSS resets
 import 'element-plus/theme-chalk/index.css'
 import '@/styles/index.scss' // global css

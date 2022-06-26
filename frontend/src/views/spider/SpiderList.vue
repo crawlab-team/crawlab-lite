@@ -2,7 +2,7 @@
   <div class="app-container">
     <!--add dialog-->
     <el-dialog
-      :title="$t('Add Spider')"
+      :title="t('Add Spider')"
       width="40%"
       v-model="addDialogVisible"
       :before-close="onAddDialogClose"
@@ -13,28 +13,28 @@
         inline-message
         label-width="120px"
       >
-        <el-form-item :label="$t('Spider Name')" prop="name" required>
+        <el-form-item :label="t('Spider Name')" prop="name" required>
           <el-input
             id="spider-name"
             v-model="spiderForm.name"
-            :placeholder="$t('Spider Name')"
+            :placeholder="t('Spider Name')"
           />
         </el-form-item>
-        <el-form-item :label="$t('Description')" prop="description">
+        <el-form-item :label="t('Description')" prop="description">
           <el-input
             id="spider-description"
             v-model="spiderForm.description"
-            :placeholder="$t('Description')"
+            :placeholder="t('Description')"
           />
         </el-form-item>
-        <!--        <el-form-item :label="$t('Results')" prop="col">-->
+        <!--        <el-form-item :label="t('Results')" prop="col">-->
         <!--          <el-input-->
         <!--            id="col"-->
         <!--            v-model="spiderForm.col"-->
-        <!--            :placeholder="$t('By default: ') + 'results_<spider_name>'"-->
+        <!--            :placeholder="t('By default: ') + 'results_<spider_name>'"-->
         <!--          />-->
         <!--        </el-form-item>-->
-        <el-form-item :label="$t('Upload Zip File')" name="site">
+        <el-form-item :label="t('Upload Zip File')" name="site">
           <el-upload
             :action="$request.baseUrl + '/spiders'"
             :before-upload="beforeUpload"
@@ -50,7 +50,7 @@
               size="small"
               type="primary"
             >
-              {{ $t('Upload and Commit') }}
+              {{ t('Upload and Commit') }}
             </el-button>
           </el-upload>
         </el-form-item>
@@ -59,8 +59,8 @@
         <p>
           <i class="fa fa-exclamation-triangle" />
           {{
-            $t(
-              'NOTE: It is best to zip your spider files from the PROJECT ROOT.'
+            t(
+              'NOTE: It is best to zip your spider files from the PROJECT ROOT.',
             )
           }}
         </p>
@@ -71,7 +71,7 @@
     <!--version list dialog-->
     <el-dialog
       v-model="versionListDialogVisible"
-      :title="`${$t('Spider Version List')} (${$t('Spider')}: ${
+      :title="`${t('Spider Version List')} (${t('Spider')}: ${
         activeSpider ? activeSpider.name : ''
       })`"
       width="640px"
@@ -86,7 +86,7 @@
         align="right"
       >
         <el-button :icon="ElIconUpload" size="small" type="success">
-          {{ $t('Upload') }}
+          {{ t('Upload') }}
         </el-button>
       </el-upload>
       <el-table
@@ -96,19 +96,19 @@
         max-height="240px"
         style="margin: 5px 10px"
       >
-        <el-table-column :label="$t('Upload Time')" prop="create_ts">
+        <el-table-column :label="t('Upload Time')" prop="create_ts">
           <template v-slot="scope">
             {{
               `${getTime(scope.row.create_ts)}${
-                scope.$index === 0 ? ' (' + $t('Latest') + ')' : ''
+                scope.$index === 0 ? ' (' + t('Latest') + ')' : ''
               }`
             }}
           </template>
         </el-table-column>
-        <el-table-column :label="$t('MD5')" prop="md5" />
-        <el-table-column :label="$t('Action')" width="120px">
+        <el-table-column :label="t('MD5')" prop="md5" />
+        <el-table-column :label="t('Action')" width="120px">
           <template v-slot="scope">
-            <el-tooltip :content="$t('Remove')" placement="top">
+            <el-tooltip :content="t('Remove')" placement="top">
               <el-button
                 type="danger"
                 :icon="ElIconDelete"
@@ -125,7 +125,7 @@
           size="small"
           type="primary"
           @click="versionListDialogVisible = false"
-          >{{ $t('Ok') }}</el-button
+          >{{ t('Ok') }}</el-button
         >
       </template>
     </el-dialog>
@@ -149,7 +149,7 @@
           <!--              <el-input-->
           <!--                v-model="filter.keyword"-->
           <!--                size="small"-->
-          <!--                :placeholder="$t('Spider Name')"-->
+          <!--                :placeholder="t('Spider Name')"-->
           <!--                clearable-->
           <!--                @keyup.enter.native="onSearch"-->
           <!--              >-->
@@ -160,7 +160,7 @@
           <!--              <el-button size="small" type="success"-->
           <!--                         class="btn refresh"-->
           <!--                         @click="onRefresh">-->
-          <!--                {{$t('Search')}}-->
+          <!--                {{t('Search')}}-->
           <!--              </el-button>-->
           <!--            </el-form-item>-->
           <!--          </el-form>-->
@@ -174,7 +174,7 @@
             style="font-weight: bolder"
             @click="onAdd"
           >
-            {{ $t('Add Spider') }}
+            {{ t('Add Spider') }}
           </el-button>
         </div>
       </div>
@@ -193,18 +193,18 @@
           <el-table-column
             v-if="col.name === 'type'"
             :property="col.name"
-            :label="$t(col.label)"
+            :label="t(col.label)"
             :sortable="col.sortable"
             align="left"
             :width="col.width"
           >
             <template v-slot="scope">
-              {{ $t(scope.row.type) }}
+              {{ t(scope.row.type) }}
             </template>
           </el-table-column>
           <el-table-column
             v-else-if="col.name === 'last_5_errors'"
-            :label="$t(col.label)"
+            :label="t(col.label)"
             :width="col.width"
             align="center"
           >
@@ -216,7 +216,7 @@
           </el-table-column>
           <el-table-column
             v-else-if="col.name === 'cmd'"
-            :label="$t(col.label)"
+            :label="t(col.label)"
             :width="col.width"
             align="left"
           >
@@ -226,7 +226,7 @@
           </el-table-column>
           <el-table-column
             v-else-if="col.name.match(/_ts$/)"
-            :label="$t(col.label)"
+            :label="t(col.label)"
             :align="col.align"
             :width="col.width"
           >
@@ -236,7 +236,7 @@
           </el-table-column>
           <el-table-column
             v-else-if="col.name === 'last_status'"
-            :label="$t(col.label)"
+            :label="t(col.label)"
             align="left"
             :width="col.width"
           >
@@ -252,19 +252,19 @@
           <el-table-column
             v-else
             :property="col.name"
-            :label="$t(col.label)"
+            :label="t(col.label)"
             :align="col.align || 'left'"
             :width="col.width"
           />
         </template>
         <el-table-column
-          :label="$t('Action')"
+          :label="t('Action')"
           align="left"
           fixed="right"
           width="130"
         >
           <template v-slot="scope">
-            <!--            <el-tooltip :content="$t('View')" placement="top">-->
+            <!--            <el-tooltip :content="t('View')" placement="top">-->
             <!--              <el-button-->
             <!--                type="primary"-->
             <!--                icon="el-icon-search"-->
@@ -272,7 +272,7 @@
             <!--                @click="onView(scope.row, $event)"-->
             <!--              />-->
             <!--            </el-tooltip>-->
-            <el-tooltip :content="$t('Run')" placement="top">
+            <el-tooltip :content="t('Run')" placement="top">
               <el-button
                 type="success"
                 :icon="faBug"
@@ -280,7 +280,7 @@
                 @click="onCrawl(scope.row, $event)"
               />
             </el-tooltip>
-            <el-tooltip :content="$t('Spider Version List')" placement="top">
+            <el-tooltip :content="t('Spider Version List')" placement="top">
               <el-button
                 type="warning"
                 :icon="faArchive"
@@ -288,7 +288,7 @@
                 @click="onViewSpiderVersions(scope.row, $event)"
               />
             </el-tooltip>
-            <el-tooltip :content="$t('Remove')" placement="top">
+            <el-tooltip :content="t('Remove')" placement="top">
               <el-button
                 type="danger"
                 :icon="ElIconDelete"
@@ -321,12 +321,17 @@ import { mapGetters, mapState } from 'vuex'
 import dayjs from 'dayjs'
 import CrawlConfirmDialog from '../../components/Dialog/CrawlConfirmDialog'
 import StatusTag from '../../components/Status/StatusTag'
+import { useI18n } from 'vue-i18n'
 
 export default {
   name: 'SpiderList',
   components: {
     CrawlConfirmDialog,
     StatusTag,
+  },
+  setup(props) {
+    const { t } = useI18n()
+    return { t }
   },
   data() {
     return {
@@ -434,22 +439,22 @@ export default {
     onRemove(row, ev) {
       ev.stopPropagation()
       this.$prompt(
-        this.$t(
-          'This action cannot be undone. This will permanently delete the spider and all associated data!'
+        this.t(
+          'This action cannot be undone. This will permanently delete the spider and all associated data!',
         ) +
           `<br>${
             this.lang === 'zh'
               ? '请输入 <b>' + row.name + '</b> 确认删除：'
               : 'Please type' + row.name + 'to confirm:'
           }`,
-        this.$t('Notification'),
+        this.t('Notification'),
         {
           dangerouslyUseHTMLString: true,
-          confirmButtonText: this.$t('Confirm'),
-          cancelButtonText: this.$t('Cancel'),
+          confirmButtonText: this.t('Confirm'),
+          cancelButtonText: this.t('Cancel'),
           inputPattern: new RegExp(`^${row.name}$`),
-          inputErrorMessage: this.$t('Inconsistent spider name'),
-        }
+          inputErrorMessage: this.t('Inconsistent spider name'),
+        },
       )
         .then(() => {
           this.$store
@@ -461,7 +466,7 @@ export default {
               }
               this.$message({
                 type: 'success',
-                message: this.$t('Deleted successfully'),
+                message: this.t('Deleted successfully'),
               })
               await this.getSpiderList()
               this.$st.sendEv('爬虫列表', '删除爬虫')
@@ -483,13 +488,13 @@ export default {
     onRemoveVersion(row, ev) {
       ev.stopPropagation()
       this.$confirm(
-        this.$t('Are you sure to delete this version?'),
-        this.$t('Notification'),
+        this.t('Are you sure to delete this version?'),
+        this.t('Notification'),
         {
-          confirmButtonText: this.$t('Confirm'),
-          cancelButtonText: this.$t('Cancel'),
+          confirmButtonText: this.t('Confirm'),
+          cancelButtonText: this.t('Cancel'),
           type: 'warning',
-        }
+        },
       )
         .then(() => {
           this.$store
@@ -504,7 +509,7 @@ export default {
               }
               this.$message({
                 type: 'success',
-                message: this.$t('Deleted successfully'),
+                message: this.t('Deleted successfully'),
               })
               await this.getSpiderVersionList(this.activeSpider.id)
               this.$st.sendEv('爬虫版本列表', '删除爬虫版本')
@@ -526,7 +531,7 @@ export default {
         this.getSpiderList()
       }, 500)
 
-      this.$message.success(this.$t('Uploaded spider files successfully'))
+      this.$message.success(this.t('Uploaded spider files successfully'))
       this.addDialogVisible = false
     },
     onUploadVersionSuccess(res) {
@@ -538,10 +543,10 @@ export default {
         this.getSpiderVersionList(this.activeSpider.id)
       }, 500)
 
-      this.$message.success(this.$t('Uploaded spider files successfully'))
+      this.$message.success(this.t('Uploaded spider files successfully'))
     },
     onUploadError() {
-      this.$message.error(this.$t('Failed to upload spider files'))
+      this.$message.error(this.t('Failed to upload spider files'))
     },
     beforeUpload(file) {
       return new Promise((resolve, reject) => {

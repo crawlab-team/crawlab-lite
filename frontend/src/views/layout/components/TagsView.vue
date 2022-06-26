@@ -13,7 +13,7 @@
         @click.middle="closeSelectedTag(tag)"
         @contextmenu.prevent="openMenu(tag, $event)"
       >
-        {{ $t(generateTitle(tag.title)) }}
+        {{ t(generateTitle(tag.title)) }}
 
         <span
           v-if="!tag.meta.affix"
@@ -28,28 +28,36 @@
       class="contextmenu"
     >
       <li @click="refreshSelectedTag(selectedTag)">
-        {{ $t('tagsView.refresh') }}
+        {{ t('tagsView.refresh') }}
       </li>
       <li
         v-if="!(selectedTag.meta && selectedTag.meta.affix)"
         @click="closeSelectedTag(selectedTag)"
       >
-        {{ $t('tagsView.close') }}
+        {{ t('tagsView.close') }}
       </li>
-      <li @click="closeOthersTags">{{ $t('tagsView.closeOthers') }}</li>
-      <li @click="closeAllTags(selectedTag)">{{ $t('tagsView.closeAll') }}</li>
+      <li @click="closeOthersTags">{{ t('tagsView.closeOthers') }}</li>
+      <li @click="closeAllTags(selectedTag)">{{ t('tagsView.closeAll') }}</li>
     </ul>
   </div>
 </template>
 
 <script>
-import * as Vue from 'vue'
+import { getCurrentInstance } from 'vue'
 import ScrollPane from '@/components/ScrollPane'
 import { generateTitle } from '@/utils/i18n'
 import path from 'path'
+import { useI18n } from 'vue-i18n'
 
 export default {
   components: { ScrollPane },
+
+  setup(props) {
+    const { t } = useI18n()
+    const currIns = getCurrentInstance()
+    currIns.t = t
+    return { t }
+  },
 
   data() {
     return {

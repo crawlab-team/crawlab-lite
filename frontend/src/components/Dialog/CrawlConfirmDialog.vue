@@ -2,14 +2,14 @@
   <div class="crawl-confirm-dialog-wrapper">
     <disclaimer-dialog v-model:value="disclaimerVisible" />
     <el-dialog
-      :title="$t('Notification')"
+      :title="t('Notification')"
       :model-value="visible"
       class="crawl-confirm-dialog"
       width="480px"
       :before-close="beforeClose"
     >
       <div style="margin-bottom: 20px">
-        {{ $t('Are you sure to run this spider?') }}
+        {{ t('Are you sure to run this spider?') }}
       </div>
       <el-form
         ref="form"
@@ -17,15 +17,15 @@
         :label-width="lang === 'zh' ? '100px' : '150px'"
       >
         <el-form-item
-          :label="$t('Execute Command')"
+          :label="t('Execute Command')"
           inline-message
           prop="cmd"
           required
         >
-          <el-input v-model="form.cmd" :placeholder="$t('Execute Command')" />
+          <el-input v-model="form.cmd" :placeholder="t('Execute Command')" />
         </el-form-item>
         <el-form-item
-          :label="$t('Version')"
+          :label="t('Version')"
           inline-message
           prop="spider_version_id"
           required
@@ -33,12 +33,12 @@
           <el-select
             v-model="form.spider_version_id"
             :loading="loadingVersions"
-            :placeholder="$t('Latest Version')"
+            :placeholder="t('Latest Version')"
             @focus="onSelectSpiderVersion"
           >
             <el-option
               value="00000000-0000-0000-0000-000000000000"
-              :label="$t('Latest Version')"
+              :label="t('Latest Version')"
             />
             <el-option
               v-for="version in spiderVersionList"
@@ -63,11 +63,11 @@
       </div>
       <!--          <div>-->
       <!--            <el-checkbox v-model="isRedirect"/>-->
-      <!--            <span style="margin-left: 5px">{{$t('Redirect to task detail')}}</span>-->
+      <!--            <span style="margin-left: 5px">{{t('Redirect to task detail')}}</span>-->
       <!--          </div>-->
       <template v-slot:footer>
         <el-button type="plain" size="small" @click="$emit('close')">{{
-          $t('Cancel')
+          t('Cancel')
         }}</el-button>
         <el-button
           type="primary"
@@ -75,7 +75,7 @@
           :disabled="isConfirmDisabled"
           @click="onConfirm"
         >
-          {{ $t('Confirm') }}
+          {{ t('Confirm') }}
         </el-button>
       </template>
     </el-dialog>
@@ -88,6 +88,7 @@ import * as Vue from 'vue'
 import { mapState } from 'vuex'
 import dayjs from 'dayjs'
 import DisclaimerDialog from '@/components/Disclaimer'
+import { useI18n } from 'vue-i18n'
 
 export default {
   name: 'CrawlConfirmDialog',
@@ -103,6 +104,10 @@ export default {
       type: String,
       default: '',
     },
+  },
+  setup(props) {
+    const { t } = useI18n()
+    return { t }
   },
   data() {
     return {
@@ -161,7 +166,7 @@ export default {
         })
 
         // 消息提示
-        this.$message.success(this.$t('A task has been scheduled successfully'))
+        this.$message.success(this.t('A task has been scheduled successfully'))
 
         $emit(this, 'close')
 

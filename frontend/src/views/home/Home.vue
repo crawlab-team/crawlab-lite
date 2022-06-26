@@ -18,7 +18,7 @@
                 {{ overviewStats[m.name] }}
               </div>
               <div class="metric-name">
-                {{ $t(m.label) }}
+                {{ t(m.label) }}
               </div>
             </div>
           </div>
@@ -28,7 +28,7 @@
           <!--            </el-col>-->
           <!--            <el-col :span="18" class="text-col">-->
           <!--              <el-row>-->
-          <!--                <label class="label">{{$t(m.label)}}</label>-->
+          <!--                <label class="label">{{t(m.label)}}</label>-->
           <!--              </el-row>-->
           <!--              <el-row>-->
           <!--                <div class="value">{{overviewStats[m.name]}}</div>-->
@@ -40,7 +40,7 @@
     </el-row>
     <el-row>
       <el-card shadow="hover">
-        <h4 class="title">{{ $t('Daily New Tasks') }}</h4>
+        <h4 class="title">{{ t('Daily New Tasks') }}</h4>
         <div id="echarts-daily-tasks" class="echarts-box" />
       </el-card>
     </el-row>
@@ -51,6 +51,7 @@
 import * as Vue from 'vue'
 import request from '../../api/request'
 import echarts from 'echarts'
+import { useI18n } from 'vue-i18n'
 
 export default {
   name: 'Home',
@@ -135,13 +136,17 @@ export default {
         },
       }
       this.echarts.dailyTasks = echarts.init(
-        this.$el.querySelector('#echarts-daily-tasks')
+        this.$el.querySelector('#echarts-daily-tasks'),
       )
       this.echarts.dailyTasks.setOption(option)
     },
     onClickMetric(m) {
       this.$router.push(`/${m.path}`)
     },
+  },
+  setup(props) {
+    const { t } = useI18n()
+    return { t }
   },
 }
 </script>

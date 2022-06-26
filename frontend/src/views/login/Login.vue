@@ -101,6 +101,7 @@
 </template>
 
 <script lang="ts">
+//@ts-nocheck
 import { computed, defineComponent, onMounted, onUnmounted, ref } from 'vue'
 import {
   isValidUsername,
@@ -115,6 +116,7 @@ import logo from '@/assets/js/svg/logo.js'
 import { useStore } from 'vuex'
 import { useI18n } from 'vue-i18n'
 const { post } = useRequest()
+
 export default defineComponent({
   name: 'Login',
   setup() {

@@ -4,21 +4,21 @@
     <div class="navbar">
       <el-dialog
         v-model="isLatestReleaseNoteVisible"
-        :title="$t('Release') + ` ${this.latestRelease.name}`"
+        :title="t('Release') + ` ${this.latestRelease.name}`"
       >
         <el-tabs v-model="activeTabName">
-          <el-tab-pane :label="$t('Release Note')" name="release-note">
+          <el-tab-pane :label="t('Release Note')" name="release-note">
             <div class="content markdown-body" v-html="latestReleaseNoteHtml" />
             <template v-slot:footer>
               <el-button
                 type="primary"
                 size="small"
                 @click="isLatestReleaseNoteVisible = false"
-                >{{ $t('Ok') }}</el-button
+                >{{ t('Ok') }}</el-button
               >
             </template>
           </el-tab-pane>
-          <el-tab-pane :label="$t('How to Upgrade')" name="how-to-upgrade">
+          <el-tab-pane :label="t('How to Upgrade')" name="how-to-upgrade">
             <div class="content markdown-body" v-html="howToUpgradeHtml" />
           </el-tab-pane>
         </el-tabs>
@@ -27,7 +27,7 @@
             type="primary"
             size="small"
             @click="isLatestReleaseNoteVisible = false"
-            >{{ $t('Ok') }}</el-button
+            >{{ t('Ok') }}</el-button
           >
         </template>
       </el-dialog>
@@ -47,7 +47,7 @@
           <el-dropdown-menu class="user-dropdown">
             <el-dropdown-item>
               <span style="display: block" @click="logout">{{
-                $t('Logout')
+                t('Logout')
               }}</span>
             </el-dropdown-item>
           </el-dropdown-menu>
@@ -55,7 +55,7 @@
       </el-dropdown>
       <el-dropdown class="lang-list right" trigger="click">
         <span class="el-dropdown-link">
-          {{ $t($store.getters['lang/lang']) }}
+          {{ t($store.getters['lang/lang']) }}
           <el-icon class="el-icon--right"><el-icon-arrow-down /></el-icon>
         </span>
         <template v-slot:dropdown>
@@ -78,18 +78,18 @@
       <div class="disclaimer right">
         <div @click="disclaimerVisible = true">
           <font-awesome-icon :icon="['fa', 'exclamation-circle']" />
-          <span style="margin-left: 5px">{{ $t('Disclaimer') }}</span>
+          <span style="margin-left: 5px">{{ t('Disclaimer') }}</span>
         </div>
       </div>
       <div v-if="isUpgradable" class="upgrade right" @click="onClickUpgrade">
         <font-awesome-icon :icon="['fas', 'arrow-up']" />
         <el-badge is-dot>
-          <span style="margin-left: 5px">{{ $t('Upgrade') }}</span>
+          <span style="margin-left: 5px">{{ t('Upgrade') }}</span>
         </el-badge>
       </div>
       <el-popover class="wechat right" trigger="click">
         <div style="margin-bottom: 5px">
-          <label>{{ $t('Add Wechat to join discussion group') }}</label>
+          <label>{{ t('Add Wechat to join discussion group') }}</label>
         </div>
         <div>
           <img
@@ -122,7 +122,7 @@
 
 <script>
 import { ArrowDown as ElIconArrowDown } from '@element-plus/icons'
-import * as Vue from 'vue'
+import { getCurrentInstance } from 'vue'
 import { mapGetters, mapState } from 'vuex'
 import Breadcrumb from '@/components/Breadcrumb'
 import Hamburger from '@/components/Hamburger'
@@ -130,6 +130,7 @@ import DisclaimerDialog from '@/components/Disclaimer'
 // import GithubButton from 'vue-github-button'
 import showdown from 'showdown'
 import 'github-markdown-css/github-markdown.css'
+import { useI18n } from 'vue-i18n'
 
 export default {
   components: {
@@ -190,8 +191,8 @@ docker-compose up -d
     ...mapState('lang', ['lang']),
     ...mapGetters(['sidebar', 'avatar']),
     username() {
-      if (!this.$store.getters['user/userInfo']) return this.$t('User')
-      if (!this.$store.getters['user/userInfo'].username) return this.$t('User')
+      if (!this.$store.getters['user/userInfo']) return this.t('User')
+      if (!this.$store.getters['user/userInfo'].username) return this.t('User')
       return this.$store.getters['user/userInfo'].username
     },
     isUpgradable() {
@@ -248,6 +249,12 @@ docker-compose up -d
       this.isLatestReleaseNoteVisible = true
       this.$st.sendEv('全局', '点击版本升级')
     },
+  },
+  setup(props) {
+    const { t } = useI18n()
+    const currIns = getCurrentInstance()
+    currIns.t = t
+    return { t }
   },
 }
 </script>

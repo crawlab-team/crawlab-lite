@@ -15,7 +15,7 @@
           <item
             v-if="onlyOneChild.meta"
             :icon="onlyOneChild.meta.icon || item.meta.icon"
-            :title="$t(onlyOneChild.meta.title)"
+            :title="t(onlyOneChild.meta.title)"
           />
         </el-menu-item>
       </app-link>
@@ -26,7 +26,7 @@
         <item
           v-if="item.meta"
           :icon="item.meta.icon"
-          :title="$t(item.meta.title)"
+          :title="t(item.meta.title)"
         />
       </template>
 
@@ -43,7 +43,7 @@
             <item
               v-if="child.meta"
               :icon="child.meta.icon"
-              :title="$t(child.meta.title)"
+              :title="t(child.meta.title)"
             />
           </el-menu-item>
         </app-link>
@@ -58,6 +58,7 @@ import path from 'path'
 import { isExternal } from '@/utils/validate'
 import Item from './Item'
 import AppLink from './Link'
+import { useI18n } from 'vue-i18n'
 
 export default {
   name: 'SidebarItem',
@@ -116,6 +117,10 @@ export default {
     isExternalLink(routePath) {
       return isExternal(routePath)
     },
+  },
+  setup(props) {
+    const { t } = useI18n()
+    return { t }
   },
 }
 </script>

@@ -21,12 +21,12 @@
     <!--documentation-->
     <div class="documentation">
       <!--      <el-tooltip-->
-      <!--        :content="$t('Click to view related Documentation')"-->
+      <!--        :content="t('Click to view related Documentation')"-->
       <!--      >-->
       <!--        <i class="el-icon-question" @click="onClickDocumentation"></i>-->
       <!--      </el-tooltip>-->
       <el-drawer
-        :title="$t('Related Documentation')"
+        :title="t('Related Documentation')"
         v-model:visible="isShowDocumentation"
         :before-close="onCloseDocumentation"
         size="300px"
@@ -43,6 +43,7 @@ import * as Vue from 'vue'
 import { AppMain, Navbar, Sidebar, TagsView } from './components'
 import ResizeMixin from './mixin/ResizeHandler'
 import Documentation from '../../components/Documentation/Documentation'
+import { useI18n } from 'vue-i18n'
 
 export default {
   name: 'Layout',
@@ -90,6 +91,10 @@ export default {
       this.isShowDocumentation = false
       this.$st.sendEv('全局', '关闭右侧文档')
     },
+  },
+  setup(props) {
+    const { t } = useI18n()
+    return { t }
   },
 }
 </script>

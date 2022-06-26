@@ -7,11 +7,9 @@
             item.redirect === 'noredirect' || index === levelList.length - 1
           "
           class="no-redirect"
-          >{{ $t(item.meta.title) }}</span
+          >{{ t(item.meta.title) }}</span
         >
-        <a v-else @click.prevent="handleLink(item)">{{
-          $t(item.meta.title)
-        }}</a>
+        <a v-else @click.prevent="handleLink(item)">{{ t(item.meta.title) }}</a>
       </el-breadcrumb-item>
     </transition-group>
   </el-breadcrumb>
@@ -20,12 +18,17 @@
 <script>
 import * as Vue from 'vue'
 import pathToRegexp from 'path-to-regexp'
+import { useI18n } from 'vue-i18n'
 
 export default {
   data() {
     return {
       levelList: null,
     }
+  },
+  setup(props) {
+    const { t } = useI18n()
+    return { t: t }
   },
   watch: {
     $route() {
@@ -45,7 +48,8 @@ export default {
       }
 
       this.levelList = matched.filter(
-        (item) => item.meta && item.meta.title && item.meta.breadcrumb !== false
+        (item) =>
+          item.meta && item.meta.title && item.meta.breadcrumb !== false,
       )
     },
     pathCompile(path) {

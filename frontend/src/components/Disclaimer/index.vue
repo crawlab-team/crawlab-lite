@@ -3,14 +3,14 @@
     class="disclaimer"
     v-model="visible"
     width="60%"
-    :title="$t('Disclaimer')"
+    :title="t('Disclaimer')"
   >
     <div class="text-container">
       <div v-html="text" />
     </div>
     <template v-slot:footer>
       <el-button size="small" type="primary" @click="visible = false">{{
-        $t('Ok')
+        t('Ok')
       }}</el-button>
     </template>
   </el-dialog>
@@ -21,9 +21,14 @@ import { $on, $off, $once, $emit } from '../../utils/gogocodeTransfer'
 import * as Vue from 'vue'
 import { mapState } from 'vuex'
 import showdown from 'showdown'
+import { useI18n } from 'vue-i18n'
 
 export default {
   name: 'Disclaimer',
+  setup(props) {
+    const { t } = useI18n()
+    return { t: t }
+  },
   props: {
     value: {
       type: Boolean,
