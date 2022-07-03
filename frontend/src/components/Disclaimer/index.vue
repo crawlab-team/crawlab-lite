@@ -1,14 +1,14 @@
 <template>
   <el-dialog
-    class="disclaimer"
-    v-model="visible"
+    :model-value="visible"
+    custom-class="disclaimer"
     width="60%"
     :title="t('Disclaimer')"
   >
     <div class="text-container">
       <div v-html="text" />
     </div>
-    <template v-slot:footer>
+    <template #footer>
       <el-button size="small" type="primary" @click="visible = false">{{
         t('Ok')
       }}</el-button>
@@ -81,10 +81,10 @@ This Disclaimer and privacy protection statement (hereinafter referred to as "di
       this.visible = current
     },
     visible: function (current) {
-      $emit(this, 'update:value', current)
+      $emit(this, 'update:model-value', current)
     },
   },
-  emits: ['update:value'],
+  emits: ['update:model-value'],
 }
 </script>
 

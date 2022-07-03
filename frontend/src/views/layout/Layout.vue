@@ -27,7 +27,7 @@
       <!--      </el-tooltip>-->
       <el-drawer
         :title="t('Related Documentation')"
-        v-model:visible="isShowDocumentation"
+        v-model="isShowDocumentation"
         :before-close="onCloseDocumentation"
         size="300px"
       >

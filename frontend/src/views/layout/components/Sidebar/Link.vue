@@ -1,12 +1,12 @@
 <template>
   <!-- eslint-disable vue/require-component-is -->
-  <component v-bind="linkProps(to)">
+  <!-- todo: must set is -->
+  <component is="RouterLink" v-bind="linkProps(to)">
     <slot />
   </component>
 </template>
 
 <script>
-import * as Vue from 'vue'
 import { isExternal } from '@/utils/validate'
 
 export default {
@@ -20,14 +20,14 @@ export default {
     linkProps(url) {
       if (isExternal(url)) {
         return {
-          is: 'a',
+          // is: 'a',
           href: url,
           target: '_blank',
           rel: 'noopener',
         }
       }
       return {
-        is: 'router-link',
+        // is: 'router-link',
         to: url,
       }
     },

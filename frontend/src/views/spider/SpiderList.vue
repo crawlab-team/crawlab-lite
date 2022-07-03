@@ -169,8 +169,6 @@
           <el-button
             size="small"
             type="success"
-            :icon="ElIconPlus"
-            class="btn add"
             style="font-weight: bolder"
             @click="onAdd"
           >

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <disclaimer-dialog v-model:value="disclaimerVisible" />
+    <disclaimer-dialog v-model="disclaimerVisible" />
     <div class="navbar">
       <el-dialog
         v-model="isLatestReleaseNoteVisible"
@@ -22,7 +22,7 @@
             <div class="content markdown-body" v-html="howToUpgradeHtml" />
           </el-tab-pane>
         </el-tabs>
-        <template v-slot:footer>
+        <template #footer>
           <el-button
             type="primary"
             size="small"
@@ -43,7 +43,7 @@
           {{ username }}
           <el-icon class="el-icon--right"><el-icon-arrow-down /></el-icon>
         </span>
-        <template v-slot:dropdown>
+        <template #dropdown>
           <el-dropdown-menu class="user-dropdown">
             <el-dropdown-item>
               <span style="display: block" @click="logout">{{
@@ -58,7 +58,7 @@
           {{ t($store.getters['lang/lang']) }}
           <el-icon class="el-icon--right"><el-icon-arrow-down /></el-icon>
         </span>
-        <template v-slot:dropdown>
+        <template #dropdown>
           <el-dropdown-menu>
             <el-dropdown-item @click="setLang('zh')">
               <span>中文</span>
@@ -87,7 +87,7 @@
           <span style="margin-left: 5px">{{ t('Upgrade') }}</span>
         </el-badge>
       </div>
-      <el-popover class="wechat right" trigger="click">
+      <el-popover trigger="click" placement="bottom" :width="275">
         <div style="margin-bottom: 5px">
           <label>{{ t('Add Wechat to join discussion group') }}</label>
         </div>
@@ -97,10 +97,8 @@
             src="http://static-docs.crawlab.cn/wechat.jpg"
           />
         </div>
-        <template v-slot:reference>
-          <div>
-            <i class="fa fa-wechat" />
-          </div>
+        <template #reference>
+          <div class="wechat right"><i class="fa fa-wechat" /></div>
         </template>
       </el-popover>
       <div class="github right">
@@ -273,7 +271,9 @@ docker-compose up -d
 
   .lang-list {
     cursor: pointer;
-    display: inline-block;
+    height: 50px;
+    display: flex;
+    align-items: center;
     margin-right: 35px;
     /*position: absolute;*/
     /*right: 80px;*/
@@ -289,7 +289,8 @@ docker-compose up -d
   .avatar-container {
     cursor: pointer;
     height: 50px;
-    display: inline-block;
+    display: flex;
+    align-items: center;
     margin-right: 35px;
     /*position: absolute;*/
     /*right: 35px;*/

@@ -4,7 +4,7 @@
     <el-dialog
       :title="t('Notification')"
       :model-value="visible"
-      class="crawl-confirm-dialog"
+      custom-class="crawl-confirm-dialog"
       width="480px"
       :before-close="beforeClose"
     >

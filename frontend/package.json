@@ -37,7 +37,7 @@
     "showdown": "^1.9.1",
     "tiny-emitter": "^2.1.0",
     "vcrontab": "^0.3.5",
-    "vue": "^3.0.0",
+    "vue": "^3.2.37",
     "vue-ba": "^1.2.8",
     "vue-codemirror": "^4.0.6",
     "vue-codemirror-lite": "^1.0.4",
