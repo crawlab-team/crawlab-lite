@@ -164,7 +164,7 @@
               <el-button
                 type="primary"
                 :icon="ElIconSearch"
-                size="mini"
+                size="small"
                 @click="onView(scope.row)"
               />
             </el-tooltip>
@@ -172,7 +172,7 @@
               <el-button
                 type="warning"
                 :icon="ElIconRefresh"
-                size="mini"
+                size="small"
                 @click="onRestart(scope.row, $event)"
               />
             </el-tooltip>
@@ -184,7 +184,7 @@
               <el-button
                 type="danger"
                 :icon="ElIconVideoPause"
-                size="mini"
+                size="small"
                 @click="onCancel(scope.row, $event)"
               />
             </el-tooltip>
@@ -192,7 +192,7 @@
               <el-button
                 type="danger"
                 :icon="ElIconDelete"
-                size="mini"
+                size="small"
                 @click="onRemove(scope.row, $event)"
               />
             </el-tooltip>
