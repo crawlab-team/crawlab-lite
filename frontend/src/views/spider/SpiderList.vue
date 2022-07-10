@@ -111,8 +111,8 @@
             <el-tooltip :content="t('Remove')" placement="top">
               <el-button
                 type="danger"
-                :icon="ElIconDelete"
-                size="mini"
+                :icon="Delete"
+                size="small"
                 @click="onRemoveVersion(scope.row, $event)"
               />
             </el-tooltip>
@@ -274,7 +274,7 @@
               <el-button
                 type="success"
                 :icon="faBug"
-                size="mini"
+                size="small"
                 @click="onCrawl(scope.row, $event)"
               />
             </el-tooltip>
@@ -282,7 +282,7 @@
               <el-button
                 type="warning"
                 :icon="faArchive"
-                size="mini"
+                size="small"
                 @click="onViewSpiderVersions(scope.row, $event)"
               />
             </el-tooltip>
@@ -290,7 +290,7 @@
               <el-button
                 type="danger"
                 :icon="ElIconDelete"
-                size="mini"
+                size="small"
                 @click="onRemove(scope.row, $event)"
               />
             </el-tooltip>
