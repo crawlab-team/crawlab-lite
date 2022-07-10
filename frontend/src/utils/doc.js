@@ -2,23 +2,23 @@ export default {
   docs: [
     {
       path: '/projects',
-      pattern: '^Project'
+      pattern: '^Project',
     },
     {
       path: '/spiders',
-      pattern: '^Spider|^SDK|^Integration|^CI/Git'
+      pattern: '^Spider|^SDK|^Integration|^CI/Git',
     },
     {
       path: '/tasks',
-      pattern: '^Task|^Architecture/Task'
+      pattern: '^Task|^Architecture/Task',
     },
     {
       path: '/schedules',
-      pattern: '^Schedule'
+      pattern: '^Schedule',
     },
     {
       path: '/setting',
-      pattern: '^Notification'
-    }
-  ]
+      pattern: '^Notification',
+    },
+  ],
 }

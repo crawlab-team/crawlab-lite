@@ -52,137 +52,137 @@
 </template>
 
 <script>
-  import { mapState } from 'vuex'
-  import MetricCard from './MetricCard'
-  import echarts from 'echarts'
+import * as Vue from 'vue'
+import { mapState } from 'vuex'
+import MetricCard from './MetricCard'
+import echarts from 'echarts'
 
-  export default {
-    name: 'SpiderStats',
-    components: { MetricCard },
-    data() {
-      return {
-        loading: false
-      }
-    },
-    computed: {
-      ...mapState('spider', [
-        'overviewStats',
-        'dailyStats'
-      ])
-    },
-    methods: {
-      renderTaskLine() {
-        const chart = echarts.init(this.$el.querySelector('#task-line'))
-        const option = {
-          grid: {
-            top: 20,
-            bottom: 40
-          },
-          xAxis: {
-            type: 'category',
-            data: this.dailyStats.map(d => d.date)
-          },
-          yAxis: {
-            type: 'value'
-          },
-          series: [{
-            type: 'line',
-            data: this.dailyStats.map(d => d.task_count),
-            areaStyle: {},
-            smooth: true
-          }],
-          tooltip: {
-            trigger: 'axis',
-            show: true
-          }
-        }
-        chart.setOption(option)
-      },
-
-      renderDurationLine() {
-        const chart = echarts.init(this.$el.querySelector('#duration-line'))
-        const option = {
-          grid: {
-            top: 20,
-            bottom: 40
-          },
-          xAxis: {
-            type: 'category',
-            data: this.dailyStats.map(d => d.date)
-          },
-          yAxis: {
-            type: 'value'
-          },
-          series: [{
-            type: 'line',
-            data: this.dailyStats.map(d => d.avg_runtime_duration),
-            areaStyle: {},
-            smooth: true
-          }],
-          tooltip: {
-            trigger: 'axis',
-            show: true
-          }
-        }
-        chart.setOption(option)
-      },
-
-      render() {
-        this.renderTaskLine()
-        this.renderDurationLine()
-      },
-
-      update() {
-        this.loading = true
-        this.$store.dispatch('spider/getSpiderStats')
-          .then(() => {
-            this.render()
-          })
-          .catch(() => {
-            this.$message.error(this.$t('An error happened when fetching the data'))
-          })
-          .finally(() => {
-            this.loading = false
-          })
-      },
-
-      getPercentStr(value) {
-        if (value === undefined) return 'NA'
-        return (value * 100).toFixed(2) + '%'
-      },
-
-      getDecimal(value) {
-        if (value === undefined) return 'NA'
-        return value.toFixed(2)
-      }
+export default {
+  name: 'SpiderStats',
+  components: { MetricCard },
+  data() {
+    return {
+      loading: false,
     }
-  }
+  },
+  computed: {
+    ...mapState('spider', ['overviewStats', 'dailyStats']),
+  },
+  methods: {
+    renderTaskLine() {
+      const chart = echarts.init(this.$el.querySelector('#task-line'))
+      const option = {
+        grid: {
+          top: 20,
+          bottom: 40,
+        },
+        xAxis: {
+          type: 'category',
+          data: this.dailyStats.map((d) => d.date),
+        },
+        yAxis: {
+          type: 'value',
+        },
+        series: [
+          {
+            type: 'line',
+            data: this.dailyStats.map((d) => d.task_count),
+            areaStyle: {},
+            smooth: true,
+          },
+        ],
+        tooltip: {
+          trigger: 'axis',
+          show: true,
+        },
+      }
+      chart.setOption(option)
+    },
+
+    renderDurationLine() {
+      const chart = echarts.init(this.$el.querySelector('#duration-line'))
+      const option = {
+        grid: {
+          top: 20,
+          bottom: 40,
+        },
+        xAxis: {
+          type: 'category',
+          data: this.dailyStats.map((d) => d.date),
+        },
+        yAxis: {
+          type: 'value',
+        },
+        series: [
+          {
+            type: 'line',
+            data: this.dailyStats.map((d) => d.avg_runtime_duration),
+            areaStyle: {},
+            smooth: true,
+          },
+        ],
+        tooltip: {
+          trigger: 'axis',
+          show: true,
+        },
+      }
+      chart.setOption(option)
+    },
+
+    render() {
+      this.renderTaskLine()
+      this.renderDurationLine()
+    },
+
+    update() {
+      this.loading = true
+      this.$store
+        .dispatch('spider/getSpiderStats')
+        .then(() => {
+          this.render()
+        })
+        .catch(() => {
+          this.$message.error(
+            this.$t('An error happened when fetching the data')
+          )
+        })
+        .finally(() => {
+          this.loading = false
+        })
+    },
+
+    getPercentStr(value) {
+      if (value === undefined) return 'NA'
+      return (value * 100).toFixed(2) + '%'
+    },
+
+    getDecimal(value) {
+      if (value === undefined) return 'NA'
+      return value.toFixed(2)
+    },
+  },
+}
 </script>
 
 <style scoped>
-  .metric-list {
-    display: flex;
-  }
-
-  .metric-list .metric-card {
-    flex-basis: 25%;
-  }
-
-  .chart-wrapper {
-    margin-top: 20px;
-  }
-
-  .chart {
-    width: 100%;
-    height: 240px;
-  }
-
-  .table {
-    height: 240px;
-  }
-
-  h4 {
-    display: inline-block;
-    margin: 0
-  }
+.metric-list {
+  display: flex;
+}
+.metric-list .metric-card {
+  flex-basis: 25%;
+}
+.chart-wrapper {
+  margin-top: 20px;
+}
+.chart {
+  width: 100%;
+  height: 240px;
+}
+.table {
+  height: 240px;
+}
+h4 {
+  display: inline-block;
+  margin: 0;
+}
 </style>

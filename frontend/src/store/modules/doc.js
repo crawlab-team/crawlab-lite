@@ -1,7 +1,7 @@
 import request from '../../api/request'
 
 const state = {
-  docData: []
+  docData: [],
 }
 
 const getters = {}
@@ -9,7 +9,7 @@ const getters = {}
 const mutations = {
   SET_DOC_DATA(state, value) {
     state.docData = value
-  }
+  },
 }
 
 const actions = {
@@ -36,21 +36,24 @@ const actions = {
       }
     }
 
-    commit('SET_DOC_DATA', Object.values(cache).map(d => {
-      d.level = 1
-      d.label = d.title
-      d.fullUrl = process.env.VUE_APP_DOC_URL + '/' + d.url
-      if (d.children) {
-        d.children = d.children.map(c => {
-          c.level = 2
-          c.label = c.title
-          c.fullUrl = process.env.VUE_APP_DOC_URL + '/' + c.url
-          return c
-        })
-      }
-      return d
-    }))
-  }
+    commit(
+      'SET_DOC_DATA',
+      Object.values(cache).map((d) => {
+        d.level = 1
+        d.label = d.title
+        d.fullUrl = process.env.VUE_APP_DOC_URL + '/' + d.url
+        if (d.children) {
+          d.children = d.children.map((c) => {
+            c.level = 2
+            c.label = c.title
+            c.fullUrl = process.env.VUE_APP_DOC_URL + '/' + c.url
+            return c
+          })
+        }
+        return d
+      })
+    )
+  },
 }
 
 export default {
@@ -58,5 +61,5 @@ export default {
   state,
   getters,
   mutations,
-  actions
+  actions,
 }

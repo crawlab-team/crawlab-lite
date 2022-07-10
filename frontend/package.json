@@ -12,18 +12,21 @@
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
+    "@element-plus/icons-vue": "^2.0.6",
     "@fortawesome/fontawesome-svg-core": "^1.2.35",
     "@fortawesome/free-brands-svg-icons": "^5.15.3",
     "@fortawesome/free-regular-svg-icons": "^5.15.3",
     "@fortawesome/free-solid-svg-icons": "^5.15.3",
-    "@fortawesome/vue-fontawesome": "^2.0.2",
+    "@fortawesome/vue-fontawesome": "^3.0.1",
     "@tinymce/tinymce-vue": "^4.0.2",
     "ansi-to-html": "^0.6.15",
     "axios": "^0.21.1",
+    "core-js": "^3.8.3",
+    "crawlab-ui": "^0.6.0-2",
     "cross-env": "^7.0.3",
     "dayjs": "^1.10.4",
     "echarts": "^5.1.1",
-    "element-ui": "2.15.1",
+    "element-plus": "2.2.6",
     "font-awesome": "^4.7.0",
     "github-markdown-css": "^4.0.0",
     "has-ansi": "^2.0.0",
@@ -32,21 +35,24 @@
     "nprogress": "0.2.0",
     "path": "^0.12.7",
     "showdown": "^1.9.1",
+    "tiny-emitter": "^2.1.0",
     "vcrontab": "^0.3.5",
-    "vue": "^2.6.12",
+    "vue": "^3.2.37",
     "vue-ba": "^1.2.8",
     "vue-codemirror": "^4.0.6",
     "vue-codemirror-lite": "^1.0.4",
     "vue-github-button": "^1.3.0",
-    "vue-i18n": "^8.24.4",
-    "vue-router": "^3.5.1",
+    "vue-i18n": "^9.1.10",
+    "vue-router": "^4.0.8",
     "vue-virtual-scroll-list": "^2.3.2",
-    "vuex": "^3.6.2"
+    "vuex": "^4.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.14.2",
+    "@babel/preset-typescript": "^7.17.12",
     "@vue/cli-plugin-babel": "^4.5.13",
     "@vue/cli-plugin-eslint": "^4.5.13",
+    "@vue/cli-plugin-typescript": "^4.5.18",
     "@vue/cli-plugin-unit-jest": "^4.5.13",
     "@vue/cli-service": "^4.5.13",
     "@vue/eslint-config-standard": "^6.0.0",
@@ -55,8 +61,8 @@
     "babel-jest": "^26.6.3",
     "eslint": "^7.26.0",
     "eslint-plugin-vue": "^7.9.0",
-    "node-sass": "^6.0.0",
+    "node-sass": "^5.0.0",
     "sass-loader": "^10.2.0",
-    "vue-template-compiler": "^2.6.12"
+    "typescript": "^4.7.4"
   }
 }

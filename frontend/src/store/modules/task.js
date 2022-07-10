@@ -22,7 +22,7 @@ const state = {
   activeErrorLogItem: {},
   // results
   resultsPageNum: 1,
-  resultsPageSize: 10
+  resultsPageSize: 10,
 }
 
 const getters = {
@@ -38,30 +38,29 @@ const getters = {
     return keys
   },
   logData(state) {
-    const data = state.taskLogList
-      .map((d, i) => {
-        return {
-          active: state.currentLogIndex === i + 1,
-          line_num: i + 1,
-          ...d
-        }
-      })
+    const data = state.taskLogList.map((d, i) => {
+      return {
+        active: state.currentLogIndex === i + 1,
+        line_num: i + 1,
+        ...d,
+      }
+    })
     if (state.taskForm && state.taskForm.status === 'RUNNING') {
       data.push({
         line_num: data.length + 1,
-        line_text: '###LOG_END###'
+        line_text: '###LOG_END###',
       })
     }
     return data
   },
   errorLogData(state, getters) {
-    const idxList = getters.logData.map(d => d.id)
-    return state.errorLogData.map(d => {
+    const idxList = getters.logData.map((d) => d.id)
+    return state.errorLogData.map((d) => {
       const idx = idxList.indexOf(d.id)
       d.index = getters.logData[idx].index
       return d
     })
-  }
+  },
 }
 
 const mutations = {
@@ -115,45 +114,44 @@ const mutations = {
   },
   SET_ACTIVE_ERROR_LOG_ITEM(state, value) {
     state.activeErrorLogItem = value
-  }
+  },
 }
 
 const actions = {
   getTaskData({ state, dispatch, commit }, id) {
-    return request.get(`/tasks/${id}`)
-      .then(response => {
-        const data = response.data.data
-        commit('SET_TASK_FORM', data)
-      })
+    return request.get(`/tasks/${id}`).then((response) => {
+      const data = response.data.data
+      commit('SET_TASK_FORM', data)
+    })
   },
   getTaskList({ state, commit }, params = {}) {
-    return request.get('/tasks', params)
-      .then(response => {
-        if (!response || !response.data || !response.data.data) {
-          return
-        }
-        commit('SET_TASK_LIST', response.data.data.list || [])
-        commit('SET_TASK_TOTAL', response.data.data.total || 0)
-      })
+    return request.get('/tasks', params).then((response) => {
+      if (!response || !response.data || !response.data.data) {
+        return
+      }
+      commit('SET_TASK_LIST', response.data.data.list || [])
+      commit('SET_TASK_TOTAL', response.data.data.total || 0)
+    })
   },
   deleteTask({ state, dispatch }, id) {
     return request.delete(`/tasks/${id}`)
   },
   deleteTaskMultiple({ state }, ids) {
     return request.delete(`/tasks`, {
-      ids: ids
+      ids: ids,
     })
   },
   restartTask({ state, dispatch }, id) {
     return request.post(`/tasks/${id}/restart`)
   },
   getTaskLogs({ state, commit }, { id, keyword }) {
-    return request.get(`/tasks/${id}/logs`, {
-      keyword,
-      page_num: state.taskLogPage,
-      page_size: state.taskLogPageSize
-    })
-      .then(response => {
+    return request
+      .get(`/tasks/${id}/logs`, {
+        keyword,
+        page_num: state.taskLogPage,
+        page_size: state.taskLogPageSize,
+      })
+      .then((response) => {
         if (!response || !response.data || !response.data.data) {
           return
         }
@@ -161,26 +159,32 @@ const actions = {
         commit('SET_TASK_LOG_TOTAL', response.data.data.total || 0)
 
         // auto switch to next page if not reaching the end
-        if (state.isLogAutoScroll && state.taskLogTotal > (state.taskLogPage * state.taskLogPageSize)) {
-          commit('SET_TASK_LOG_PAGE', Math.ceil(state.taskLogTotal / state.taskLogPageSize))
+        if (
+          state.isLogAutoScroll &&
+          state.taskLogTotal > state.taskLogPage * state.taskLogPageSize
+        ) {
+          commit(
+            'SET_TASK_LOG_PAGE',
+            Math.ceil(state.taskLogTotal / state.taskLogPageSize)
+          )
         }
       })
   },
   getTaskErrorLog({ state, commit }, id) {
-    return request.get(`/tasks/${id}/error-log`, {})
-      .then(response => {
-        if (!response || !response.data || !response.data.data) {
-          return
-        }
-        commit('SET_ERROR_LOG_DATA', response.data.data.list || [])
-      })
+    return request.get(`/tasks/${id}/error-log`, {}).then((response) => {
+      if (!response || !response.data || !response.data.data) {
+        return
+      }
+      commit('SET_ERROR_LOG_DATA', response.data.data.list || [])
+    })
   },
   getTaskResults({ state, commit }, id) {
-    return request.get(`/tasks/${id}/results`, {
-      page_num: state.resultsPageNum,
-      page_size: state.resultsPageSize
-    })
-      .then(response => {
+    return request
+      .get(`/tasks/${id}/results`, {
+        page_num: state.resultsPageNum,
+        page_size: state.resultsPageSize,
+      })
+      .then((response) => {
         if (!response || !response.data || !response.data.data) {
           return
         }
@@ -189,14 +193,13 @@ const actions = {
       })
   },
   cancelTask({ state, dispatch }, id) {
-    return new Promise(resolve => {
-      request.post(`/tasks/${id}/cancel`)
-        .then(res => {
-          dispatch('getTaskData', id)
-          resolve(res)
-        })
+    return new Promise((resolve) => {
+      request.post(`/tasks/${id}/cancel`).then((res) => {
+        dispatch('getTaskData', id)
+        resolve(res)
+      })
     })
-  }
+  },
 }
 
 export default {
@@ -204,5 +207,5 @@ export default {
   state,
   getters,
   mutations,
-  actions
+  actions,
 }

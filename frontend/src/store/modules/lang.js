@@ -1,5 +1,5 @@
 const state = {
-  lang: window.localStorage.getItem('lang') || 'zh'
+  lang: window.localStorage.getItem('lang') || 'zh',
 }
 
 const getters = {
@@ -11,13 +11,13 @@ const getters = {
     } else {
       return state.lang
     }
-  }
+  },
 }
 
 const mutations = {
   SET_LANG(state, value) {
     state.lang = value
-  }
+  },
 }
 
 const actions = {}
@@ -27,5 +27,5 @@ export default {
   state,
   getters,
   mutations,
-  actions
+  actions,
 }

@@ -1,5 +1,5 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
+import * as Vue from 'vue'
+import * as Vuex from 'vuex'
 import app from './modules/app'
 import user from './modules/user'
 import tagsView from './modules/tagsView'
@@ -14,9 +14,7 @@ import version from './modules/version'
 import doc from './modules/doc'
 import getters from './getters'
 
-Vue.use(Vuex)
-
-const store = new Vuex.Store({
+const store = Vuex.createStore({
   modules: {
     app,
     user,
@@ -29,9 +27,9 @@ const store = new Vuex.Store({
     lang,
     version,
     doc,
-    stats
+    stats,
   },
-  getters
+  getters,
 })
 
 export default store

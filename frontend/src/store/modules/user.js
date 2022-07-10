@@ -11,18 +11,16 @@ const user = {
     globalVariableForm: {},
     userForm: {},
     userInfo: undefined,
-    adminPaths: [
-      '/users'
-    ],
+    adminPaths: ['/users'],
     pageNum: 1,
     pageSize: 10,
-    totalCount: 0
+    totalCount: 0,
   },
 
   getters: {
     token() {
       return window.localStorage.getItem('token')
-    }
+    },
   },
 
   mutations: {
@@ -34,14 +32,17 @@ const user = {
     },
     SET_GLOBAL_VARIABLE_LIST: (state, value) => {
       state.globalVariableList = value
-    }
+    },
   },
 
   actions: {
     // 登录
     async login({ commit }, userInfo) {
       const username = userInfo.username.trim()
-      const res = await request.post('/login', { username, password: userInfo.password })
+      const res = await request.post('/login', {
+        username,
+        password: userInfo.password,
+      })
       if (res.status === 200) {
         const token = res.data.data
         commit('SET_TOKEN', token)
@@ -66,10 +67,9 @@ const user = {
 
     // 新增全局变量
     addGlobalVariable({ commit, state }) {
-      return request.put(`/variable`, state.globalVariableForm)
-        .then(() => {
-          state.globalVariableForm = {}
-        })
+      return request.put(`/variable`, state.globalVariableForm).then(() => {
+        state.globalVariableForm = {}
+      })
     },
     // 获取全局变量列表
     getGlobalVariable({ commit, state }) {
@@ -80,8 +80,8 @@ const user = {
     // 删除全局变量
     deleteGlobalVariable({ commit, state }, id) {
       return request.delete(`/variable/${id}`)
-    }
-  }
+    },
+  },
 }
 
 export default user

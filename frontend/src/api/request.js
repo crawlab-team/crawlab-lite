@@ -1,9 +1,11 @@
 import axios from 'axios'
 import router from '../router'
-import { Message } from 'element-ui'
+import { ElMessage as Message } from 'element-plus'
 
 // 根据 VUE_APP_BASE_URL 生成 baseUrl
-let baseUrl = process.env.VUE_APP_BASE_URL ? process.env.VUE_APP_BASE_URL : 'http://localhost:8000'
+let baseUrl = process.env.VUE_APP_BASE_URL
+  ? process.env.VUE_APP_BASE_URL
+  : 'http://localhost:8000'
 if (!baseUrl.match(/^https?/i)) {
   baseUrl = `${window.location.protocol}//${window.location.host}${process.env.VUE_APP_BASE_URL}`
 }
@@ -17,7 +19,7 @@ if (!CRAWLAB_API_ADDRESS.match('CRAWLAB_API_ADDRESS')) {
 const request = (method, path, params, data, others = {}) => {
   const url = baseUrl + path
   const headers = {
-    'Authorization': window.localStorage.getItem('token')
+    Authorization: window.localStorage.getItem('token'),
   }
   return axios({
     method,
@@ -25,28 +27,30 @@ const request = (method, path, params, data, others = {}) => {
     params,
     data,
     headers,
-    ...others
-  }).then((response) => {
-    if (response.status === 200) {
-      return Promise.resolve(response)
-    }
-    return Promise.reject(response)
-  }).catch((e) => {
-    const response = e.response
-    if (!response) {
-      return e
-    }
-    if (response.status === 400) {
-      Message.error(response.data.message)
-    }
-    if (response.status === 401 && router.currentRoute.path !== '/login') {
-      router.push('/login')
-    }
-    if (response.status === 500) {
-      Message.error(response.data.message)
-    }
-    return e
+    ...others,
   })
+    .then((response) => {
+      if (response.status === 200) {
+        return Promise.resolve(response)
+      }
+      return Promise.reject(response)
+    })
+    .catch((e) => {
+      const response = e.response
+      if (!response) {
+        return e
+      }
+      if (response.status === 400) {
+        Message.error(response.data.message)
+      }
+      if (response.status === 401 && router.currentRoute.path !== '/login') {
+        router.push('/login')
+      }
+      if (response.status === 500) {
+        Message.error(response.data.message)
+      }
+      return e
+    })
 }
 
 const get = (path, params) => {
@@ -71,5 +75,5 @@ export default {
   get,
   post,
   put,
-  delete: del
+  delete: del,
 }

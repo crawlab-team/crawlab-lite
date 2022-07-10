@@ -3,7 +3,7 @@ import request from '../../api/request'
 const state = {
   currentPath: '',
   fileList: [],
-  fileContent: ''
+  fileContent: '',
 }
 
 const getters = {}
@@ -17,7 +17,7 @@ const mutations = {
   },
   SET_FILE_CONTENT(state, value) {
     state.fileContent = value
-  }
+  },
 }
 
 const actions = {
@@ -25,29 +25,34 @@ const actions = {
     const { path } = payload
     const spiderId = rootState.spider.spiderForm.id
     commit('SET_CURRENT_PATH', path)
-    return request.get(`/spiders/${spiderId}/dir`, { path })
-      .then(response => {
+    return request
+      .get(`/spiders/${spiderId}/dir`, { path })
+      .then((response) => {
         if (!response.data.data) response.data.data = []
         commit(
           'SET_FILE_LIST',
           response.data.data
-            .sort((a, b) => a.name > b.name ? -1 : 1)
-            .sort((a, b) => a.is_dir > b.is_dir ? -1 : 1)
+            .sort((a, b) => (a.name > b.name ? -1 : 1))
+            .sort((a, b) => (a.is_dir > b.is_dir ? -1 : 1))
         )
       })
   },
   getFileContent({ commit, rootState }, payload) {
     const { path } = payload
     const spiderId = rootState.spider.spiderForm.id
-    return request.get(`/spiders/${spiderId}/file`, { path })
-      .then(response => {
+    return request
+      .get(`/spiders/${spiderId}/file`, { path })
+      .then((response) => {
         commit('SET_FILE_CONTENT', response.data.data)
       })
   },
   saveFileContent({ state, rootState }, payload) {
     const { path } = payload
     const spiderId = rootState.spider.spiderForm.id
-    return request.post(`/spiders/${spiderId}/file`, { path, content: state.fileContent })
+    return request.post(`/spiders/${spiderId}/file`, {
+      path,
+      content: state.fileContent,
+    })
   },
   addFile({ rootState }, payload) {
     const { path } = payload
@@ -67,8 +72,11 @@ const actions = {
   renameFile({ rootState }, payload) {
     const { path, newPath } = payload
     const spiderId = rootState.spider.spiderForm.id
-    return request.post(`/spiders/${spiderId}/file/rename`, { path, new_path: newPath })
-  }
+    return request.post(`/spiders/${spiderId}/file/rename`, {
+      path,
+      new_path: newPath,
+    })
+  },
 }
 
 export default {
@@ -76,5 +84,5 @@ export default {
   state,
   getters,
   mutations,
-  actions
+  actions,
 }

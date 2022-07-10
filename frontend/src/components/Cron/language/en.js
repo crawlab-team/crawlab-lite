@@ -4,21 +4,21 @@ export default {
     every: 'Every second',
     interval: ['Every', 'second(s) starting at second'],
     specific: 'Specific second (choose one or many)',
-    cycle: ['Every second between second', 'and second']
+    cycle: ['Every second between second', 'and second'],
   },
   Minutes: {
     name: 'Minutes',
     every: 'Every minute',
     interval: ['Every', 'minute(s) starting at minute'],
     specific: 'Specific minute (choose one or many)',
-    cycle: ['Every minute between minute', 'and minute']
+    cycle: ['Every minute between minute', 'and minute'],
   },
   Hours: {
     name: 'Hours',
     every: 'Every hour',
     interval: ['Every', 'hour(s) starting at hour'],
     specific: 'Specific hour (choose one or many)',
-    cycle: ['Every hour between hour', 'and hour']
+    cycle: ['Every hour between hour', 'and hour'],
   },
   Day: {
     name: 'Day',
@@ -31,16 +31,27 @@ export default {
     lastWeekday: 'On the last weekday of the month',
     lastWeek: ['On the last', ' of the month'],
     beforeEndMonth: ['day(s) before the end of the month'],
-    nearestWeekday: ['Nearest weekday (Monday to Friday) to the', 'of the month'],
+    nearestWeekday: [
+      'Nearest weekday (Monday to Friday) to the',
+      'of the month',
+    ],
     someWeekday: ['On the', 'of the month'],
-    cycle: ['From', 'to']
+    cycle: ['From', 'to'],
   },
   Week: {
     name: 'Week',
     every: 'Every day',
     specific: 'Specific weekday (choose on or many)',
-    list: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-    cycle: ['From', 'to']
+    list: [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday',
+    ],
+    cycle: ['From', 'to'],
   },
   // Week:['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],
   Month: {
@@ -48,15 +59,15 @@ export default {
     every: 'Every month',
     interval: ['Every', 'month(s) starting in'],
     specific: 'Specific month (choose one or many)',
-    cycle: ['Every month between', 'and']
+    cycle: ['Every month between', 'and'],
   },
   Year: {
     name: 'Year',
     every: 'Any year',
     interval: ['Every', 'year(s) starting in'],
     specific: 'Specific year (choose one or many)',
-    cycle: ['Every year between', 'and']
+    cycle: ['Every year between', 'and'],
   },
   Save: 'Save',
-  Close: 'Close'
+  Close: 'Close',
 }

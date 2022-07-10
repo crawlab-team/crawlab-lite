@@ -1,31 +1,45 @@
 <template>
-  <el-dialog class="disclaimer" :visible.sync="visible" width="60%" :title="$t('Disclaimer')">
+  <el-dialog
+    :model-value="visible"
+    custom-class="disclaimer"
+    width="60%"
+    :title="t('Disclaimer')"
+  >
     <div class="text-container">
       <div v-html="text" />
     </div>
-    <template slot="footer">
-      <el-button size="small" type="primary" @click="visible = false">{{ $t('Ok') }}</el-button>
+    <template #footer>
+      <el-button size="small" type="primary" @click="visible = false">{{
+        t('Ok')
+      }}</el-button>
     </template>
   </el-dialog>
 </template>
 
 <script>
-  import { mapState } from 'vuex'
-  import showdown from 'showdown'
+import { $on, $off, $once, $emit } from '../../utils/gogocodeTransfer'
+import * as Vue from 'vue'
+import { mapState } from 'vuex'
+import showdown from 'showdown'
+import { useI18n } from 'vue-i18n'
 
-  export default {
-    name: 'Disclaimer',
-    props: {
-      value: {
-        type: Boolean
-      }
+export default {
+  name: 'Disclaimer',
+  setup(props) {
+    const { t } = useI18n()
+    return { t: t }
+  },
+  props: {
+    value: {
+      type: Boolean,
     },
-    data() {
-      const converter = new showdown.Converter()
-      return {
-        visible: this.value,
-        converter,
-        textEn: `
+  },
+  data() {
+    const converter = new showdown.Converter()
+    return {
+      visible: this.value,
+      converter,
+      textEn: `
 This Disclaimer and privacy protection statement (hereinafter referred to as "disclaimer statement" or "this statement") is applicable to the series of software (hereinafter referred to as "crawlab") developed by crawlab development group (hereinafter referred to as "development group") after you read this statement, if you do not agree with any terms in this statement or have doubts about this statement, please stop using our software immediately. If you have started or are using crawlab, you have read and agree to all terms of this statement.
 
 1. General: by installing crawlab and using the services and functions provided by crawlab, you have agreed to establish this agreement with the development team. The developer group may at any time change the terms at its sole discretion. The amended "terms" shall take effect automatically as soon as they are published on the GitHub disclaimer page.
@@ -36,8 +50,8 @@ This Disclaimer and privacy protection statement (hereinafter referred to as "di
 6. Crawlab respects and protects the personal privacy of all users and will not steal any information from users' computers.
 7. Copyright of the system: the crawleb development team owns the intellectual property rights, copyrights, copyrights and use rights for all developed or jointly developed products, which are protected by applicable intellectual property rights, copyrights, trademarks, service trademarks, patents or other laws.
 8. Communication: any company or individual who publishes or disseminates our software on the Internet is allowed, but the crawlab development team shall not be responsible for any legal and criminal events that may be caused by the company or individual disseminating the software.
-      `,
-        textZh: `
+    `,
+      textZh: `
 本免责及隐私保护声明(下简称“免责声明”或“本声明”)适用于 Crawlab 开发组 (以下简称“开发组”)研发的系列软件(以下简称"Crawlab") 在您阅读本声明后若不同意此声明中的任何条款，或对本声明存在质疑，请立刻停止使用我们的软件。若您已经开始或正在使用 Crawlab，则表示您已阅读并同意本声明的所有条款之约定。
 
 1. 总则：您通过安装 Crawlab 并使用 Crawlab 提供的服务与功能即表示您已经同意与开发组立本协议。开发组可随时执行全权决定更改“条款”。经修订的“条款”一经在 Github 免责声明页面上公布后，立即自动生效。
@@ -48,47 +62,45 @@ This Disclaimer and privacy protection statement (hereinafter referred to as "di
 6. Crawlab 尊重并保护所有用户的个人隐私权，不会窃取任何用户计算机中的信息。
 7. 系统的版权：Crawlab 开发组对所有开发的或合作开发的产品拥有知识产权，著作权，版权和使用权，这些产品受到适用的知识产权、版权、商标、服务商标、专利或其他法律的保护。
 8. 传播:任何公司或个人在网络上发布，传播我们软件的行为都是允许的，但因公司或个人传播软件可能造成的任何法律和刑事事件 Crawlab 开发组不负任何责任。
-      `
-      }
-    },
-    computed: {
-      ...mapState('lang', [
-        'lang'
-      ]),
-      text() {
-        if (!this.converter) return ''
-        if (this.lang === 'zh') {
-          return this.converter.makeHtml(this.textZh)
-        } else {
-          return this.converter.makeHtml(this.textEn)
-        }
-      }
-    },
-    watch: {
-      value: function(current) {
-        this.visible = current
-      },
-      visible: function(current) {
-        this.$emit('input', current)
-      }
+    `,
     }
-  }
+  },
+  computed: {
+    ...mapState('lang', ['lang']),
+    text() {
+      if (!this.converter) return ''
+      if (this.lang === 'zh') {
+        return this.converter.makeHtml(this.textZh)
+      } else {
+        return this.converter.makeHtml(this.textEn)
+      }
+    },
+  },
+  watch: {
+    value: function (current) {
+      this.visible = current
+    },
+    visible: function (current) {
+      $emit(this, 'update:model-value', current)
+    },
+  },
+  emits: ['update:model-value'],
+}
 </script>
 
 <style scoped>
-  .disclaimer >>> ol li {
-    margin: 10px 0;
-  }
-
-  .disclaimer >>> a {
-    color: #409EFF;
-  }
-
-  .disclaimer >>> a:hover {
-    text-decoration: underline;
-  }
-
-  .disclaimer .text-container {
-    max-height: 480px; overflow-y: scroll; padding: 1rem
-  }
+.disclaimer >>> ol li {
+  margin: 10px 0;
+}
+.disclaimer >>> a {
+  color: #409eff;
+}
+.disclaimer >>> a:hover {
+  text-decoration: underline;
+}
+.disclaimer .text-container {
+  max-height: 480px;
+  overflow-y: scroll;
+  padding: 1rem;
+}
 </style>
