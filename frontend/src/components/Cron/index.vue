@@ -1,7 +1,7 @@
 <template>
   <div id="change-crontab">
     <div class="cron-wrapper">
-      <label> {{ $t('Cron Expression') }}: </label>
+      <label> {{ t('Cron Expression') }}: </label>
       <el-tag type="success" size="small">
         {{ cron }}
       </el-tag>
@@ -392,6 +392,7 @@ import { Date as ElIconDate } from '@element-plus/icons'
 import { $on, $off, $once, $emit } from '../../utils/gogocodeTransfer'
 import * as Vue from 'vue'
 import Language from './language/index'
+import { useI18n } from 'vue-i18n'
 
 export default {
   components: {
@@ -400,6 +401,12 @@ export default {
   name: 'VueCronLinux',
   // eslint-disable-next-line vue/require-prop-types
   props: ['data', 'i18n'],
+  setup(props) {
+    const { t } = useI18n()
+    const currIns = Vue.getCurrentInstance()
+    currIns.t = t
+    return { t }
+  },
   data() {
     return {
       second: {
@@ -636,7 +643,7 @@ export default {
     },
     submit() {
       if (!this.validate()) {
-        this.$message.error(this.$t('Cron expression is invalid'))
+        this.$message.error(this.t('Cron expression is invalid'))
         return false
       }
       $emit(this, 'submit', this.cron)

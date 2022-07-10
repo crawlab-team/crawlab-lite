@@ -231,6 +231,8 @@ import { useI18n } from 'vue-i18n'
 export default {
   setup(props) {
     const { t } = useI18n()
+    const inst = Vue.getCurrentInstance()
+    inst.t = t
     return { t }
   },
   data() {

@@ -242,7 +242,7 @@
               <el-button
                 type="warning"
                 :icon="Edit"
-                size="mini"
+                size="small"
                 @click="onEdit(scope.row)"
               />
             </el-tooltip>
@@ -253,7 +253,7 @@
               <el-button
                 type="danger"
                 :icon="Delete"
-                size="mini"
+                size="small"
                 @click="onRemove(scope.row)"
               />
             </el-tooltip>
@@ -264,7 +264,7 @@
               <el-button
                 type="primary"
                 :icon="Search"
-                size="mini"
+                size="small"
                 @click="onViewTasks(scope.row)"
               />
             </el-tooltip>
@@ -275,7 +275,7 @@
               <el-button
                 type="success"
                 :icon="faBug"
-                size="mini"
+                size="small"
                 @click="onRun(scope.row)"
               />
             </el-tooltip>
@@ -317,6 +317,8 @@ export default {
   },
   setup(props) {
     const { t } = useI18n()
+    const inst = Vue.getCurrentInstance()
+    inst.t = t
     return { t }
   },
   data() {
@@ -529,6 +531,7 @@ export default {
     async onViewTasks(row) {
       this.$store.commit('schedule/SET_SCHEDULE_FORM', row)
       this.tasksDialogVisible = true
+      console.log(this.$refs)
       setTimeout(() => {
         this.$refs['schedule-task-list'].open()
       }, 100)
