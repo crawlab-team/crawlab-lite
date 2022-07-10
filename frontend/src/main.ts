@@ -10,6 +10,7 @@ import 'codemirror/theme/darcula.css'
 import '@/icons' // icon
 import '@/permission' // permission control
 
+import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import * as Vue from 'vue'
 
 import {
@@ -35,6 +36,9 @@ import store from './store'
 import utils from './utils'
 
 const app = (window.$vueApp = createApp(App))
+for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+  app.component(key, component)
+}
 
 app.use(getI18n())
 

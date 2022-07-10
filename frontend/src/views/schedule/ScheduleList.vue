@@ -71,7 +71,7 @@
           <el-button
             class="cron-edit"
             type="primary"
-            :icon="ElIconEdit"
+            :icon="Edit"
             style="width: 100px"
             @click="onShowCronDialog"
           >
@@ -161,8 +161,8 @@
           <el-button
             size="small"
             type="primary"
-            :icon="ElIconPlus"
             class="btn-add"
+            :icon="Edit"
             @click="onAdd"
           >
             {{ t('Add Schedule') }}
@@ -241,7 +241,7 @@
             <el-tooltip :content="t('Edit')" placement="top">
               <el-button
                 type="warning"
-                :icon="ElIconEdit"
+                :icon="Edit"
                 size="mini"
                 @click="onEdit(scope.row)"
               />
@@ -252,7 +252,7 @@
             <el-tooltip :content="t('Remove')" placement="top">
               <el-button
                 type="danger"
-                :icon="ElIconDelete"
+                :icon="Delete"
                 size="mini"
                 @click="onRemove(scope.row)"
               />
@@ -263,7 +263,7 @@
             <el-tooltip :content="t('View Tasks')" placement="top">
               <el-button
                 type="primary"
-                :icon="ElIconSearch"
+                :icon="Search"
                 size="mini"
                 @click="onViewTasks(scope.row)"
               />

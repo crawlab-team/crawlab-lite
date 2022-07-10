@@ -15,11 +15,12 @@
       >
         {{ t(generateTitle(tag.title)) }}
 
-        <span
-          v-if="!tag.meta.affix"
+        <el-icon
           class="el-icon-close"
+          v-if="!tag.meta.affix"
           @click.prevent.stop="closeSelectedTag(tag)"
-        />
+          ><Close
+        /></el-icon>
       </router-link>
     </scroll-pane>
     <ul
@@ -247,7 +248,8 @@ export default {
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.12), 0 0 3px 0 rgba(0, 0, 0, 0.04);
   .tags-view-wrapper {
     .tags-view-item {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
       position: relative;
       cursor: pointer;
       height: 26px;

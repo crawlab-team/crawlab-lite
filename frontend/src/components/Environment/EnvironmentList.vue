@@ -2,13 +2,9 @@
   <div class="environment-list">
     <el-row>
       <div class="button-group">
-        <el-button
-          size="small"
-          type="primary"
-          :icon="ElIconPlus"
-          @click="addEnv"
-          >{{ $t('Add Environment Variables') }}</el-button
-        >
+        <el-button size="small" type="primary" :icon="Plus" @click="addEnv">{{
+          $t('Add Environment Variables')
+        }}</el-button>
         <el-button size="small" type="success" @click="save">{{
           $t('Save')
         }}</el-button>
@@ -42,7 +38,6 @@
 </template>
 
 <script>
-import { Plus as ElIconPlus, Delete as ElIconDelete } from '@element-plus/icons'
 import * as Vue from 'vue'
 import { mapState } from 'vuex'
 
@@ -77,7 +72,7 @@ export default {
         .dispatch('spider/editSpider')
         .then(() => {
           this.$message.success(
-            this.$t('Spider info has been saved successfully')
+            this.$t('Spider info has been saved successfully'),
           )
         })
         .catch((error) => {

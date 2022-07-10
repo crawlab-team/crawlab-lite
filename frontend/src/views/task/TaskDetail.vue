@@ -5,7 +5,7 @@
       <!--      <el-tab-pane :label="$t('Overview')" name="overview">-->
       <!--        <task-overview @click-log="activeTabName = 'log'" />-->
       <!--      </el-tab-pane>-->
-      <el-tab-pane :label="$t('Log')" name="log">
+      <el-tab-pane :label="t('Log')" name="log">
         <log-view @search="getTaskLogs(true)" />
       </el-tab-pane>
       <!--      <el-tab-pane :label="$t('Results')" name="results">-->
@@ -31,11 +31,16 @@
 import * as Vue from 'vue'
 import { mapState, mapGetters } from 'vuex'
 import LogView from '../../components/ScrollView/LogView'
+import { useI18n } from 'vue-i18n'
 
 export default {
   name: 'TaskDetail',
   components: {
     LogView,
+  },
+  setup(props) {
+    const { t } = useI18n()
+    return { t }
   },
   data() {
     return {

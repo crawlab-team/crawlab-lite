@@ -5,16 +5,16 @@
       <div class="filter">
         <div class="left">
           <el-form :model="filter" label-position="right" inline>
-            <el-form-item prop="spider_id" :label="$t('Spider')">
+            <el-form-item prop="spider_id" :label="t('Spider')">
               <el-select
                 v-model="filter.spider_id"
                 size="small"
-                :placeholder="$t('All')"
+                :placeholder="t('All')"
                 :disabled="isFilterSpiderDisabled"
                 @focus="onSelectFilterSpider"
                 @change="onFilterChange"
               >
-                <el-option value="" :label="$t('All')" />
+                <el-option value="" :label="t('All')" />
                 <el-option
                   v-for="spider in spiderList"
                   :key="spider.id"
@@ -23,19 +23,19 @@
                 />
               </el-select>
             </el-form-item>
-            <el-form-item prop="status" :label="$t('Status')">
+            <el-form-item prop="status" :label="t('Status')">
               <el-select
                 v-model="filter.status"
                 size="small"
-                :placeholder="$t('Status')"
+                :placeholder="t('Status')"
                 @change="onFilterChange"
               >
-                <el-option value="" :label="$t('All')" />
-                <el-option value="PADDING" :label="$t('Pending')" />
-                <el-option value="RUNNING" :label="$t('Running')" />
-                <el-option value="FINISHED" :label="$t('Finished')" />
-                <el-option value="ERROR" :label="$t('Error')" />
-                <el-option value="CANCELLED" :label="$t('Cancelled')" />
+                <el-option value="" :label="t('All')" />
+                <el-option value="PADDING" :label="t('Pending')" />
+                <el-option value="RUNNING" :label="t('Running')" />
+                <el-option value="FINISHED" :label="t('Finished')" />
+                <el-option value="ERROR" :label="t('Error')" />
+                <el-option value="CANCELLED" :label="t('Cancelled')" />
               </el-select>
             </el-form-item>
           </el-form>
@@ -49,7 +49,7 @@
             type="danger"
             @click="onRemoveMultipleTask"
           >
-            {{ $t('Remove') }}
+            {{ t('Remove') }}
           </el-button>
         </div>
       </div>
@@ -75,7 +75,7 @@
         <template v-for="col in columns">
           <el-table-column
             v-if="col.name === 'spider_name'"
-            :label="$t(col.label)"
+            :label="t(col.label)"
             :sortable="col.sortable"
             :align="col.align"
           >
@@ -86,7 +86,7 @@
           </el-table-column>
           <el-table-column
             v-else-if="col.name.match(/_ts$/)"
-            :label="$t(col.label)"
+            :label="t(col.label)"
             :sortable="col.sortable"
             :align="col.align"
             :width="col.width"
@@ -97,7 +97,7 @@
           </el-table-column>
           <el-table-column
             v-else-if="col.name === 'wait_duration'"
-            :label="$t(col.label)"
+            :label="t(col.label)"
             :sortable="col.sortable"
             :align="col.align"
             :width="col.width"
@@ -108,7 +108,7 @@
           </el-table-column>
           <el-table-column
             v-else-if="col.name === 'runtime_duration'"
-            :label="$t(col.label)"
+            :label="t(col.label)"
             :sortable="col.sortable"
             :align="col.align"
             :width="col.width"
@@ -119,7 +119,7 @@
           </el-table-column>
           <el-table-column
             v-else-if="col.name === 'total_duration'"
-            :label="$t(col.label)"
+            :label="t(col.label)"
             :sortable="col.sortable"
             :align="col.align"
             :width="col.width"
@@ -130,7 +130,7 @@
           </el-table-column>
           <el-table-column
             v-else-if="col.name === 'status'"
-            :label="$t(col.label)"
+            :label="t(col.label)"
             :sortable="col.sortable"
             :align="col.align"
             :width="col.width"
@@ -147,20 +147,20 @@
           <el-table-column
             v-else
             :property="col.name"
-            :label="$t(col.label)"
+            :label="t(col.label)"
             :sortable="col.sortable"
             :align="col.align"
             :width="col.width"
           />
         </template>
         <el-table-column
-          :label="$t('Action')"
+          :label="t('Action')"
           align="left"
           fixed="right"
           width="130px"
         >
           <template v-slot="scope">
-            <el-tooltip :content="$t('View')" placement="top">
+            <el-tooltip :content="t('View')" placement="top">
               <el-button
                 type="primary"
                 :icon="ElIconSearch"
@@ -168,7 +168,7 @@
                 @click="onView(scope.row)"
               />
             </el-tooltip>
-            <el-tooltip :content="$t('Restart')" placement="top">
+            <el-tooltip :content="t('Restart')" placement="top">
               <el-button
                 type="warning"
                 :icon="ElIconRefresh"
@@ -178,7 +178,7 @@
             </el-tooltip>
             <el-tooltip
               v-if="['PENDING', 'RUNNING'].includes(scope.row.status)"
-              :content="$t('Cancel')"
+              :content="t('Cancel')"
               placement="top"
             >
               <el-button
@@ -188,7 +188,7 @@
                 @click="onCancel(scope.row, $event)"
               />
             </el-tooltip>
-            <el-tooltip v-else :content="$t('Remove')" placement="top">
+            <el-tooltip v-else :content="t('Remove')" placement="top">
               <el-button
                 type="danger"
                 :icon="ElIconDelete"
@@ -226,8 +226,13 @@ import * as Vue from 'vue'
 import { mapState } from 'vuex'
 import dayjs from 'dayjs'
 import StatusTag from '../../components/Status/StatusTag'
+import { useI18n } from 'vue-i18n'
 
 export default {
+  setup(props) {
+    const { t } = useI18n()
+    return { t }
+  },
   data() {
     return {
       filter: {},
@@ -311,19 +316,19 @@ export default {
     onCancel(row, ev) {
       ev.stopPropagation()
       this.$confirm(
-        this.$t('Are you sure to cancel this task?'),
-        this.$t('Notification'),
+        this.t('Are you sure to cancel this task?'),
+        this.t('Notification'),
         {
-          confirmButtonText: this.$t('Confirm'),
-          cancelButtonText: this.$t('Cancel'),
+          confirmButtonText: this.t('Confirm'),
+          cancelButtonText: this.t('Cancel'),
           type: 'warning',
-        }
+        },
       )
         .then(() => {
           this.$store.dispatch('task/cancelTask', row.id).then(() => {
             this.$message({
               type: 'success',
-              message: this.$t('Canceled successfully'),
+              message: this.t('Canceled successfully'),
             })
             this.getTaskList()
           })
@@ -334,19 +339,19 @@ export default {
     onRemove(row, ev) {
       ev.stopPropagation()
       this.$confirm(
-        this.$t('Are you sure to delete this task?'),
-        this.$t('Notification'),
+        this.t('Are you sure to delete this task?'),
+        this.t('Notification'),
         {
-          confirmButtonText: this.$t('Confirm'),
-          cancelButtonText: this.$t('Cancel'),
+          confirmButtonText: this.t('Confirm'),
+          cancelButtonText: this.t('Cancel'),
           type: 'warning',
-        }
+        },
       )
         .then(() => {
           this.$store.dispatch('task/deleteTask', row.id).then(() => {
             this.$message({
               type: 'success',
-              message: this.$t('Deleted successfully'),
+              message: this.t('Deleted successfully'),
             })
             this.getTaskList()
           })
@@ -356,20 +361,20 @@ export default {
     },
     onRemoveMultipleTask() {
       this.$confirm(
-        this.$t('Are you sure to delete these tasks?'),
-        this.$t('Notification'),
+        this.t('Are you sure to delete these tasks?'),
+        this.t('Notification'),
         {
-          confirmButtonText: this.$t('Confirm'),
-          cancelButtonText: this.$t('Cancel'),
+          confirmButtonText: this.t('Confirm'),
+          cancelButtonText: this.t('Cancel'),
           type: 'warning',
-        }
+        },
       )
         .then(() => {
           const ids = this.multipleSelection.map((item) => item.id)
           this.$store.dispatch('task/deleteTaskMultiple', ids).then((resp) => {
             this.$message({
               type: 'success',
-              message: this.$t('Deleted successfully'),
+              message: this.t('Deleted successfully'),
             })
             this.getTaskList()
             this.$refs['table'].clearSelection()
@@ -381,19 +386,19 @@ export default {
     onRestart(row, ev) {
       ev.stopPropagation()
       this.$confirm(
-        this.$t('Are you sure to restart this task?'),
-        this.$t('Notification'),
+        this.t('Are you sure to restart this task?'),
+        this.t('Notification'),
         {
-          confirmButtonText: this.$t('Confirm'),
-          cancelButtonText: this.$t('Cancel'),
+          confirmButtonText: this.t('Confirm'),
+          cancelButtonText: this.t('Cancel'),
           type: 'warning',
-        }
+        },
       )
         .then(() => {
           this.$store.dispatch('task/restartTask', row.id).then(() => {
             this.$message({
               type: 'success',
-              message: this.$t('Restarted successfully'),
+              message: this.t('Restarted successfully'),
             })
             setTimeout(this.getTaskList, 500)
           })
@@ -426,7 +431,7 @@ export default {
       return dayjs(row.finish_ts).diff(row.create_ts, 'second')
     },
     onRowClick(row, event, column) {
-      if (column.label !== this.$t('Action')) {
+      if (column.label !== this.t('Action')) {
         this.onView(row)
       }
     },

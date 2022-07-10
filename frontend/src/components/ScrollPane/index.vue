@@ -30,7 +30,7 @@ export default {
       const $container = this.$refs.scrollContainer.$el
       const $containerWidth = $container.offsetWidth
       const $scrollWrapper = this.$refs.scrollContainer.$refs.wrap$
-      const tagList = this.$parent.$refs.tag
+      const tagList = this.$parent.$arrRefs.tag
 
       let firstTag = null
       let lastTag = null

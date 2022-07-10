@@ -163,7 +163,7 @@
               class="add-btn"
               size="small"
               type="primary"
-              :icon="ElIconPlus"
+              :icon="Plus"
               @click="onEmptyClick"
             >
               {{ $t('Add') }}
@@ -256,7 +256,6 @@
 </template>
 
 <script>
-import { Plus as ElIconPlus } from '@element-plus/icons'
 import * as Vue from 'vue'
 import { mapState } from 'vuex'
 import FileDetail from './FileDetail'
@@ -491,7 +490,7 @@ export default {
           cancelButtonText: this.$t('Cancel'),
           confirmButtonClass: 'danger',
           type: 'warning',
-        }
+        },
       )
         .then(() => {
           this.onFileDeleteNav(data.path)
