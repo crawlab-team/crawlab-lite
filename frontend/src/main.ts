@@ -18,14 +18,21 @@ import {
   FontAwesomeLayers,
   FontAwesomeLayersText,
 } from '@fortawesome/vue-fontawesome'
+import {
+  faArchive,
+  faBug,
+  faFileUpload,
+  faGlassMartini,
+  faPenSquare,
+  faPlus,
+  faTrash,
+} from '@fortawesome/free-solid-svg-icons'
 
 import App from './App'
+import { ElementPlus } from '@element-plus/icons-vue'
 import ElementUI from 'element-plus'
 import { codemirror } from 'vue-codemirror-lite'
 import { createApp } from 'vue'
-import { fab } from '@fortawesome/free-brands-svg-icons'
-import { far } from '@fortawesome/free-regular-svg-icons'
-import { fas } from '@fortawesome/free-solid-svg-icons'
 import { getI18n } from 'crawlab-ui'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import locale from 'element-plus/lib/locale/lang/en' // lang i18n
@@ -39,6 +46,7 @@ const app = (window.$vueApp = createApp(App))
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, component)
 }
+app.use(ElementPlus)
 
 app.use(getI18n())
 
@@ -49,9 +57,15 @@ app.use(codemirror)
 app.use(ElementUI, { locale })
 
 // font-awesome
-library.add(fab)
-library.add(far)
-library.add(fas)
+library.add(
+  faBug,
+  faArchive,
+  faTrash,
+  faPlus,
+  faFileUpload,
+  faPenSquare,
+  faGlassMartini,
+)
 app.component('FontAwesomeIcon', FontAwesomeIcon)
 app.component('FontAwesomeLayers', FontAwesomeLayers)
 app.component('FontAwesomeLayersText', FontAwesomeLayersText)

@@ -157,7 +157,7 @@
           :label="t('Action')"
           align="left"
           fixed="right"
-          width="130px"
+          width="140px"
         >
           <template v-slot="scope">
             <el-tooltip :content="t('View')" placement="top">
