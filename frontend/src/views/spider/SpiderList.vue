@@ -44,12 +44,10 @@
             :on-success="onUploadSuccess"
             :on-error="onUploadError"
           >
-            <el-button
-              id="upload"
-              :icon="ElIconUpload"
-              size="small"
-              type="primary"
-            >
+            <el-button id="upload" size="small" type="primary">
+              <el-icon style="margin-right: 5px"
+                ><font-awesome-icon icon="fa-solid fa-file-upload"
+              /></el-icon>
               {{ t('Upload and Commit') }}
             </el-button>
           </el-upload>
@@ -85,7 +83,10 @@
         :on-error="onUploadError"
         align="right"
       >
-        <el-button :icon="ElIconUpload" size="small" type="success">
+        <el-button size="small" type="success">
+          <el-icon style="margin-right: 5px"
+            ><font-awesome-icon icon="fa-solid fa-file-upload"
+          /></el-icon>
           {{ t('Upload') }}
         </el-button>
       </el-upload>
@@ -111,10 +112,12 @@
             <el-tooltip :content="t('Remove')" placement="top">
               <el-button
                 type="danger"
-                :icon="ElIconDelete"
-                size="mini"
+                size="small"
                 @click="onRemoveVersion(scope.row, $event)"
-              />
+              >
+                <el-icon :size="10"
+                  ><font-awesome-icon icon="fa-solid fa-trash" /></el-icon
+              ></el-button>
             </el-tooltip>
           </template>
         </el-table-column>
@@ -172,6 +175,9 @@
             style="font-weight: bolder"
             @click="onAdd"
           >
+            <el-icon style="margin-right: 5px"
+              ><font-awesome-icon icon="fa-solid fa-plus"
+            /></el-icon>
             {{ t('Add Spider') }}
           </el-button>
         </div>
@@ -273,26 +279,34 @@
             <el-tooltip :content="t('Run')" placement="top">
               <el-button
                 type="success"
-                :icon="faBug"
-                size="mini"
+                size="small"
                 @click="onCrawl(scope.row, $event)"
-              />
+              >
+                <el-icon :size="10"
+                  ><font-awesome-icon icon="fa-solid fa-bug"
+                /></el-icon>
+              </el-button>
             </el-tooltip>
             <el-tooltip :content="t('Spider Version List')" placement="top">
               <el-button
                 type="warning"
-                :icon="faArchive"
-                size="mini"
+                size="small"
                 @click="onViewSpiderVersions(scope.row, $event)"
-              />
+              >
+                <el-icon :size="10"
+                  ><font-awesome-icon icon="fa-solid fa-archive"
+                /></el-icon>
+              </el-button>
             </el-tooltip>
             <el-tooltip :content="t('Remove')" placement="top">
               <el-button
                 type="danger"
-                :icon="ElIconDelete"
-                size="mini"
+                size="small"
                 @click="onRemove(scope.row, $event)"
-              />
+              >
+                <el-icon :size="10"
+                  ><font-awesome-icon icon="fa-solid fa-trash" /></el-icon
+              ></el-button>
             </el-tooltip>
           </template>
         </el-table-column>
@@ -314,7 +328,6 @@
 </template>
 
 <script>
-import * as Vue from 'vue'
 import { mapGetters, mapState } from 'vuex'
 import dayjs from 'dayjs'
 import CrawlConfirmDialog from '../../components/Dialog/CrawlConfirmDialog'

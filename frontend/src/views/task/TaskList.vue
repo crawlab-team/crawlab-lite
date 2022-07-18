@@ -157,14 +157,14 @@
           :label="t('Action')"
           align="left"
           fixed="right"
-          width="130px"
+          width="140px"
         >
           <template v-slot="scope">
             <el-tooltip :content="t('View')" placement="top">
               <el-button
                 type="primary"
                 :icon="ElIconSearch"
-                size="mini"
+                size="small"
                 @click="onView(scope.row)"
               />
             </el-tooltip>
@@ -172,7 +172,7 @@
               <el-button
                 type="warning"
                 :icon="ElIconRefresh"
-                size="mini"
+                size="small"
                 @click="onRestart(scope.row, $event)"
               />
             </el-tooltip>
@@ -184,7 +184,7 @@
               <el-button
                 type="danger"
                 :icon="ElIconVideoPause"
-                size="mini"
+                size="small"
                 @click="onCancel(scope.row, $event)"
               />
             </el-tooltip>
@@ -192,7 +192,7 @@
               <el-button
                 type="danger"
                 :icon="ElIconDelete"
-                size="mini"
+                size="small"
                 @click="onRemove(scope.row, $event)"
               />
             </el-tooltip>
@@ -231,6 +231,8 @@ import { useI18n } from 'vue-i18n'
 export default {
   setup(props) {
     const { t } = useI18n()
+    const inst = Vue.getCurrentInstance()
+    inst.t = t
     return { t }
   },
   data() {

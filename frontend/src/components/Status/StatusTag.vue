@@ -1,12 +1,14 @@
 <template>
   <el-tag :type="type" class="status-tag">
     <i :class="icon" />
-    {{ $t(label) }}
+    {{ t(label) }}
   </el-tag>
 </template>
 
 <script>
 import * as Vue from 'vue'
+import { useI18n } from 'vue-i18n'
+
 export default {
   name: 'StatusTag',
   props: {
@@ -14,6 +16,10 @@ export default {
       type: String,
       default: '',
     },
+  },
+  setup(props) {
+    const { t } = useI18n()
+    return { t }
   },
   data() {
     return {

@@ -71,10 +71,12 @@
           <el-button
             class="cron-edit"
             type="primary"
-            :icon="Edit"
             style="width: 100px"
             @click="onShowCronDialog"
           >
+            <el-icon style="margin-right: 5px"
+              ><font-awesome-icon icon="fa-solid fa-pen-to-square"
+            /></el-icon>
             {{ t('Edit') }}
           </el-button>
         </el-form-item>
@@ -158,13 +160,10 @@
       <!--filter-->
       <div class="filter">
         <div class="right">
-          <el-button
-            size="small"
-            type="primary"
-            class="btn-add"
-            :icon="Edit"
-            @click="onAdd"
-          >
+          <el-button size="small" type="primary" class="btn-add" @click="onAdd">
+            <el-icon style="margin-right: 5px"
+              ><font-awesome-icon icon="fa-solid fa-plus"
+            /></el-icon>
             {{ t('Add Schedule') }}
           </el-button>
         </div>
@@ -233,29 +232,26 @@
           :label="t('Action')"
           class="actions"
           align="left"
-          width="170"
+          width="180"
           fixed="right"
         >
           <template v-slot="scope">
             <!--edit-->
             <el-tooltip :content="t('Edit')" placement="top">
-              <el-button
-                type="warning"
-                :icon="Edit"
-                size="mini"
-                @click="onEdit(scope.row)"
-              />
+              <el-button type="warning" size="small" @click="onEdit(scope.row)">
+                <el-icon :size="10"
+                  ><font-awesome-icon
+                    icon="fa-solid fa-pen-to-square" /></el-icon
+              ></el-button>
             </el-tooltip>
             <!--./edit-->
 
             <!--delete-->
             <el-tooltip :content="t('Remove')" placement="top">
-              <el-button
-                type="danger"
-                :icon="Delete"
-                size="mini"
-                @click="onRemove(scope.row)"
-              />
+              <el-button type="danger" size="small" @click="onRemove(scope.row)"
+                ><el-icon :size="10"
+                  ><font-awesome-icon icon="fa-solid fa-trash" /></el-icon
+              ></el-button>
             </el-tooltip>
             <!--./delete-->
 
@@ -263,21 +259,22 @@
             <el-tooltip :content="t('View Tasks')" placement="top">
               <el-button
                 type="primary"
-                :icon="Search"
-                size="mini"
+                size="small"
                 @click="onViewTasks(scope.row)"
-              />
+              >
+                <el-icon :size="10"
+                  ><font-awesome-icon icon="fa-solid fa-magnifying-glass"
+                /></el-icon>
+              </el-button>
             </el-tooltip>
             <!--./view tasks-->
 
             <!--run-->
             <el-tooltip :content="t('Run')" placement="top">
-              <el-button
-                type="success"
-                :icon="faBug"
-                size="mini"
-                @click="onRun(scope.row)"
-              />
+              <el-button type="success" size="small" @click="onRun(scope.row)">
+                <el-icon :size="10"
+                  ><font-awesome-icon icon="fa-solid fa-bug" /></el-icon
+              ></el-button>
             </el-tooltip>
             <!--./run-->
           </template>
@@ -307,6 +304,7 @@ import ScheduleTaskList from '../../components/Schedule/ScheduleTaskList'
 import CrawlConfirmDialog from '../../components/Dialog/CrawlConfirmDialog'
 import dayjs from 'dayjs'
 import { useI18n } from 'vue-i18n'
+import { Edit as ElIconEdit } from '@element-plus/icons'
 
 export default {
   name: 'ScheduleList',
@@ -317,6 +315,8 @@ export default {
   },
   setup(props) {
     const { t } = useI18n()
+    const inst = Vue.getCurrentInstance()
+    inst.t = t
     return { t }
   },
   data() {

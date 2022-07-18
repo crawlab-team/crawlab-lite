@@ -6,7 +6,7 @@ services:
     ports:
       - "8081:8080"
     volumes:
-      - "./data:/app/data"
+      - "/tmp/crawlab-lite-data:/app/data"
     environment:
       CRAWLAB_USER_USERNAME: admin # login username  用户名
       CRAWLAB_USER_PASSWORD: admin # login password  用户密码

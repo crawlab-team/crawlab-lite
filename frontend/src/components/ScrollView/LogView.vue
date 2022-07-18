@@ -4,14 +4,14 @@
       <div class="left">
         <el-switch
           v-model="isLogAutoScroll"
-          :inactive-text="$t('Auto-Scroll')"
+          :inactive-text="t('Auto-Scroll')"
           style="margin-right: 10px"
         />
         <!--        <el-input-->
         <!--          v-model="logKeyword"-->
         <!--          size="small"-->
         <!--          suffix-icon="el-icon-search"-->
-        <!--          :placeholder="$t('Search Log')"-->
+        <!--          :placeholder="t('Search Log')"-->
         <!--          style="width: 240px; margin-right: 10px"-->
         <!--          clearable-->
         <!--        />-->
@@ -21,7 +21,7 @@
         <!--          icon="el-icon-search"-->
         <!--          @click="onSearchLog"-->
         <!--        >-->
-        <!--          {{ $t('Search Log') }}-->
+        <!--          {{ t('Search Log') }}-->
         <!--        </el-button>-->
       </div>
       <div class="right">
@@ -44,7 +44,7 @@
             :icon="ElIconWarningOutline"
             @click="toggleErrors"
           >
-            {{ $t('Error Count') }}
+            {{ t('Error Count') }}
           </el-button>
         </el-badge>
       </div>
@@ -98,9 +98,14 @@ import Convert from 'ansi-to-html'
 import hasAnsi from 'has-ansi'
 
 import LogItem from './LogItem'
+import { useI18n } from 'vue-i18n'
 
 const convert = new Convert()
 export default {
+  setup(props) {
+    const { t } = useI18n()
+    return { t }
+  },
   data() {
     return {
       itemComponent: LogItem,
