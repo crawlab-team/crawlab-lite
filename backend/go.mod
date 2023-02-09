@@ -7,7 +7,7 @@ require (
 	github.com/apex/log v1.9.0
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fsnotify/fsnotify v1.4.7
-	github.com/gin-gonic/gin v1.7.1
+	github.com/gin-gonic/gin v1.7.7
 	github.com/go-playground/validator/v10 v10.6.1
 	github.com/imroc/req v0.3.0
 	github.com/jinzhu/copier v0.3.0
